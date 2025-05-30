@@ -14,6 +14,7 @@ public class PlayerSelector : MonoBehaviour
 
         if (random == 1)
         {
+            Debug.Log("start");
             player1Controller.enabled = true;
             player2Controller.enabled = false;
             Debug.Log("分配到 Player1 控制邏輯");
