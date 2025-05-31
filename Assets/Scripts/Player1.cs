@@ -20,8 +20,6 @@ public class Player1: MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("Hibitch");
-        Debug.Log("Hipussy");
         controller = GetComponent<CharacterController>();
     }
 
