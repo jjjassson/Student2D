@@ -134,5 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4abd59c03ef45846a12641c78889dec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player1Object: {fileID: 6906998413789825852, guid: 643dbb07222e5094cb4e2f9a9c180d76, type: 3}
+  player2Object: {fileID: 6936872004301007010, guid: a983f0a0bd722184db3bc245427c058f, type: 3}
   player1Controller: {fileID: 4618876987514644776, guid: 643dbb07222e5094cb4e2f9a9c180d76, type: 3}
   player2Controller: {fileID: 441266790926359206, guid: a983f0a0bd722184db3bc245427c058f, type: 3}
