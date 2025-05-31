@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class PlayerSelector : MonoBehaviour
 {
-    [SerializeField] private GameObject player1Object;
-    [SerializeField] private GameObject player2Object; 
     [SerializeField] private Player1 player1Controller;
     [SerializeField] private Player2 player2Controller;
 
@@ -16,16 +14,15 @@ public class PlayerSelector : MonoBehaviour
 
         if (random == 1)
         {
-            player1Object.SetActive(true);
-            player2Object.SetActive(false);
-
+            Debug.Log("start");
+            player1Controller.enabled = true;
+            player2Controller.enabled = false;
             Debug.Log("分配到 Player1 控制邏輯");
         }
         else
         {
-            player1Object.SetActive(false);
-            player2Object.SetActive(true);
-
+            player1Controller.enabled = false;
+            player2Controller.enabled = true;
             Debug.Log("分配到 Player2 控制邏輯");
         }
     }
