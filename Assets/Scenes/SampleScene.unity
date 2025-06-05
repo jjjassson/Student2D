@@ -630,7 +630,7 @@ MonoBehaviour:
   SpawnPoint1: {fileID: 1265579788}
   SpawnPoint2: {fileID: 129330278}
   Player1: {fileID: 6906998413789825852, guid: 657debd73b726ab4aadd059f96656ad2, type: 3}
-  Player2: {fileID: 6906998413789825852, guid: b1b88d74392904d4fbd9751a01b22286, type: 3}
+  Player2: {fileID: 6936872004301007010, guid: a983f0a0bd722184db3bc245427c058f, type: 3}
 --- !u!1 &605020466
 GameObject:
   m_ObjectHideFlags: 0
