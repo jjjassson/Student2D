@@ -12,6 +12,8 @@ public class Player1: MonoBehaviour
     private float jumpHeight = 1.0f;
     [SerializeField]
     private float gravityValue = -9.81f;
+    [SerializeField]
+    private int PlayerIndex = 0;
 
     private CharacterController controller;
     private Vector3 playerVelocity;
@@ -35,6 +37,11 @@ public class Player1: MonoBehaviour
         {
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
         }
+    }
+
+    public int GetPlayerIndex()
+    {
+        return PlayerIndex;
     }
 
     void Update()
