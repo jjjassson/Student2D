@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerSpeed: 10
-  jumpHeight: 1
+  jumpHeight: 3
   gravityValue: -9.81
 --- !u!1001 &8223316525156851252
 PrefabInstance:
