@@ -61,4 +61,5 @@ public class Player1: MonoBehaviour
         Vector3 finalMove = move * playerSpeed + Vector3.up * playerVelocity.y;
         controller.Move(finalMove * Time.deltaTime);
     }
+    
 }
