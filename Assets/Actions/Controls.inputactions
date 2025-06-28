@@ -106,7 +106,7 @@
                     "name": "",
                     "id": "261342ee-7252-4974-b4d6-34c55758c752",
                     "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": ";Controller",
                     "action": "Jump",
