@@ -1353,6 +1353,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 982628051}
+  - component: {fileID: 982628052}
   m_Layer: 0
   m_Name: LevelInitializer
   m_TagString: Untagged
@@ -1379,6 +1380,20 @@ Transform:
   - {fileID: 77477384}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &982628052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982628050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24befcca06edb44cb9daab35b052dd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerSpawns: []
+  playerPrefab: {fileID: 0}
 --- !u!1 &1115636936 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7029948723529949830, guid: 9b019d812293c5842b96106bbf544620, type: 3}
