@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
 
 public class PlayerConfigurationManager : MonoBehaviour
 {
     private List<PlayerConfiguration> playerConfigs;
     [SerializeField]
-    private int MaxPlayers = 4;
+    private int MaxPlayers = 2;
 
     public static PlayerConfigurationManager Instance { get; private set; }
 
@@ -54,7 +55,7 @@ public class PlayerConfigurationManager : MonoBehaviour
         playerConfigs[index].isReady = true;
         if (playerConfigs.Count == MaxPlayers && playerConfigs.All(p => p.isReady == true))
         {
-            SceneManager.LoadScene("SampleScene");
+            SceneManager.LoadScene("Cliff");
         }
     }
 }
@@ -72,3 +73,4 @@ public class PlayerConfiguration
     public bool isReady { get; set; }
     public Material playerMaterial { get; set; }
 }
+
