@@ -391,11 +391,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8128215266902133644}
         m_TargetAssemblyTypeName: PlayerSetupMenuController, Assembly-CSharp
-        m_MethodName: SetColor
+        m_MethodName: SetCharacter
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 2100000, guid: b70b155b29c797d468763d6922c2bae1, type: 2}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Material, UnityEngine
+          m_ObjectArgument: {fileID: 6906998413789825852, guid: 657debd73b726ab4aadd059f96656ad2, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -927,11 +927,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8128215266902133644}
         m_TargetAssemblyTypeName: PlayerSetupMenuController, Assembly-CSharp
-        m_MethodName: SetColor
+        m_MethodName: SetCharacter
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 2100000, guid: 107b9d788c3c89840aa3cc079e73138f, type: 2}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Material, UnityEngine
+          m_ObjectArgument: {fileID: 6936872004301007010, guid: 7f591b2e3e22bb049af6f890ba5105ab, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 

@@ -37,14 +37,14 @@ public class PlayerSetupMenuController : MonoBehaviour
         }
     }
 
-    public void SetColor(Material color)
-    {
-        if (!inputEnable) { return; }
-        PlayerConfigurationManager.Instance.SetPlayerColor(playerIndex, color);
-        readyPanel.SetActive(true);
-        readyButton.Select();
-        menuPanel.SetActive(false);
-    }
+    //public void SetColor(Material color)
+    //{
+        //if (!inputEnable) { return; }
+        //PlayerConfigurationManager.Instance.SetPlayerColor(playerIndex, color);
+        //readyPanel.SetActive(true);
+        //readyButton.Select();
+        //menuPanel.SetActive(false);
+    //}
 
     public void SetCharacter(GameObject characterPrefab)
     {
@@ -52,7 +52,7 @@ public class PlayerSetupMenuController : MonoBehaviour
 
         PlayerConfigurationManager.Instance.SetPlayerCharacterPrefab(playerIndex, characterPrefab);
 
-        // 接下來流程一樣
+        
         readyPanel.SetActive(true);
         readyButton.Select();
         menuPanel.SetActive(false);
