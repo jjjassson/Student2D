@@ -46,6 +46,18 @@ public class PlayerSetupMenuController : MonoBehaviour
         menuPanel.SetActive(false);
     }
 
+    public void SetCharacter(GameObject characterPrefab)
+    {
+        if (!inputEnable) { return; }
+
+        PlayerConfigurationManager.Instance.SetPlayerCharacterPrefab(playerIndex, characterPrefab);
+
+        // 接下來流程一樣
+        readyPanel.SetActive(true);
+        readyButton.Select();
+        menuPanel.SetActive(false);
+    }
+
     public void ReadyPlayer()
     {
         if (!inputEnable) { return; }

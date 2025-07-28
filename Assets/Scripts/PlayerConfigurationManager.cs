@@ -10,7 +10,7 @@ public class PlayerConfigurationManager : MonoBehaviour
 {
     private List<PlayerConfiguration> playerConfigs;
     [SerializeField]
-    private int MaxPlayers = 2;
+    private int MaxPlayers = 1;
 
     public static PlayerConfigurationManager Instance { get; private set; }
 
@@ -37,6 +37,14 @@ public class PlayerConfigurationManager : MonoBehaviour
         if (!playerConfigs.Any(p => p.PlayerIndex == pi.playerIndex))
         {
             playerConfigs.Add(new PlayerConfiguration(pi));
+        }
+    }
+
+    public void SetPlayerCharacterPrefab(int index, GameObject prefab)
+    {
+        if (index >= 0 && index < playerConfigs.Count)
+        {
+            playerConfigs[index].SelectedCharacterPrefab = prefab;
         }
     }
 
@@ -72,5 +80,6 @@ public class PlayerConfiguration
     public int PlayerIndex { get; private set; }
     public bool isReady { get; set; }
     public Material playerMaterial { get; set; }
+    public GameObject SelectedCharacterPrefab { get; set; }
 }
 

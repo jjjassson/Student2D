@@ -1277,7 +1277,7 @@ MonoBehaviour:
   playerSpawns:
   - {fileID: 1606695420}
   - {fileID: 534410910}
-  playerPrefab: {fileID: 2125253858}
+  PlayerPrefab: {fileID: 6906998413789825852, guid: 657debd73b726ab4aadd059f96656ad2, type: 3}
 --- !u!1 &1115636936 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7029948723529949830, guid: 9b019d812293c5842b96106bbf544620, type: 3}
