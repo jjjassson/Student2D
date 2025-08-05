@@ -8,10 +8,10 @@ public class reset : MonoBehaviour
 {
     public void resetgame()
     {
-        SceneManager.LoadScene("Main");
+        SceneManager.LoadScene("MainMenu");
         if (Input.GetKey("z"))
         {
-            SceneManager.LoadScene("Main");
+            SceneManager.LoadScene("MainMenu");
         }
 
     }
