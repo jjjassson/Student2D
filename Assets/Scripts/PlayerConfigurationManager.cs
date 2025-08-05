@@ -18,15 +18,15 @@ public class PlayerConfigurationManager : MonoBehaviour
     {
         if (Instance != null)
         {
-            Debug.Log("[Singleton] Trying to instantiate a seccond instance of a singleton class.");
+            Debug.Log("[Singleton] Trying to instantiate a second instance of a singleton class.");
+            Destroy(gameObject);
         }
         else
         {
             Instance = this;
-            DontDestroyOnLoad(Instance);
+            DontDestroyOnLoad(gameObject);
             playerConfigs = new List<PlayerConfiguration>();
         }
-
     }
 
     public void HandlePlayerJoin(PlayerInput pi)
@@ -61,7 +61,7 @@ public class PlayerConfigurationManager : MonoBehaviour
     public void ReadyPlayer(int index)
     {
         playerConfigs[index].isReady = true;
-        if (playerConfigs.Count == MaxPlayers && playerConfigs.All(p => p.isReady == true))
+        if (playerConfigs.Count == MaxPlayers && playerConfigs.All(p => p.isReady))
         {
             SceneManager.LoadScene("Cliff");
         }
@@ -74,12 +74,13 @@ public class PlayerConfiguration
     {
         PlayerIndex = pi.playerIndex;
         Input = pi;
+        User = pi.user; // 記住這個玩家的 InputUser
     }
 
     public PlayerInput Input { get; private set; }
+    public InputUser User { get; private set; } // 記住控制器綁定
     public int PlayerIndex { get; private set; }
     public bool isReady { get; set; }
     public Material playerMaterial { get; set; }
     public GameObject SelectedCharacterPrefab { get; set; }
 }
-
