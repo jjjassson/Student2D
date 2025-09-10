@@ -10,7 +10,7 @@ public class PlayerConfigurationManager : MonoBehaviour
 {
     private List<PlayerConfiguration> playerConfigs;
     [SerializeField]
-    private int MaxPlayers = 1;
+    private int MaxPlayers = 2;
 
     public static PlayerConfigurationManager Instance { get; private set; }
 
@@ -51,11 +51,6 @@ public class PlayerConfigurationManager : MonoBehaviour
     public List<PlayerConfiguration> GetPlayerConfigs()
     {
         return playerConfigs;
-    }
-
-    public void SetPlayerColor(int index, Material color)
-    {
-        playerConfigs[index].playerMaterial = color;
     }
 
     public void ReadyPlayer(int index)
