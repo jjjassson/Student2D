@@ -754,9 +754,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2818716792385140960}
+      - m_Target: {fileID: 8128215266902133644}
         m_TargetAssemblyTypeName: PlayerSetupMenuController, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: SetCharacter
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 6906998413789825852, guid: 0418e4b7dfb339d40a513323bbef3aa0, type: 3}

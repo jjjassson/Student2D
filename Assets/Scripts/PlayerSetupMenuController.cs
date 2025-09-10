@@ -37,6 +37,14 @@ public class PlayerSetupMenuController : MonoBehaviour
         }
     }
 
+    //public void SetColor(Material color)
+    //{
+        //if (!inputEnable) { return; }
+        //PlayerConfigurationManager.Instance.SetPlayerColor(playerIndex, color);
+        //readyPanel.SetActive(true);
+        //readyButton.Select();
+        //menuPanel.SetActive(false);
+    //}
 
     public void SetCharacter(GameObject characterPrefab)
     {
