@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4618876987514644776}
   - component: {fileID: 6473054374949799907}
   - component: {fileID: 2128659873852073697}
+  - component: {fileID: 7443653401252930909}
   m_Layer: 0
   m_Name: Love 2
   m_TagString: Player
@@ -226,6 +227,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7764305b50102564da43c47adbb8c2a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  score: 0
+--- !u!114 &7443653401252930909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30ca56c5f14190a42a62ac1389834af3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7929102225041131849
