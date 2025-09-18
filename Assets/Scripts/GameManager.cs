@@ -1,20 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
-[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
 public class GameManager : MonoBehaviour
 {
-    private void Awake()
-    {
-        DontDestroyOnLoad(gameObject);
-    }
+    public static GameManager Instance;
+    public GameObject selectedObject;
 
-    private string GetDebuggerDisplay()
+    void Awake()
     {
-        return ToString();
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+    public void SelectThis(GameObject prefab)
+    {
+        GameManager.Instance.selectedObject = prefab;
+    }
+    public void DeselectThis()
+    {
+        GameManager.Instance.selectedObject = null;
     }
 }
-
-
