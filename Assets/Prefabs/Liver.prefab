@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 2689930771702510549}
   - component: {fileID: 4618876987514644776}
   - component: {fileID: 6473054374949799907}
+  - component: {fileID: -8130976476701950430}
+  - component: {fileID: -2660098754286080608}
   m_Layer: 0
   m_Name: Liver
   m_TagString: Player
@@ -215,6 +217,31 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-8130976476701950430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7764305b50102564da43c47adbb8c2a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  score: 0
+--- !u!114 &-2660098754286080608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30ca56c5f14190a42a62ac1389834af3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7929102225041131849
 GameObject:
   m_ObjectHideFlags: 0
