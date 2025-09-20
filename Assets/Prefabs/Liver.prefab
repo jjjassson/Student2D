@@ -16,7 +16,8 @@ GameObject:
   - component: {fileID: 4618876987514644776}
   - component: {fileID: 6473054374949799907}
   - component: {fileID: -8130976476701950430}
-  - component: {fileID: -2660098754286080608}
+  - component: {fileID: -294478715876801648}
+  - component: {fileID: -6382191396721401047}
   m_Layer: 0
   m_Name: Liver
   m_TagString: Player
@@ -149,7 +150,7 @@ MonoBehaviour:
     m_ActionId: e65b5dd5-9a38-4bfe-b5c6-3d4cdedd6cca
     m_ActionName: GamePlay/Jump[/Keyboard/space]
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Controller
+  m_DefaultControlScheme: 
   m_DefaultActionMap: GamePlay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -230,7 +231,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   score: 0
---- !u!114 &-2660098754286080608
+--- !u!114 &-294478715876801648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 897d345b6b3968a46ad87739e61cfaa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-6382191396721401047
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

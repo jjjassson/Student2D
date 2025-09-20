@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 
 public class InitializeLevel : MonoBehaviour
 {
-    [SerializeField] private Transform[] playerSpawns; // 玩家生成點
+    [SerializeField] private Transform[] playerSpawns;
 
     private void Start()
     {
@@ -23,26 +21,22 @@ public class InitializeLevel : MonoBehaviour
                 continue;
             }
 
-            // Instantiate 角色 prefab
             GameObject playerObject = Instantiate(prefab, playerSpawns[i].position, playerSpawns[i].rotation);
 
-            // 取得角色 prefab 上的 PlayerInput
+            // 綁定控制器
             PlayerInput playerInput = playerObject.GetComponent<PlayerInput>();
-
-            if (playerInput == null)
+            if (playerInput != null)
             {
-                Debug.LogError("角色 prefab 必須有 PlayerInput！");
-                continue;
+                foreach (var device in config.Input.devices)
+                    InputUser.PerformPairingWithDevice(device, playerInput.user);
+
+                playerInput.user.AssociateActionsWithUser(playerInput.actions);
             }
 
-            // 綁定玩家原本使用的控制器
-            foreach (var device in config.Input.devices)
-            {
-                InputUser.PerformPairingWithDevice(device, playerInput.user);
-            }
-
-            // 設定 playerIndex
-            playerInput.user.AssociateActionsWithUser(playerInput.actions);
+            // 綁定 PlayerInputHandler
+            var inputHandler = playerObject.GetComponent<PlayerInputHandler>();
+            if (inputHandler != null)
+                inputHandler.InitializePlayer(config);
         }
     }
 }

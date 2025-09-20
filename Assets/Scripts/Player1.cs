@@ -1,33 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
-public class Player1: MonoBehaviour
+public class Player1 : MonoBehaviour, IMover
 {
-    [SerializeField]
-    private float playerSpeed = 2.0f;
-    [SerializeField]
-    private float jumpHeight = 1.0f;
-    [SerializeField]
-    private float gravityValue = -9.81f;
+    [SerializeField] private float playerSpeed = 2f;
+    [SerializeField] private float jumpHeight = 1f;
+    [SerializeField] private float gravityValue = -9.81f;
 
     private CharacterController controller;
+    private Vector2 movementInput = Vector2.zero;
     private Vector3 playerVelocity;
     private bool groundedPlayer;
-    private Vector2 movementInput = Vector2.zero;
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
     }
 
-    public void OnMove(InputAction.CallbackContext context)
+    // ‚úÖ IMover ÂØ¶‰Ωú
+    public void SetInputVector(Vector2 direction)
     {
-        movementInput = context.ReadValue<Vector2>();
+        movementInput = direction;
     }
 
+    // ‚úÖ PlayerInput Áõ¥Êé•ÂëºÂè´ Jump
     public void OnJump(InputAction.CallbackContext context)
     {
         if (context.performed && groundedPlayer)
@@ -36,30 +33,28 @@ public class Player1: MonoBehaviour
         }
     }
 
-    void Update()
+    // Â¶ÇÊûú‰Ω†ÊÉ≥Áõ¥Êé•Á∂Å Movement Action ‰πüÂèØ‰ª•‰øùÁïô OnMove
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        SetInputVector(context.ReadValue<Vector2>());
+    }
+
+    private void Update()
     {
         groundedPlayer = controller.isGrounded;
-        if (groundedPlayer && playerVelocity.y < 0)
-        {
+        if (groundedPlayer && playerVelocity.y < 0f)
             playerVelocity.y = 0f;
-        }
 
-        // •H•@¨…Æyº–≥B≤z§Ë¶V
         Vector3 move = new Vector3(movementInput.x, 0, movementInput.y);
 
-        // ¶p™G¶≥øÈ§J°A¥NßÔ≈‹®§¶‚¥¬¶V°]®œ•Œ•@¨…§Ë¶V°^
         if (move != Vector3.zero)
         {
-            Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, 720 * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,
+                Quaternion.LookRotation(move, Vector3.up), 720f * Time.deltaTime);
         }
 
-        // ≠´§O≥B≤z
         playerVelocity.y += gravityValue * Time.deltaTime;
-
-        // ≤æ∞ ®§¶‚
         Vector3 finalMove = move * playerSpeed + Vector3.up * playerVelocity.y;
         controller.Move(finalMove * Time.deltaTime);
     }
-    
 }
