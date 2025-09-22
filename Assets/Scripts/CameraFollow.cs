@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
@@ -13,11 +14,19 @@ public class CameraFollow : MonoBehaviour
     void LateUpdate()
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
-        if (players.Length == 0) return;
+        var alivePlayers = new List<GameObject>();
 
-        // 計算角色包圍盒
-        Bounds bounds = new Bounds(players[0].transform.position, Vector3.zero);
-        foreach (var player in players)
+        foreach (var p in players)
+        {
+            var ps = p.GetComponent<PlayerScore>();
+            if (ps != null && ps.isAlive)
+                alivePlayers.Add(p);
+        }
+
+        if (alivePlayers.Count == 0) return;
+
+        Bounds bounds = new Bounds(alivePlayers[0].transform.position, Vector3.zero);
+        foreach (var player in alivePlayers)
         {
             bounds.Encapsulate(player.transform.position);
         }
@@ -25,12 +34,10 @@ public class CameraFollow : MonoBehaviour
         Vector3 center = bounds.center;
         float greatestDistance = Mathf.Max(bounds.size.x, bounds.size.z);
 
-        // 決定攝影機距離
         float distance = Mathf.Clamp(greatestDistance, minDistance, maxDistance);
         Vector3 desiredPos = center + offsetDirection.normalized * distance;
 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, smoothTime);
-
         transform.LookAt(center);
     }
 }

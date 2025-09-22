@@ -3,18 +3,28 @@ using UnityEngine;
 public class PlayerScore : MonoBehaviour
 {
     public int score = 0;
+    public bool isAlive = true; // 是否存活
 
-    // 玩家到達終點
     public void ReachGoal()
     {
         score += 1;
         Debug.Log($"{gameObject.name} reached goal! Score: {score}");
+        RoundManager.Instance.NotifyPlayerReachedGoal(this);
     }
 
-    // 玩家掉落
     public void FallDown()
     {
         score -= 1;
+        isAlive = false;
         Debug.Log($"{gameObject.name} fell! Score: {score}");
+        RoundManager.Instance.NotifyPlayerDeath(this);
+    }
+
+    public void Revive(Vector3 spawnPos)
+    {
+        isAlive = true;
+        transform.position = spawnPos;
+        gameObject.SetActive(true);
+        Debug.Log($"{gameObject.name} revived!");
     }
 }

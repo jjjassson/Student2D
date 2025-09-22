@@ -16,17 +16,12 @@ public class PlayerCollision : MonoBehaviour
         if (other.CompareTag("Goal"))
         {
             score.ReachGoal();
-
-            // 回合結束
-            RoundManager.Instance.EndRound();
-
-            // 可選：把玩家拉回起點
-            transform.position = new Vector3(0, 2f, 0);
+            gameObject.SetActive(false); // 抵達終點後不再受控制
         }
         else if (other.CompareTag("DeathZone"))
         {
             score.FallDown();
-            transform.position = new Vector3(0, 2f, 0);
+            gameObject.SetActive(false); // 死亡後暫時消失
         }
     }
 }
