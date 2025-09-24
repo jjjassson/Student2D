@@ -149,7 +149,7 @@ MonoBehaviour:
     m_ActionId: e65b5dd5-9a38-4bfe-b5c6-3d4cdedd6cca
     m_ActionName: GamePlay/Jump[/Keyboard/space]
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
+  m_DefaultControlScheme: Controller
   m_DefaultActionMap: GamePlay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -242,6 +242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   score: 0
+  isAlive: 1
 --- !u!114 &-1411683847322103611
 MonoBehaviour:
   m_ObjectHideFlags: 0
