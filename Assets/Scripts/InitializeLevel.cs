@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 
@@ -17,26 +17,38 @@ public class InitializeLevel : MonoBehaviour
 
             if (prefab == null)
             {
-                Debug.LogError($"Player {i} �S���﨤�� prefab�I");
+                Debug.LogError($"Player {i} 沒有選角色 prefab！");
                 continue;
             }
 
+            // 🔹 生成玩家在對應 Spawn
             GameObject playerObject = Instantiate(prefab, playerSpawns[i].position, playerSpawns[i].rotation);
 
-            // �j�w���
+            // 綁定控制器
             PlayerInput playerInput = playerObject.GetComponent<PlayerInput>();
             if (playerInput != null)
             {
                 foreach (var device in config.Input.devices)
+                {
                     InputUser.PerformPairingWithDevice(device, playerInput.user);
+                }
 
                 playerInput.user.AssociateActionsWithUser(playerInput.actions);
             }
 
-            // �j�w PlayerInputHandler
+            // 綁定 PlayerInputHandler
             var inputHandler = playerObject.GetComponent<PlayerInputHandler>();
             if (inputHandler != null)
+            {
                 inputHandler.InitializePlayer(config);
+            }
+
+            // 🔹 綁定 PlayerScore 的初始 Spawn
+            var playerScore = playerObject.GetComponent<PlayerScore>();
+            if (playerScore != null && i < playerSpawns.Length)
+            {
+                playerScore.SetInitialSpawn(playerSpawns[i]);
+            }
         }
     }
 }

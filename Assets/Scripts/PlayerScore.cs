@@ -1,30 +1,89 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerScore : MonoBehaviour
 {
-    public int score = 0;
-    public bool isAlive = true; // �O�_�s��
+    [Header("Player Settings")]
+    public int maxHealth = 100;
+    private int currentHealth;
 
-    public void ReachGoal()
+    private bool isDead = false;
+
+    public bool isAlive => !isDead;
+
+    private Transform initialSpawn; // 🔹 原始出生點
+
+    private void Start()
     {
-        score += 1;
-        Debug.Log($"{gameObject.name} reached goal! Score: {score}");
-        RoundManager.Instance.NotifyPlayerReachedGoal(this);
+        currentHealth = maxHealth;
+        isDead = false;
+    }
+
+    // 記住初始出生點
+    public void SetInitialSpawn(Transform spawn)
+    {
+        initialSpawn = spawn;
+    }
+
+    // 受傷
+    public void TakeDamage(int amount)
+    {
+        if (isDead) return;
+
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    // 死亡
+    private void Die()
+    {
+        if (isDead) return;
+
+        isDead = true;
+        currentHealth = 0;
+
+        gameObject.SetActive(false);
+
+        if (RoundManager.Instance != null)
+        {
+            RoundManager.Instance.NotifyPlayerDeath(this);
+        }
     }
 
     public void FallDown()
     {
-        score -= 1;
-        isAlive = false;
-        Debug.Log($"{gameObject.name} fell! Score: {score}");
-        RoundManager.Instance.NotifyPlayerDeath(this);
+        Debug.Log($"{gameObject.name} 掉落死亡！");
+        Die();
     }
 
-    public void Revive(Vector3 spawnPos)
+    // 復活（優先使用原始 Spawn）
+    public void Revive()
     {
-        isAlive = true;
-        transform.position = spawnPos;
+        isDead = false;
+        currentHealth = maxHealth;
+
+        if (initialSpawn != null)
+        {
+            transform.position = initialSpawn.position;
+            transform.rotation = initialSpawn.rotation;
+        }
+
         gameObject.SetActive(true);
-        Debug.Log($"{gameObject.name} revived!");
+        Debug.Log($"{gameObject.name} 復活在初始出生點");
+    }
+
+    public void ReachGoal()
+    {
+        if (RoundManager.Instance != null)
+        {
+            RoundManager.Instance.NotifyPlayerReachedGoal(this);
+        }
+    }
+
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
     }
 }

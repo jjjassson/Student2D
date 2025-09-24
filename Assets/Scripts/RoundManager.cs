@@ -13,9 +13,6 @@ public class RoundManager : MonoBehaviour
     private static RoundManager instance;
     public static RoundManager Instance => instance;
 
-    [Header("Spawn Settings")]
-    public Vector3 spawnPosition = new Vector3(0, 2f, 0);
-
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -32,6 +29,9 @@ public class RoundManager : MonoBehaviour
         StartRound();
     }
 
+    /// <summary>
+    /// 開始新的一回合
+    /// </summary>
     private void StartRound()
     {
         roundNumber++;
@@ -40,29 +40,37 @@ public class RoundManager : MonoBehaviour
 
         alivePlayers = totalPlayers;
 
-        // 復活所有玩家
-        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        // 復活所有玩家（回到自己的初始 Spawn）
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in players)
         {
             var ps = player.GetComponent<PlayerScore>();
             if (ps != null)
             {
-                ps.Revive(spawnPosition);
+                ps.Revive();
             }
         }
     }
 
+    /// <summary>
+    /// 結束目前回合
+    /// </summary>
     public void EndRound()
     {
         Debug.Log($"=== Round {roundNumber} 結束！ ===");
         OnRoundEnd?.Invoke(roundNumber);
 
-        StartRound();
+        StartRound(); // 🔹 自動進入下一回合
     }
 
-    // 🔹 當玩家死亡
+    /// <summary>
+    /// 玩家死亡時呼叫
+    /// </summary>
     public void NotifyPlayerDeath(PlayerScore player)
     {
         alivePlayers--;
+
+        Debug.Log($"{player.gameObject.name} 死亡，剩下 {alivePlayers}/{totalPlayers}");
 
         if (alivePlayers <= 0)
         {
@@ -70,9 +78,12 @@ public class RoundManager : MonoBehaviour
         }
     }
 
-    // 🔹 當有玩家到達終點
+    /// <summary>
+    /// 玩家到達終點時呼叫
+    /// </summary>
     public void NotifyPlayerReachedGoal(PlayerScore player)
     {
+        Debug.Log($"{player.gameObject.name} 到達終點！");
         EndRound();
     }
 }
