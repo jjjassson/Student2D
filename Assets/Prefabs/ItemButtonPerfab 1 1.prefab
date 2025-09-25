@@ -118,4 +118,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placer: {fileID: 0}
-  prefabToPlace: {fileID: 0}
+  prefabToPlace: {fileID: 919132149155446097, guid: 36f896d5ec75b7344b0631b92d954e8d, type: 3}
