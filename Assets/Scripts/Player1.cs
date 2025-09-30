@@ -13,9 +13,18 @@ public class Player1 : MonoBehaviour, IMover
     private Vector3 playerVelocity;
     private bool groundedPlayer;
 
+    // ⬇️ 新增：速度倍率
+    private float speedMultiplier = 1f;
+
     private void Start()
     {
         controller = GetComponent<CharacterController>();
+    }
+
+    // ✅ 提供 SlowZone 呼叫的接口
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = multiplier;
     }
 
     // ✅ IMover 實作
@@ -54,7 +63,9 @@ public class Player1 : MonoBehaviour, IMover
         }
 
         playerVelocity.y += gravityValue * Time.deltaTime;
-        Vector3 finalMove = move * playerSpeed + Vector3.up * playerVelocity.y;
+
+        // ⬇️ 這裡套用 speedMultiplier
+        Vector3 finalMove = move * playerSpeed * speedMultiplier + Vector3.up * playerVelocity.y;
         controller.Move(finalMove * Time.deltaTime);
     }
 }
