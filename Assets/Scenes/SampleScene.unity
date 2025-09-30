@@ -557,7 +557,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 584484096}
-  - component: {fileID: 584484095}
+  - component: {fileID: 584484098}
   - component: {fileID: 584484097}
   m_Layer: 0
   m_Name: PlayerInputHandler
@@ -566,18 +566,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &584484095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 584484094}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 897d345b6b3968a46ad87739e61cfaa7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &584484096
 Transform:
   m_ObjectHideFlags: 0
@@ -608,6 +596,21 @@ MonoBehaviour:
   playerId: 0
   cursorUI: {fileID: 1319392468}
   moveSpeed: 500
+--- !u!114 &584484098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 584484094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cc7b4c5fe783a34f8f0786a7b6324b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 963194227}
+  cursorVisual: {fileID: 1657023865}
+  cursorSpeed: 1000
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
