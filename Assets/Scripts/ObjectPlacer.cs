@@ -4,25 +4,31 @@ using UnityEngine.InputSystem;
 public class ObjectPlacer : MonoBehaviour
 {
     [Header("放置設定")]
-    public GameObject selectedObjectPrefab;
-    public Camera mainCamera;
-    public float placeDepth = 10f;         // 初始放置深度
-    public float scrollSpeed = 2f;         // 滾輪調整速度
-    public float minDepth = 1f;            // 最小深度
-    public float maxDepth = 50f;           // 最大深度
+    public Camera mainCamera;                 // 主攝影機
+    public float placeDepth = 10f;            // 初始深度
+    public float scrollSpeed = 2f;            // 滾輪調整速度
+    public float minDepth = 1f;               // 最小深度
+    public float maxDepth = 50f;              // 最大深度
+
+    [Header("放置物件")]
+    public GameObject selectedObjectPrefab;   // 當前選擇的物件
 
     void Update()
     {
-        // 🔄 用滑鼠滾輪調整放置深度
+        // ==============================
+        // 滾輪調整放置深度
+        // ==============================
         float scrollValue = Mouse.current.scroll.ReadValue().y;
         if (scrollValue != 0)
         {
-            placeDepth -= scrollValue * scrollSpeed * Time.deltaTime; // 向上滾→往遠處放
-            placeDepth = Mathf.Clamp(placeDepth, minDepth, maxDepth); // 限制深度範圍
+            placeDepth -= scrollValue * scrollSpeed * Time.deltaTime;
+            placeDepth = Mathf.Clamp(placeDepth, minDepth, maxDepth);
             Debug.Log($"目前深度：{placeDepth:F2}");
         }
 
-        // 🖱️ 點擊左鍵放置物件
+        // ==============================
+        // 左鍵放置物件
+        // ==============================
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (selectedObjectPrefab == null)
@@ -41,10 +47,21 @@ public class ObjectPlacer : MonoBehaviour
         }
     }
 
-    // 🧭 讓 UI 按鈕呼叫，設定目前要放置的 prefab
-    public void SetSelectedObject(GameObject prefab)
+    // ==============================
+    // 由 UI 按鈕呼叫：右鍵選擇物件
+    // ==============================
+    public void SelectObjectFromButton(GameObject prefab)
     {
+        if (prefab == null) return;
+
         selectedObjectPrefab = prefab;
-        Debug.Log("已選擇物件：" + prefab.name);
+        Debug.Log("右鍵選擇物件：" + prefab.name);
+    }
+
+    // 可選：取消選擇
+    public void DeselectObject()
+    {
+        selectedObjectPrefab = null;
+        Debug.Log("取消選擇物件");
     }
 }

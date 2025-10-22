@@ -1,26 +1,25 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class PrefabSelectorButton : MonoBehaviour
+public class PrefabSelectorButton : MonoBehaviour, IPointerClickHandler
 {
-    public ObjectPlacer placer;            // ©ì ObjectPlacer ªºª«¥ó¶i¨Ó
-    public GameObject prefabToPlace;       // ©ì§A·Q¿ï¾Üªº Prefab ¶i¨Ó
+    public ObjectPlacer placer;          // æ‹–å…¥ ObjectPlacer
+    public GameObject prefabToPlace;     // é€™å€‹æŒ‰éˆ•ä»£è¡¨çš„ç‰©ä»¶
 
-    void Start()
+    // æ»‘é¼ é»æ“Šäº‹ä»¶
+    public void OnPointerClick(PointerEventData eventData)
     {
-        // ³]©w«ö¶sÂIÀ»¨Æ¥ó
-        GetComponent<Button>().onClick.AddListener(OnClick);
-    }
-
-    void OnClick()
-    {
-        if (placer != null && prefabToPlace != null)
+        if (placer == null || prefabToPlace == null)
         {
-            placer.SetSelectedObject(prefabToPlace);
+            Debug.LogWarning("å°šæœªæŒ‡å®š placer æˆ– prefabToPlaceï¼");
+            return;
         }
-        else
+
+        // ğŸ–±ï¸ å³éµé¸æ“‡ç‰©ä»¶
+        if (eventData.button == PointerEventData.InputButton.Right)
         {
-            Debug.LogWarning("©|¥¼«ü©w placer ©Î prefabToPlace¡I");
+            placer.SelectObjectFromButton(prefabToPlace);
         }
     }
 }

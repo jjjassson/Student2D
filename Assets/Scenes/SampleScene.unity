@@ -389,7 +389,7 @@ PrefabInstance:
     - target: {fileID: 5307437976076524725, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: placer
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1286903753}
     - target: {fileID: 5307437976076524725, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: prefabToPlace
       value: 
@@ -1112,9 +1112,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb6b2be0631601646bd1ad865336ae83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedObjectPrefab: {fileID: 919132149155446097, guid: 024a1df924e3ce24bb1d60a5463de7c1, type: 3}
   mainCamera: {fileID: 963194227}
   placeDepth: 10
+  scrollSpeed: 2
+  minDepth: 1
+  maxDepth: 50
+  selectedObjectPrefab: {fileID: 919132149155446097, guid: 024a1df924e3ce24bb1d60a5463de7c1, type: 3}
 --- !u!4 &1286903754
 Transform:
   m_ObjectHideFlags: 0
