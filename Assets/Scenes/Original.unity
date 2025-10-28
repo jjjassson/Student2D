@@ -158,6 +158,7 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: 36f896d5ec75b7344b0631b92d954e8d, type: 3}
   content: {fileID: 1419493809}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
+  placer: {fileID: 1286903753}
 --- !u!4 &83037869
 Transform:
   m_ObjectHideFlags: 0
@@ -188,7 +189,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: m_Name
-      value: ItemButtonPerfab 1 (1)
+      value: ItemButtonPerfab 2
       objectReference: {fileID: 0}
     - target: {fileID: 5307437976076524725, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: placer
@@ -384,7 +385,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: m_Name
-      value: ItemButtonPerfab 1 (3)
+      value: ItemButtonPerfab 4
       objectReference: {fileID: 0}
     - target: {fileID: 5307437976076524725, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: placer
@@ -719,7 +720,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: m_Name
-      value: ItemButtonPerfab 1 (2)
+      value: ItemButtonPerfab 3
       objectReference: {fileID: 0}
     - target: {fileID: 5307437976076524725, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: placer
@@ -1094,7 +1095,7 @@ GameObject:
   - component: {fileID: 1286903754}
   - component: {fileID: 1286903753}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: PlacementManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1117,7 +1118,7 @@ MonoBehaviour:
   scrollSpeed: 2
   minDepth: 1
   maxDepth: 50
-  selectedObjectPrefab: {fileID: 919132149155446097, guid: 024a1df924e3ce24bb1d60a5463de7c1, type: 3}
+  selectedObjectPrefab: {fileID: 0}
 --- !u!4 &1286903754
 Transform:
   m_ObjectHideFlags: 0
@@ -1342,6 +1343,7 @@ MonoBehaviour:
   items: []
   content: {fileID: 0}
   buttonPrefab: {fileID: 172671453}
+  placer: {fileID: 0}
 --- !u!1 &1476698329
 GameObject:
   m_ObjectHideFlags: 0
@@ -1824,6 +1826,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7584910790183354653, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7584910790183354653, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -1866,7 +1872,6 @@ SceneRoots:
   - {fileID: 1657023868}
   - {fileID: 584484096}
   - {fileID: 1557127273}
-  - {fileID: 83037869}
   - {fileID: 2116548952}
   - {fileID: 1913956858}
   - {fileID: 1015647405}
@@ -1874,4 +1879,5 @@ SceneRoots:
   - {fileID: 201194967}
   - {fileID: 850947458}
   - {fileID: 279663184}
+  - {fileID: 83037869}
   - {fileID: 1286903754}
