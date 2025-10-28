@@ -14,7 +14,10 @@ public class Player1 : MonoBehaviour, IMover
     private bool groundedPlayer;
 
     // ⬇️ 新增：速度倍率
-    private float speedMultiplier = 1f;
+    private float speedMultiplier = 0.5f;
+
+    // ⬇️ 新增：跳躍倍率
+    private float jumpMultiplier = 0.5f;
 
     private void Start()
     {
@@ -25,6 +28,12 @@ public class Player1 : MonoBehaviour, IMover
     public void SetSpeedMultiplier(float multiplier)
     {
         speedMultiplier = multiplier;
+    }
+
+    // ✅ 提供 LowJumpZone 呼叫的接口
+    public void SetJumpMultiplier(float multiplier)
+    {
+        jumpMultiplier = multiplier;
     }
 
     // ✅ IMover 實作
@@ -38,7 +47,8 @@ public class Player1 : MonoBehaviour, IMover
     {
         if (context.performed && groundedPlayer)
         {
-            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
+            // ⬇️ 修改：加入 jumpMultiplier
+            playerVelocity.y = Mathf.Sqrt(jumpHeight * jumpMultiplier * -2f * gravityValue);
         }
     }
 
