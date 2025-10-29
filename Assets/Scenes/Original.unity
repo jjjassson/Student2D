@@ -152,10 +152,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - {fileID: 919132149155446097, guid: 113e17d308d70464ba491ef1b8bf668f, type: 3}
-  - {fileID: 919132149155446097, guid: 148e6a2be99ab4e40a74d6b68d350fbf, type: 3}
-  - {fileID: 919132149155446097, guid: ba3c12b8828c1f84388295991455ddd8, type: 3}
-  - {fileID: 919132149155446097, guid: 36f896d5ec75b7344b0631b92d954e8d, type: 3}
+  - {fileID: 1061243245407525608, guid: 96ca48b7759d3b94b9dcd9feef7c9a8c, type: 3}
+  - {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
+  - {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
+  - {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
+  - {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
   content: {fileID: 1419493809}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
   placer: {fileID: 1286903753}
