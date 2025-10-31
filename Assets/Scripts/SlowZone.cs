@@ -1,28 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SlowZone : MonoBehaviour
 {
-    [Tooltip("進入時的移速倍率 (例如 0.5 = 減半)")]
-    public float slowMultiplier = 0.5f;
+    [SerializeField] private float slowMultiplier = 0.5f; // 減速倍率
+    private Player1 player; // 你的玩家腳本
 
-    private void OnTriggerEnter(Collider other)
+    void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Player1 player = other.GetComponent<Player1>();
-        if (player != null)
+        if (hit.collider == null) return;
+
+        if (hit.collider.CompareTag("Player"))
         {
-            player.SetSpeedMultiplier(slowMultiplier);
+            // 嘗試取得 Player 腳本
+            if (player == null)
+                player = hit.collider.GetComponent<Player1>();
+
+            if (player != null && !player.isSlowed)
+            {
+                player.moveSpeed *= slowMultiplier;
+                player.isSlowed = true;
+                Debug.Log("踩到減速區！");
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnCollisionExit(Collision collision)
     {
-        Player1 player = other.GetComponent<Player1>();
-        if (player != null)
+        if (collision.gameObject.CompareTag("Player") && player != null)
         {
-            player.SetSpeedMultiplier(1f); // 離開後回復正常
+            player.ResetSpeed();
+            Debug.Log("離開減速區，速度恢復");
         }
     }
 }
-

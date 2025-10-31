@@ -1,28 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class LowJumpZone : MonoBehaviour
+public class LowJump : MonoBehaviour
 {
-    [Tooltip("進入時的跳躍倍率 (例如 0.5 = 跳躍高度減半)")]
-    public float jumpMultiplier = 0.5f;
+    [SerializeField] private float jumpMultiplier = 0.5f; // 跳躍力下降倍率
+    private Player1 player;
 
-    private void OnTriggerEnter(Collider other)
+    void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Player1 player = other.GetComponent<Player1>();
-        if (player != null)
+        if (hit.collider == null) return;
+
+        if (hit.collider.CompareTag("Player"))
         {
-            player.SetJumpMultiplier(jumpMultiplier);
+            if (player == null)
+                player = hit.collider.GetComponent<Player1>();
+
+            if (player != null && !player.isJumpReduced)
+            {
+                player.jumpForce *= jumpMultiplier;
+                player.isJumpReduced = true;
+                Debug.Log("踩到低跳區！");
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnCollisionExit(Collision collision)
     {
-        Player1 player = other.GetComponent<Player1>();
-        if (player != null)
+        if (collision.gameObject.CompareTag("Player") && player != null)
         {
-            player.SetJumpMultiplier(1f); // 離開後回復正常
+            player.ResetJump();
+            Debug.Log("離開低跳區，跳躍恢復");
         }
     }
 }
-
