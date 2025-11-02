@@ -1,34 +1,29 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-public class LowJump : MonoBehaviour
+[RequireComponent(typeof(Collider))]
+public class LowJumpZone : MonoBehaviour
 {
-    [SerializeField] private float jumpMultiplier = 0.5f; // ¸õÅD¤O¤U­°­¿²v
-    private Player1 player;
+    [Tooltip("è·³èºåŠ›å€ç‡ï¼ˆä¾‹å¦‚ 0.5 = æ¸›åŠï¼‰")]
+    [Range(0.1f, 2f)]
+    public float jumpMultiplier = 0.5f;
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    private void OnTriggerEnter(Collider other)
     {
-        if (hit.collider == null) return;
-
-        if (hit.collider.CompareTag("Player"))
+        Player1 player = other.GetComponent<Player1>();
+        if (player != null)
         {
-            if (player == null)
-                player = hit.collider.GetComponent<Player1>();
-
-            if (player != null && !player.isJumpReduced)
-            {
-                player.jumpForce *= jumpMultiplier;
-                player.isJumpReduced = true;
-                Debug.Log("½ò¨ì§C¸õ°Ï¡I");
-            }
+            player.ApplyJumpMultiplier(jumpMultiplier);
+            Debug.Log("â–¶ é€²å…¥ä½è·³å€");
         }
     }
 
-    void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        if (collision.gameObject.CompareTag("Player") && player != null)
+        Player1 player = other.GetComponent<Player1>();
+        if (player != null)
         {
             player.ResetJump();
-            Debug.Log("Â÷¶}§C¸õ°Ï¡A¸õÅD«ì´_");
+            Debug.Log("â—€ é›¢é–‹ä½è·³å€");
         }
     }
 }

@@ -2,80 +2,94 @@
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
-public class Player1 : MonoBehaviour, IMover
+public class Player1 : MonoBehaviour
 {
-    [SerializeField] private float playerSpeed = 2f;
-    [SerializeField] private float jumpHeight = 1f;
-    [SerializeField] private float gravityValue = -9.81f;
+    [Header("角色基本參數")]
+    public float moveSpeed = 4f;
+    public float jumpForce = 1f;
+    public float gravityValue = -9.81f;
 
     private CharacterController controller;
-    private Vector2 movementInput = Vector2.zero;
-    private Vector3 playerVelocity;
+    private Vector2 moveInput;
+    private Vector3 velocity;
     private bool groundedPlayer;
 
-    // ⬇️ 新增：速度倍率
-    private float speedMultiplier = 0.5f;
+    // 🧩 狀態
+    [HideInInspector] public bool isSlowed = false;
+    [HideInInspector] public bool isJumpReduced = false;
 
-    // ⬇️ 新增：跳躍倍率
-    private float jumpMultiplier = 0.5f;
+    // 🧩 預設參數記錄
+    private float defaultMoveSpeed;
+    private float defaultJumpForce;
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
+        defaultMoveSpeed = moveSpeed;
+        defaultJumpForce = jumpForce;
     }
 
-    // ✅ 提供 SlowZone 呼叫的接口
-    public void SetSpeedMultiplier(float multiplier)
+    // ===== 接收 SlowZone / LowJumpZone 呼叫 =====
+    public void ApplySpeedMultiplier(float multiplier)
     {
-        speedMultiplier = multiplier;
+        moveSpeed = defaultMoveSpeed * multiplier;
+        isSlowed = multiplier < 1f;
     }
 
-    // ✅ 提供 LowJumpZone 呼叫的接口
-    public void SetJumpMultiplier(float multiplier)
+    public void ApplyJumpMultiplier(float multiplier)
     {
-        jumpMultiplier = multiplier;
+        jumpForce = defaultJumpForce * multiplier;
+        isJumpReduced = multiplier < 1f;
     }
 
-    // ✅ IMover 實作
-    public void SetInputVector(Vector2 direction)
+    public void ResetSpeed()
     {
-        movementInput = direction;
+        moveSpeed = defaultMoveSpeed;
+        isSlowed = false;
     }
 
-    // ✅ PlayerInput 直接呼叫 Jump
+    public void ResetJump()
+    {
+        jumpForce = defaultJumpForce;
+        isJumpReduced = false;
+    }
+
+    // ===== 玩家輸入 =====
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        moveInput = context.ReadValue<Vector2>();
+    }
+
     public void OnJump(InputAction.CallbackContext context)
     {
         if (context.performed && groundedPlayer)
         {
-            // ⬇️ 修改：加入 jumpMultiplier
-            playerVelocity.y = Mathf.Sqrt(jumpHeight * jumpMultiplier * -2f * gravityValue);
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravityValue);
         }
     }
 
-    // 如果你想直接綁 Movement Action 也可以保留 OnMove
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        SetInputVector(context.ReadValue<Vector2>());
-    }
-
+    // ===== 更新移動 =====
     private void Update()
     {
         groundedPlayer = controller.isGrounded;
-        if (groundedPlayer && playerVelocity.y < 0f)
-            playerVelocity.y = 0f;
 
-        Vector3 move = new Vector3(movementInput.x, 0, movementInput.y);
+        if (groundedPlayer && velocity.y < 0)
+            velocity.y = 0f;
 
-        if (move != Vector3.zero)
+        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
+        controller.Move(move * Time.deltaTime * moveSpeed);
+
+        velocity.y += gravityValue * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+
+        // 轉向
+        if (move.sqrMagnitude > 0.01f)
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation,
-                Quaternion.LookRotation(move, Vector3.up), 720f * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                Quaternion.LookRotation(move, Vector3.up),
+                720f * Time.deltaTime
+            );
         }
-
-        playerVelocity.y += gravityValue * Time.deltaTime;
-
-        // ⬇️ 這裡套用 speedMultiplier
-        Vector3 finalMove = move * playerSpeed * speedMultiplier + Vector3.up * playerVelocity.y;
-        controller.Move(finalMove * Time.deltaTime);
     }
 }

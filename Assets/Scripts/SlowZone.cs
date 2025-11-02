@@ -1,35 +1,29 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class SlowZone : MonoBehaviour
 {
-    [SerializeField] private float slowMultiplier = 0.5f; // ´î³t­¿²v
-    private Player1 player; // §Aªºª±®a¸}¥»
+    [Tooltip("è§’è‰²é€Ÿåº¦å€ç‡ï¼ˆä¾‹å¦‚ 0.5 = æ¸›åŠï¼‰")]
+    [Range(0.1f, 2f)]
+    public float slowMultiplier = 0.5f;
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    private void OnTriggerEnter(Collider other)
     {
-        if (hit.collider == null) return;
-
-        if (hit.collider.CompareTag("Player"))
+        Player1 player = other.GetComponent<Player1>();
+        if (player != null)
         {
-            // ¹Á¸Õ¨ú±o Player ¸}¥»
-            if (player == null)
-                player = hit.collider.GetComponent<Player1>();
-
-            if (player != null && !player.isSlowed)
-            {
-                player.moveSpeed *= slowMultiplier;
-                player.isSlowed = true;
-                Debug.Log("½ò¨ì´î³t°Ï¡I");
-            }
+            player.ApplySpeedMultiplier(slowMultiplier);
+            Debug.Log("â–¶ é€²å…¥æ¸›é€Ÿå€");
         }
     }
 
-    void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        if (collision.gameObject.CompareTag("Player") && player != null)
+        Player1 player = other.GetComponent<Player1>();
+        if (player != null)
         {
             player.ResetSpeed();
-            Debug.Log("Â÷¶}´î³t°Ï¡A³t«×«ì´_");
+            Debug.Log("â—€ é›¢é–‹æ¸›é€Ÿå€");
         }
     }
 }
