@@ -682,6 +682,7 @@ MonoBehaviour:
   minDepth: 1
   maxDepth: 50
   selectedObjectPrefab: {fileID: 0}
+  secondaryObjectPrefab: {fileID: 0}
 --- !u!4 &642393186
 Transform:
   m_ObjectHideFlags: 0
@@ -1374,11 +1375,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - {fileID: 1061243245407525608, guid: 96ca48b7759d3b94b9dcd9feef7c9a8c, type: 3}
-  - {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
-  - {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
-  - {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
-  - {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
+  - mainPrefab: {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
+    secondaryPrefab: {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
+  - mainPrefab: {fileID: 1061243245407525608, guid: 96ca48b7759d3b94b9dcd9feef7c9a8c, type: 3}
+    secondaryPrefab: {fileID: 1061243245407525608, guid: 96ca48b7759d3b94b9dcd9feef7c9a8c, type: 3}
+  - mainPrefab: {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
+    secondaryPrefab: {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
+  - mainPrefab: {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
+    secondaryPrefab: {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
+  - mainPrefab: {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
+    secondaryPrefab: {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
   content: {fileID: 380421951}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
   placer: {fileID: 642393185}
