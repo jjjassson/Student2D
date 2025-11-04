@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class ItemSelector : MonoBehaviour
 {
@@ -10,16 +11,14 @@ public class ItemSelector : MonoBehaviour
     public Transform content;
     public GameObject buttonPrefab;
 
-    // 💡 關鍵連線：引用場景中的 ObjectPlacer
     [Header("控制器")]
     public ObjectPlacer placer;
 
     void Start()
     {
-        // 檢查 Placer 是否已連線
+        // 自動尋找 ObjectPlacer
         if (placer == null)
         {
-            // 嘗試自動尋找場景中的 ObjectPlacer 實例 (如果 Inspector 沒拖入的話)
             placer = FindObjectOfType<ObjectPlacer>();
             if (placer == null)
             {
@@ -28,33 +27,47 @@ public class ItemSelector : MonoBehaviour
             }
         }
 
-        // 動態生成按鈕
+        // 為每個物件生成按鈕
         foreach (var item in items)
         {
             GameObject currentItem = item;
 
-            // 實例化按鈕 Prefab
-            var btn = Instantiate(buttonPrefab, content);
+            var btnObj = Instantiate(buttonPrefab, content);
 
-            // 設定按鈕文字 (假設按鈕的子物件有 Text 元件)
-            Text buttonText = btn.GetComponentInChildren<Text>();
+            // 設定按鈕文字
+            Text buttonText = btnObj.GetComponentInChildren<Text>();
             if (buttonText != null)
-            {
                 buttonText.text = currentItem.name;
+
+            // 確保按鈕存在
+            Button buttonComponent = btnObj.GetComponent<Button>();
+            if (buttonComponent == null)
+            {
+                Debug.LogError($"ItemSelector 錯誤：{buttonPrefab.name} 缺少 Button 元件！");
+                continue;
             }
 
-            // 取得 Button 元件並新增點擊監聽器
-            Button buttonComponent = btn.GetComponent<Button>();
-            if (buttonComponent != null)
+            // 移除預設的左鍵事件（可選）
+            buttonComponent.onClick.RemoveAllListeners();
+
+            // 使用 EventTrigger 監聽右鍵
+            EventTrigger trigger = btnObj.AddComponent<EventTrigger>();
+
+            EventTrigger.Entry rightClickEntry = new EventTrigger.Entry
             {
-                // 當按鈕被點擊時，呼叫 ObjectPlacer 中的 SelectObjectFromButton 方法
-                // 注意：這裡使用左鍵點擊來選擇物件
-                buttonComponent.onClick.AddListener(() => placer.SelectObjectFromButton(currentItem));
-            }
-            else
+                eventID = EventTriggerType.PointerClick
+            };
+            rightClickEntry.callback.AddListener((data) =>
             {
-                Debug.LogError($"ItemSelector 錯誤：生成的 Button Prefab {buttonPrefab.name} 缺少 Button 元件！");
-            }
+                PointerEventData ped = (PointerEventData)data;
+                if (ped.button == PointerEventData.InputButton.Right)
+                {
+                    placer.SelectObjectFromButton(currentItem);
+                    Debug.Log($"右鍵選擇物件：{currentItem.name}");
+                }
+            });
+
+            trigger.triggers.Add(rightClickEntry);
         }
     }
 }
