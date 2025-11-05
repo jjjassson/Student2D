@@ -10,19 +10,28 @@ public class InitializeLevel : MonoBehaviour
     {
         var playerConfigs = PlayerConfigurationManager.Instance.GetPlayerConfigs().ToArray();
 
-        for (int i = 0; i < playerConfigs.Length; i++)
+        foreach (var config in playerConfigs)
         {
-            var config = playerConfigs[i];
-            GameObject prefab = config.SelectedCharacterPrefab;
+            int playerIndex = config.PlayerIndex; // 🔹 玩家編號（0 = Player1, 1 = Player2）
+            if (playerIndex >= playerSpawns.Length)
+            {
+                Debug.LogWarning($"Player {playerIndex} 沒有對應的 Spawn 點！");
+                continue;
+            }
 
+            GameObject prefab = config.SelectedCharacterPrefab;
             if (prefab == null)
             {
-                Debug.LogError($"Player {i} 沒有選角色 prefab！");
+                Debug.LogError($"Player {playerIndex} 沒有選角色 prefab！");
                 continue;
             }
 
             // 🔹 生成玩家在對應 Spawn
-            GameObject playerObject = Instantiate(prefab, playerSpawns[i].position, playerSpawns[i].rotation);
+            GameObject playerObject = Instantiate(
+                prefab,
+                playerSpawns[playerIndex].position,
+                playerSpawns[playerIndex].rotation
+            );
 
             // 綁定控制器
             PlayerInput playerInput = playerObject.GetComponent<PlayerInput>();
@@ -45,10 +54,12 @@ public class InitializeLevel : MonoBehaviour
 
             // 🔹 綁定 PlayerScore 的初始 Spawn
             var playerScore = playerObject.GetComponent<PlayerScore>();
-            if (playerScore != null && i < playerSpawns.Length)
+            if (playerScore != null)
             {
-                playerScore.SetInitialSpawn(playerSpawns[i]);
+                playerScore.SetInitialSpawn(playerSpawns[playerIndex]);
             }
+
+            Debug.Log($"✅ Player {playerIndex + 1} 生成於 {playerSpawns[playerIndex].name}");
         }
     }
 }

@@ -364,6 +364,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7918335002988649766, guid: 9b019d812293c5842b96106bbf544620, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: eb9dbbcc52e70da41a0d2590c312032b, type: 2}
     - target: {fileID: 919132149155446097, guid: 9b019d812293c5842b96106bbf544620, type: 3}
       propertyPath: m_Name
       value: cliff
@@ -1330,8 +1334,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - mainPrefab: {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
-    secondaryPrefab: {fileID: 2471618925598150436, guid: cd187965fa930314c8dda3d59d19489d, type: 3}
+  - mainPrefab: {fileID: 2471618925598150436, guid: f120366402176a643a9f940cde6bb04e, type: 3}
+    secondaryPrefab: {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
   - mainPrefab: {fileID: 1061243245407525608, guid: 96ca48b7759d3b94b9dcd9feef7c9a8c, type: 3}
     secondaryPrefab: {fileID: 1061243245407525608, guid: 180ab25f41da6aa409ef903a859ae9df, type: 3}
   - mainPrefab: {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
