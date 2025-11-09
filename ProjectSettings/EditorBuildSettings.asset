@@ -9,11 +9,17 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 5f2399388bf1eaa48b0dc04370fc3628
   - enabled: 1
+    path: Assets/Scenes/MapSelect.unity
+    guid: c9f1d7ca2f85835448241f9e2bb62447
+  - enabled: 1
     path: Assets/Scenes/PlayerSetup.unity
     guid: 4a366af4861b15a43b44dd2839eb2ae6
   - enabled: 1
     path: Assets/Scenes/Cliff.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/Road.unity
+    guid: 20990f5c12b78684da225e296db35559
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 0b445423a35e9f34e9c20a872b6c8abf, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3f8fb36217c78624c96d1e2bb53bfb20, type: 3}

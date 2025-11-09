@@ -5,10 +5,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 更健壯的 PlayerConfigurationManager
-/// - 顯示大量 Debug.Log 以便排錯
-/// - 可指定 defaultPrefabs（選填），當玩家加入時會預設設定 SelectedCharacterPrefab
-/// - 提供 DebugPrintConfigs() 可在任何時候手動呼叫印出目前狀態
+/// PlayerConfigurationManager
+/// - 管理玩家加入與選角
+/// - 當所有玩家準備完成時自動載入 AllGameManager.selectedMapName
 /// </summary>
 public class PlayerConfigurationManager : MonoBehaviour
 {
@@ -17,7 +16,6 @@ public class PlayerConfigurationManager : MonoBehaviour
     private List<PlayerConfiguration> playerConfigs = new List<PlayerConfiguration>();
     [SerializeField] private int MaxPlayers = 2;
 
-    // 可在 Inspector 拉兩個預設 prefab（如果你想讓加入時就有預設角色）
     [Header("Optional: default prefabs per playerIndex (0 = Player1, 1 = Player2)")]
     [SerializeField] private List<GameObject> defaultPrefabs = new List<GameObject>();
 
@@ -25,7 +23,7 @@ public class PlayerConfigurationManager : MonoBehaviour
     {
         if (Instance != null)
         {
-            Debug.LogWarning("[Singleton] Second instance of PlayerConfigurationManager!");
+            Debug.LogWarning("[PCM] Second instance detected!");
         }
         else
         {
@@ -35,7 +33,9 @@ public class PlayerConfigurationManager : MonoBehaviour
         }
     }
 
-    // 重要：當 PlayerInputManager 觸發加入時會呼叫這裡（確保 PlayerInputManager 正確設定）
+    /// <summary>
+    /// 當 PlayerInputManager 加入玩家時呼叫
+    /// </summary>
     public void HandlePlayerJoin(PlayerInput pi)
     {
         if (pi == null)
@@ -46,34 +46,30 @@ public class PlayerConfigurationManager : MonoBehaviour
 
         Debug.Log($"[PCM] HandlePlayerJoin called. pi.playerIndex = {pi.playerIndex}, pi.name = {pi.name}");
 
-        // 如果已存在同 playerIndex 的 config 就忽略（避免重複）
         if (playerConfigs.Any(p => p.PlayerIndex == pi.playerIndex))
         {
-            Debug.LogWarning($"[PCM] Player with index {pi.playerIndex} already exists in playerConfigs. Skipping add.");
+            Debug.LogWarning($"[PCM] Player with index {pi.playerIndex} already exists. Skipping add.");
             return;
         }
 
         var newConfig = new PlayerConfiguration(pi);
 
-        // 如果 Inspector 裡有預設 prefab，嘗試用 playerIndex 把它放進 SelectedCharacterPrefab（避免 null）
+        // 指派預設 prefab（如果有設定）
         if (pi.playerIndex >= 0 && pi.playerIndex < defaultPrefabs.Count && defaultPrefabs[pi.playerIndex] != null)
         {
             newConfig.SelectedCharacterPrefab = defaultPrefabs[pi.playerIndex];
             Debug.Log($"[PCM] Assigned default prefab to playerIndex {pi.playerIndex}: {defaultPrefabs[pi.playerIndex].name}");
         }
-        else
-        {
-            Debug.Log($"[PCM] No default prefab for playerIndex {pi.playerIndex} (defaultPrefabs size = {defaultPrefabs.Count})");
-        }
 
         playerConfigs.Add(newConfig);
         Debug.Log($"[PCM] Added PlayerConfiguration: index={newConfig.PlayerIndex} totalCount={playerConfigs.Count}");
 
-        // 每次加入後印出目前清單（便於檢查順序與 index）
         DebugPrintConfigs();
     }
 
-    // 在你選角畫面/測試時可調用這方法手動設定
+    /// <summary>
+    /// 在選角畫面手動設定玩家角色
+    /// </summary>
     public void SetPlayerCharacterPrefab(int index, GameObject prefab)
     {
         if (index >= 0 && index < playerConfigs.Count)
@@ -87,8 +83,9 @@ public class PlayerConfigurationManager : MonoBehaviour
         }
     }
 
-    public List<PlayerConfiguration> GetPlayerConfigs() => playerConfigs;
-
+    /// <summary>
+    /// 玩家按 Ready
+    /// </summary>
     public void ReadyPlayer(int index)
     {
         if (index < 0 || index >= playerConfigs.Count)
@@ -100,14 +97,32 @@ public class PlayerConfigurationManager : MonoBehaviour
         playerConfigs[index].isReady = true;
         Debug.Log($"[PCM] Player {index} isReady = true");
 
+        // 檢查所有玩家是否準備完成
         if (playerConfigs.Count == MaxPlayers && playerConfigs.All(p => p.isReady))
         {
-            Debug.Log("[PCM] All players ready. Loading scene 'Cliff'");
-            SceneManager.LoadScene("Cliff"); // 替換成你的遊戲場景
+            string selectedMap = AllGameManager.Instance.selectedMapName;
+
+            if (!string.IsNullOrEmpty(selectedMap))
+            {
+                Debug.Log($"[PCM] All players ready. Loading selected map: {selectedMap}");
+                SceneManager.LoadScene(selectedMap);
+            }
+            else
+            {
+                Debug.LogWarning("[PCM] No map selected, defaulting to 'Cliff'");
+                SceneManager.LoadScene("Cliff");
+            }
         }
     }
 
-    // 方便檢查目前 playerConfigs 的內容
+    /// <summary>
+    /// 取得目前玩家設定
+    /// </summary>
+    public List<PlayerConfiguration> GetPlayerConfigs() => playerConfigs;
+
+    /// <summary>
+    /// 印出所有玩家狀態（Debug）
+    /// </summary>
     public void DebugPrintConfigs()
     {
         Debug.Log($"[PCM] ==== DebugPrintConfigs (Count={playerConfigs.Count}) ====");
@@ -119,7 +134,9 @@ public class PlayerConfigurationManager : MonoBehaviour
         Debug.Log("[PCM] =====================================");
     }
 
-    // 幫助你在 Editor 測試時清除記錄（非必要）
+    /// <summary>
+    /// 清除玩家設定（測試用）
+    /// </summary>
     public void ClearConfigs()
     {
         playerConfigs.Clear();
@@ -127,6 +144,9 @@ public class PlayerConfigurationManager : MonoBehaviour
     }
 }
 
+/// <summary>
+/// 單一玩家設定
+/// </summary>
 public class PlayerConfiguration
 {
     public PlayerConfiguration(PlayerInput pi)
