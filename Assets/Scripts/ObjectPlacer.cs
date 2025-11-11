@@ -1,37 +1,32 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ObjectPlacer : MonoBehaviour
 {
     [Header("放置設定")]
-    public Camera mainCamera;                 // 主攝影機
-    public float placeDepth = 10f;            // 初始深度
-    public float scrollSpeed = 2f;            // 滾輪調整速度
-    public float minDepth = 1f;               // 最小深度
-    public float maxDepth = 50f;              // 最大深度
+    public Camera mainCamera;
+    public float placeDepth = 10f;
+    public float scrollSpeed = 2f;
+    public float minDepth = 1f;
+    public float maxDepth = 50f;
 
     [Header("放置物件")]
-    public GameObject selectedObjectPrefab;   // 當前選擇的物件
+    public GameObject selectedObjectPrefab;
+    public GameObject secondaryObjectPrefab;
 
-    [Header("副物件對應表")]
-    public GameObject secondaryObjectPrefab;  // 選擇的物件對應 Z=0 的副物件
+    private float lastDepthDisplayTime;
 
     void Update()
     {
-        // ==============================
-        // 滾輪調整放置深度
-        // ==============================
         float scrollValue = Mouse.current.scroll.ReadValue().y;
         if (scrollValue != 0)
         {
             placeDepth -= scrollValue * scrollSpeed * Time.deltaTime;
             placeDepth = Mathf.Clamp(placeDepth, minDepth, maxDepth);
-            Debug.Log($"目前深度：{placeDepth:F2}");
+            lastDepthDisplayTime = Time.time; // 更新顯示時間
         }
 
-        // ==============================
-        // 左鍵放置物件
-        // ==============================
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (selectedObjectPrefab == null)
@@ -45,32 +40,37 @@ public class ObjectPlacer : MonoBehaviour
                 new Vector3(mouseScreenPos.x, mouseScreenPos.y, placeDepth)
             );
 
-            // 放置主物件
             GameObject mainObj = Instantiate(selectedObjectPrefab, worldPos, Quaternion.identity);
-            Debug.Log("放置主物件於：" + worldPos);
 
-            // 如果有對應副物件，放置副物件於 Z=0
             if (secondaryObjectPrefab != null)
             {
                 Vector3 secondaryPos = new Vector3(worldPos.x, worldPos.y, 0f);
                 Instantiate(secondaryObjectPrefab, secondaryPos, Quaternion.identity);
-                Debug.Log("放置副物件於：" + secondaryPos);
             }
         }
     }
 
-    // ==============================
-    // 由 UI 按鈕呼叫：右鍵選擇物件
-    // ==============================
+    // --- 螢幕上顯示目前深度 ---
+    void OnGUI()
+    {
+        GUIStyle style = new GUIStyle(GUI.skin.label);
+        style.fontSize = 20;
+        style.normal.textColor = Color.yellow;
+
+        // 只有在最近滾輪操作後的 2 秒內顯示
+        if (Time.time - lastDepthDisplayTime < 2f)
+        {
+            GUI.Label(new Rect(10, 10, 300, 40), $"目前深度：{placeDepth:F2}", style);
+        }
+    }
+
     public void SelectObjectFromButton(GameObject prefab)
     {
         if (prefab == null) return;
 
         selectedObjectPrefab = prefab;
-
-        // 嘗試自動找對應副物件（例如命名規則：A 對應 A-1）
         string secondaryName = prefab.name + "-1";
-        GameObject secondary = Resources.Load<GameObject>(secondaryName); // 從 Resources 資料夾載入
+        GameObject secondary = Resources.Load<GameObject>(secondaryName);
         if (secondary != null)
         {
             secondaryObjectPrefab = secondary;
@@ -79,13 +79,11 @@ public class ObjectPlacer : MonoBehaviour
         else
         {
             secondaryObjectPrefab = null;
-            Debug.LogWarning($"未找到副物件：{secondaryName}");
         }
 
         Debug.Log("右鍵選擇物件：" + prefab.name);
     }
 
-    // 可選：取消選擇
     public void DeselectObject()
     {
         selectedObjectPrefab = null;
