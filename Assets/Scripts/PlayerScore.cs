@@ -4,15 +4,13 @@ public class PlayerScore : MonoBehaviour
 {
     [Header("Player Settings")]
     public int maxHealth = 100;
-
     private int currentHealth;
+
     private bool isDead = false;
 
-    // 🔹 讓 CameraFollow 或其他程式可以讀取玩家是否活著
     public bool isAlive => !isDead;
 
-    // 🔹 儲存玩家初始出生點
-    private Transform initialSpawn;
+    private Transform initialSpawn; // 🔹 原始出生點
 
     private void Start()
     {
@@ -20,18 +18,13 @@ public class PlayerScore : MonoBehaviour
         isDead = false;
     }
 
-    /// <summary>
-    /// 設定初始出生點（通常在生成玩家時呼叫）
-    /// </summary>
-    /// <param name="spawn">玩家出生點 Transform</param>
+    // 記住初始出生點
     public void SetInitialSpawn(Transform spawn)
     {
         initialSpawn = spawn;
     }
 
-    /// <summary>
-    /// 受傷
-    /// </summary>
+    // 受傷
     public void TakeDamage(int amount)
     {
         if (isDead) return;
@@ -43,10 +36,8 @@ public class PlayerScore : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 死亡
-    /// </summary>
-    public void Die()
+    // 死亡
+    private void Die()
     {
         if (isDead) return;
 
@@ -61,18 +52,13 @@ public class PlayerScore : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 玩家掉落死亡
-    /// </summary>
     public void FallDown()
     {
         Debug.Log($"{gameObject.name} 掉落死亡！");
         Die();
     }
 
-    /// <summary>
-    /// 復活玩家，回到初始出生點
-    /// </summary>
+    // 復活（優先使用原始 Spawn）
     public void Revive()
     {
         isDead = false;
@@ -88,9 +74,6 @@ public class PlayerScore : MonoBehaviour
         Debug.Log($"{gameObject.name} 復活在初始出生點");
     }
 
-    /// <summary>
-    /// 玩家到達終點
-    /// </summary>
     public void ReachGoal()
     {
         if (RoundManager.Instance != null)

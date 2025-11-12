@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
@@ -23,8 +23,7 @@ public class CameraFollow : MonoBehaviour
                 alivePlayers.Add(p);
         }
 
-        if (alivePlayers.Count == 0)
-            return; // 沒有活著的玩家就不追蹤
+        if (alivePlayers.Count == 0) return;
 
         Bounds bounds = new Bounds(alivePlayers[0].transform.position, Vector3.zero);
         foreach (var player in alivePlayers)
@@ -34,6 +33,7 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 center = bounds.center;
         float greatestDistance = Mathf.Max(bounds.size.x, bounds.size.z);
+
         float distance = Mathf.Clamp(greatestDistance, minDistance, maxDistance);
         Vector3 desiredPos = center + offsetDirection.normalized * distance;
 
