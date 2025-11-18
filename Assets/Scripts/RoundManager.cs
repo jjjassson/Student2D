@@ -1,89 +1,150 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class RoundManager : MonoBehaviour
 {
+    public static RoundManager Instance { get; private set; }
+
+    [Header("回合設定")]
+    public float intermissionDelay = 3f;     // 回合結束後等待時間 (顯示結果等)
+    public float startCountdownTime = 3f;  // 回合開始前的倒數計時時間
+
     private int roundNumber = 0;
-    private int totalPlayers;
-    private int alivePlayers;
+    private bool isRoundActive = false;
+    // 儲存所有已生成且帶有 PlayerScore 腳本的玩家實體
+    private List<PlayerScore> activePlayers = new List<PlayerScore>();
 
-    public delegate void RoundEvent(int round);
-    public event RoundEvent OnRoundStart;
-    public event RoundEvent OnRoundEnd;
-
-    private static RoundManager instance;
-    public static RoundManager Instance => instance;
+    // 可以在 UI 上顯示的回合狀態事件 (可選)
+    public event System.Action<int> OnRoundStart;
+    public event System.Action<int> OnRoundEnd;
+    public event System.Action<float> OnCountdownTick;
 
     private void Awake()
     {
-        if (instance != null && instance != this)
+        if (Instance != null)
         {
             Destroy(gameObject);
             return;
         }
-        instance = this;
+        Instance = this;
+        // 假設 RoundManager 是跨場景持續存在的單例
+        DontDestroyOnLoad(gameObject);
     }
 
-    void Start()
+    private void Start()
     {
-        totalPlayers = GameObject.FindGameObjectsWithTag("Player").Length;
-        StartRound();
+        // 確保遊戲開始時啟動回合流程
+        // (此方法應在 InitializeLevel.cs 設置完玩家後被呼叫)
+        StartGame();
     }
 
-    /// <summary>
-    /// 開始新的一回合
-    /// </summary>
-    private void StartRound()
+    public void StartGame()
     {
-        roundNumber++;
-        Debug.Log($"=== Round {roundNumber} 開始！ ===");
-        OnRoundStart?.Invoke(roundNumber);
+        // 找到所有玩家（假設它們已經被 InitializeLevel.cs 生成）
+        GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
+        activePlayers = playerObjects.Select(p => p.GetComponent<PlayerScore>())
+                                     .Where(ps => ps != null).ToList();
 
-        alivePlayers = totalPlayers;
-
-        // 復活所有玩家（回到自己的初始 Spawn）
-        var players = GameObject.FindGameObjectsWithTag("Player");
-        foreach (var player in players)
+        if (activePlayers.Count > 0)
         {
-            var ps = player.GetComponent<PlayerScore>();
-            if (ps != null)
-            {
-                ps.Revive();
-            }
+            // 啟動第一回合的序列 (包含倒數計時)
+            StartCoroutine(StartRoundSequence());
+        }
+        else
+        {
+            Debug.LogError("場景中找不到任何帶有 PlayerScore 的 Player 物件！請確認 Player Prefab 上有 'PlayerScore' 腳本並有正確 Tag。");
         }
     }
 
-    /// <summary>
-    /// 結束目前回合
-    /// </summary>
+    // 🔴 負責處理「回合開始前倒數計時」的協程
+    private IEnumerator StartRoundSequence()
+    {
+        roundNumber++;
+        isRoundActive = false;
+        Debug.Log($"=== Round {roundNumber} 準備開始！ ===");
+
+        // 步驟 1: 執行倒數計時
+        float timer = startCountdownTime;
+        while (timer > 0)
+        {
+            int displayTime = Mathf.CeilToInt(timer);
+            OnCountdownTick?.Invoke(displayTime);
+            Debug.Log($"倒數: {displayTime}...");
+            yield return new WaitForSeconds(1f);
+            timer -= 1f;
+        }
+        OnCountdownTick?.Invoke(0); // 倒數結束
+
+        // 步驟 2: 正式開始回合
+        StartRound();
+    }
+
+    // 這是實際開始回合，並讓玩家復活的方法 (Round Start Logic)
+    public void StartRound()
+    {
+        Debug.Log($"=== Round {roundNumber} 正式開始！ ===");
+
+        // 💡 滿足「只清理角色」需求：只處理玩家重置
+        foreach (var player in activePlayers)
+        {
+            // 呼叫玩家的 Revive() 方法，它會將玩家傳送到出生點並啟用碰撞體
+            // (假設 PlayerScore 內有 ReviveSequence 協程確保安全重生)
+            player.Revive();
+        }
+
+        isRoundActive = true;
+        OnRoundStart?.Invoke(roundNumber);
+    }
+
     public void EndRound()
     {
+        if (!isRoundActive) return;
+
+        isRoundActive = false;
         Debug.Log($"=== Round {roundNumber} 結束！ ===");
         OnRoundEnd?.Invoke(roundNumber);
 
-        StartRound(); // 🔹 自動進入下一回合
+        // 步驟 3: 進入回合間隔，然後啟動下一回合序列
+        StartCoroutine(IntermissionSequence());
     }
 
-    /// <summary>
-    /// 玩家死亡時呼叫
-    /// </summary>
+    // 進入回合間隔時間的協程
+    private IEnumerator IntermissionSequence()
+    {
+        Debug.Log($"回合間隔中，等待 {intermissionDelay} 秒...");
+        // 等待間隔時間，讓玩家看到結果
+        yield return new WaitForSeconds(intermissionDelay);
+
+        // 啟動下一回合倒數
+        StartCoroutine(StartRoundSequence());
+    }
+
+
     public void NotifyPlayerDeath(PlayerScore player)
     {
-        alivePlayers--;
+        if (!isRoundActive) return;
 
-        Debug.Log($"{player.gameObject.name} 死亡，剩下 {alivePlayers}/{totalPlayers}");
+        // 確保玩家已經被正確標記為死亡，且不是重複呼叫
+        // 由於我們在 PlayerCollision 中檢查了 isAlive，這裡只需判斷全部是否死亡
 
-        if (alivePlayers <= 0)
+        // 檢查是否所有玩家都死亡
+        bool allDead = activePlayers.All(p => !p.isAlive);
+
+        if (allDead)
         {
+            Debug.Log("所有玩家死亡，回合結束。");
             EndRound();
         }
     }
 
-    /// <summary>
-    /// 玩家到達終點時呼叫
-    /// </summary>
     public void NotifyPlayerReachedGoal(PlayerScore player)
     {
-        Debug.Log($"{player.gameObject.name} 到達終點！");
+        if (!isRoundActive) return;
+
+        // 這裡您可以加入您的勝利條件判斷 (例如：所有人都抵達終點)
+
         EndRound();
     }
 }

@@ -727,6 +727,10 @@ PrefabInstance:
       propertyPath: MaxPlayers
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8712342617801318690, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
+      propertyPath: defaultPrefabs.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8981425283465146929, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
       propertyPath: m_Name
       value: PlayerConfigurationManager
