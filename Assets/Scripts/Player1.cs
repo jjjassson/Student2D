@@ -92,4 +92,18 @@ public class Player1 : MonoBehaviour
             );
         }
     }
+
+    // ===== 新增：讓 PlatformDisappear 可以被通知（玩家踩上平台） =====
+    // 我只加了這個最小改動：當 CharacterController 與 collider 接觸時，嘗試取得平台腳本並呼叫 OnStepped()
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.collider == null) return;
+
+        // 嘗試取得 PlatformDisappear（若平台使用的是不同類名，改用平台實際類名）
+        PlatformDisappear platform = hit.collider.GetComponent<PlatformDisappear>();
+        if (platform != null)
+        {
+            platform.OnStepped();
+        }
+    }
 }
