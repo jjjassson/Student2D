@@ -2098,7 +2098,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   intermissionDelay: 3
-  startCountdownTime: 20
+  startCountdownTime: 3
 --- !u!4 &1355522324
 Transform:
   m_ObjectHideFlags: 0
