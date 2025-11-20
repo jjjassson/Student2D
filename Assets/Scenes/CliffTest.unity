@@ -1200,11 +1200,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - {fileID: 1061243245407525608, guid: 96ca48b7759d3b94b9dcd9feef7c9a8c, type: 3}
-  - {fileID: 2471618925598150436, guid: a8f101dd558458c449d038be02d0a988, type: 3}
-  - {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
-  - {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
-  - {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
+  - mainPrefab: {fileID: 0}
+    secondaryPrefab: {fileID: 0}
+  - mainPrefab: {fileID: 0}
+    secondaryPrefab: {fileID: 0}
+  - mainPrefab: {fileID: 0}
+    secondaryPrefab: {fileID: 0}
+  - mainPrefab: {fileID: 0}
+    secondaryPrefab: {fileID: 0}
+  - mainPrefab: {fileID: 0}
+    secondaryPrefab: {fileID: 0}
   content: {fileID: 1912685874}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
   placer: {fileID: 1736680624}
@@ -1705,9 +1710,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e24befcca06edb44cb9daab35b052dd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerSpawns:
-  - {fileID: 1606695420}
-  - {fileID: 534410910}
+  player1Spawn: {fileID: 0}
+  player2Spawn: {fileID: 0}
 --- !u!1 &994738955
 GameObject:
   m_ObjectHideFlags: 0
@@ -1998,6 +2002,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc6821d49d6bcfe49986255becca5877, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  intermissionDelay: 3
+  startCountdownTime: 3
 --- !u!4 &1355522324
 Transform:
   m_ObjectHideFlags: 0
@@ -2516,6 +2522,7 @@ MonoBehaviour:
   minDepth: 1
   maxDepth: 50
   selectedObjectPrefab: {fileID: 0}
+  secondaryObjectPrefab: {fileID: 0}
 --- !u!4 &1736680625
 Transform:
   m_ObjectHideFlags: 0
