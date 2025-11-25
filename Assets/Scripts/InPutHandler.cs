@@ -3,62 +3,133 @@ using UnityEngine.InputSystem;
 
 public class InPutHandler : MonoBehaviour
 {
-    [Header("References")]
-    public Camera mainCamera;
-    public GameObject cursorVisual; // 用來顯示自定義游標
+    [Header("Player Settings")]
+    public int playerId = 0;               // 玩家ID，0 = 滑鼠
 
     [Header("Cursor Settings")]
-    public float cursorSpeed = 1000f;
+    public float moveSpeed = 500f;         // 搖桿游標速度
+    public float cursorDepth = 10f;        // 預覽物件距離相機的深度
+    public Transform cursorVisual;         // 游標可視化物件
+
+    [Header("Camera")]
+    public Camera cam;
+
+    private Vector2 moveInput;
+    private Vector2 mouseInput;
+    private bool useMouse = true;
+
+    private Transform previewObject;
 
     private GameControls controls;
-    private Vector2 cursorInput;
-    private Vector2 mousePosition;
-    private bool useMouse = false;
 
-    private void Awake()
+    void Awake()
     {
         controls = new GameControls();
+    }
 
-        // 搖桿控制游標（例如 P1～P4）
-        controls.Player.Move.performed += ctx => cursorInput = ctx.ReadValue<Vector2>();
-        controls.Player.Move.canceled += _ => cursorInput = Vector2.zero;
+    void Start()
+    {
+        if (cam == null)
+            cam = Camera.main;
 
-        // 滑鼠控制點擊與位置（只給測試者用）
+        if (cursorVisual == null)
+        {
+            // 沒有游標模型就生成一個小球
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.transform.localScale = Vector3.one * 0.3f;
+            Destroy(go.GetComponent<Collider>());
+            cursorVisual = go.transform;
+        }
+    }
+
+    void OnEnable()
+    {
+        controls.Player.Enable();
+
+        // 搖桿移動
+        controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+
+        // 滑鼠位置
         controls.Player.MousePoint.performed += ctx =>
         {
-            mousePosition = ctx.ReadValue<Vector2>();
+            mouseInput = ctx.ReadValue<Vector2>();
             useMouse = true;
-        };
-
-        controls.Player.MouseClick.performed += ctx =>
-        {
-            Debug.Log("Mouse Clicked!");
-            // 可以呼叫選擇函式，例如：
-            // SelectObjectAtPosition(mousePosition);
-        };
-
-        // 搖桿按鍵（如 A 鍵放置）
-        controls.Player.Confirm.performed += ctx =>
-        {
-            Debug.Log("Confirm (Gamepad A) Pressed!");
         };
     }
 
-    private void OnEnable() => controls.Enable();
-    private void OnDisable() => controls.Disable();
-
-    private void Update()
+    void OnDisable()
     {
-        if (useMouse)
+        controls.Player.Disable();
+    }
+
+    void Update()
+    {
+        UpdateCursorPosition();
+        UpdatePreviewPosition();
+    }
+
+    // -------------------------------
+    // 更新游標/預覽物件位置
+    // -------------------------------
+    private void UpdateCursorPosition()
+    {
+        if (cursorVisual == null || cam == null) return;
+
+        Vector3 newPos;
+
+        if (useMouse && playerId == 0)
         {
-            // 滑鼠控制模式
-            cursorVisual.transform.position = mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y, 10f));
+            // 滑鼠模式
+            newPos = cam.ScreenToWorldPoint(new Vector3(mouseInput.x, mouseInput.y, cursorDepth));
         }
         else
         {
-            // 搖桿控制模式（加速移動）
-            Vector3 moveDelta = new Vector3(cursorInput.x, cursorInput.y, 0f) * cursorSpeed * Time.deltaTime;
-            cursorVisual.transform.position += moveDelta;
+            // 搖桿模式
+            Vector3 delta = new Vector3(moveInput.x, moveInput.y, 0f) * moveSpeed * Time.deltaTime;
+            newPos = cursorVisual.position + delta;
         }
+
+        cursorVisual.position = newPos;
+    }
+
+    // -------------------------------
+    // 更新預覽物件位置
+    // -------------------------------
+    private void UpdatePreviewPosition()
+    {
+        if (previewObject == null || cursorVisual == null) return;
+
+        previewObject.position = cursorVisual.position;
+    }
+
+    // -------------------------------
+    // 按鈕選擇物件時呼叫 → 生成/更新預覽物件
+    // -------------------------------
+    public void StartPreview(Transform prefab)
+    {
+        ClearPreview();
+
+        if (prefab == null) return;
+
+        previewObject = Instantiate(prefab);
+        previewObject.name = prefab.name + "_Preview";
+
+        foreach (var col in previewObject.GetComponentsInChildren<Collider>())
+            col.enabled = false;
+
+        foreach (var rb in previewObject.GetComponentsInChildren<Rigidbody>())
+            Destroy(rb);
+    }
+
+    // -------------------------------
+    // 清除預覽物件
+    // -------------------------------
+    public void ClearPreview()
+    {
+        if (previewObject != null)
+            Destroy(previewObject.gameObject);
+
+        previewObject = null;
     }
 }
