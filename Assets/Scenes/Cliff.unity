@@ -1932,10 +1932,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc6821d49d6bcfe49986255becca5877, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placementTimePerPlayer: 5
+  placementTimePerPlayer: 10
   roundDuration: 30
   intermissionDelay: 1
-  startCountdownTime: 1
+  interPlacementDelay: 5
 --- !u!4 &1355522324
 Transform:
   m_ObjectHideFlags: 0

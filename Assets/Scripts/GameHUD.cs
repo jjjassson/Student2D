@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.UI; // 必須引用，才能控制 Image
+using UnityEngine.UI;
 using TMPro;
 
 public class GameHUD : MonoBehaviour
@@ -12,32 +12,37 @@ public class GameHUD : MonoBehaviour
     public Image statusImage;
 
     [Header("狀態圖片資源 (請將對應 Sprite 拉入此處)")]
-    public Sprite buildPhaseSprite;   // 建造階段圖片 (例如：槌子圖示)
-    public Sprite readyPhaseSprite;   // 準備階段圖片 (例如：Ready字樣或旗幟)
-    public Sprite goSprite;           // 開始圖片 (例如：GO!字樣)
-    public Sprite roundEndSprite;     // 結束圖片 (例如：Time's Up)
+    public Sprite buildPhaseSprite;      // 建造階段圖片 (槌子)
+    public Sprite cooldownPhaseSprite;   // 新增：冷卻/休息階段圖片 (例如：沙漏或暫停圖示)
+    public Sprite goSprite;             // 回合開始圖片 (GO!)
+    public Sprite roundEndSprite;        // 結束圖片 (Time's Up)
+
+    private RoundManager roundManager;
 
     private void Start()
     {
-        if (RoundManager.Instance != null)
+        roundManager = RoundManager.Instance;
+        if (roundManager != null)
         {
-            RoundManager.Instance.OnCountdownTick += UpdateTimerDisplay;
-            RoundManager.Instance.OnPlacementStart += HandlePlacementStart;
-            RoundManager.Instance.OnPlacementEnd += HandlePlacementEnd;
-            RoundManager.Instance.OnRoundStart += HandleRoundStart;
-            RoundManager.Instance.OnRoundEnd += HandleRoundEnd;
+            // 訂閱事件
+            roundManager.OnCountdownTick += UpdateTimerDisplay;
+            roundManager.OnPlacementStart += HandlePlacementStart;
+            roundManager.OnPlacementEnd += HandlePlacementEnd;
+            roundManager.OnRoundStart += HandleRoundStart;
+            roundManager.OnRoundEnd += HandleRoundEnd;
         }
     }
 
     private void OnDestroy()
     {
-        if (RoundManager.Instance != null)
+        if (roundManager != null)
         {
-            RoundManager.Instance.OnCountdownTick -= UpdateTimerDisplay;
-            RoundManager.Instance.OnPlacementStart -= HandlePlacementStart;
-            RoundManager.Instance.OnPlacementEnd -= HandlePlacementEnd;
-            RoundManager.Instance.OnRoundStart -= HandleRoundStart;
-            RoundManager.Instance.OnRoundEnd -= HandleRoundEnd;
+            // 取消訂閱
+            roundManager.OnCountdownTick -= UpdateTimerDisplay;
+            roundManager.OnPlacementStart -= HandlePlacementStart;
+            roundManager.OnPlacementEnd -= HandlePlacementEnd;
+            roundManager.OnRoundStart -= HandleRoundStart;
+            roundManager.OnRoundEnd -= HandleRoundEnd;
         }
     }
 
@@ -47,6 +52,7 @@ public class GameHUD : MonoBehaviour
     {
         if (timerText != null)
         {
+            // 處理負數或極小數值，避免顯示 -1 或 -0
             if (timeRemaining <= 0)
                 timerText.text = "";
             else
@@ -57,57 +63,75 @@ public class GameHUD : MonoBehaviour
     // 1. 建造階段
     private void HandlePlacementStart(float totalTime)
     {
-        UpdateStatusImage(buildPhaseSprite); // 切換圖片
+        // 如果有正在運行的 Invoke，先取消，避免在錯誤時間切換狀態
+        CancelInvoke();
+        UpdateStatusImage(buildPhaseSprite); // 切換到建造圖示
         if (timerText != null) timerText.color = Color.yellow;
         ShowUI(true);
     }
 
-    // 2. 準備階段 (倒數前)
+    // 2. 放置階段結束
     private void HandlePlacementEnd()
     {
-        UpdateStatusImage(readyPhaseSprite); // 切換圖片
-        if (timerText != null) timerText.color = Color.red;
+        // 由於多人模式下，放置結束會接著 interPlacementDelay 冷卻，
+        // 我們讓 UI 顯示冷卻狀態，並在冷卻結束時讓狀態圖示消失 (等待下一輪放置或死亡)
+
+        UpdateStatusImage(cooldownPhaseSprite); // 切換到冷卻圖示
+        if (timerText != null) timerText.text = ""; // 冷卻期間不顯示數字
+
+        // 1秒後隱藏所有 UI，讓畫面乾淨 (因為冷卻完之後就是遊玩階段)
+        // 使用 Invoke + delay 確保它不會在 RoundStart 之前就被覆蓋
+        Invoke(nameof(HideAllUI), roundManager.interPlacementDelay);
     }
 
     // 3. 回合開始
     private void HandleRoundStart(int roundNum)
     {
-        UpdateStatusImage(goSprite); // 切換圖片
+        // 清除 HandlePlacementEnd 可能設定的 Invoke
+        CancelInvoke();
+
+        UpdateStatusImage(goSprite); // 切換到 GO! 圖示
         if (timerText != null) timerText.text = ""; // GO 階段通常不用數字
 
-        // 1秒後隱藏所有 UI，讓畫面乾淨
+        // 立即或短暫延遲後隱藏 UI，讓玩家可以專心遊玩
         Invoke(nameof(HideAllUI), 1f);
     }
 
     // 4. 回合結束
     private void HandleRoundEnd(int roundNum)
     {
+        CancelInvoke(); // 清除所有延遲操作
         ShowUI(true);
-        UpdateStatusImage(roundEndSprite); // 切換圖片
+        UpdateStatusImage(roundEndSprite); // 切換到結束圖示
     }
 
     // 🛠️ 小工具：切換圖片並確保不為空
     private void UpdateStatusImage(Sprite newSprite)
     {
-        if (statusImage != null && newSprite != null)
+        if (statusImage != null)
         {
-            statusImage.sprite = newSprite;
-            statusImage.gameObject.SetActive(true); // 確保圖片是開啟的
-
-            // 可選：如果你希望圖片保持原始比例
-            statusImage.preserveAspect = true;
-        }
-        else if (statusImage != null)
-        {
-            // 如果沒給圖片，就隱藏 Image 物件以免顯示白色方塊
-            statusImage.gameObject.SetActive(false);
+            if (newSprite != null)
+            {
+                statusImage.sprite = newSprite;
+                statusImage.gameObject.SetActive(true); // 確保圖片是開啟的
+                statusImage.preserveAspect = true;
+            }
+            else
+            {
+                // 如果沒有提供圖片，則隱藏 Image 物件
+                statusImage.gameObject.SetActive(false);
+            }
         }
     }
 
     private void ShowUI(bool show)
     {
         if (timerText != null) timerText.gameObject.SetActive(show);
-        if (statusImage != null) statusImage.gameObject.SetActive(show);
+        // statusImage 的 active 狀態由 UpdateStatusImage 處理
+        if (show == false)
+        {
+            if (statusImage != null) statusImage.gameObject.SetActive(false);
+        }
     }
 
     private void HideAllUI()
