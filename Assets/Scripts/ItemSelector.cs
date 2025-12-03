@@ -7,7 +7,6 @@ public class ItemPair
 {
     public GameObject mainPrefab;      // 主物件
     public GameObject secondaryPrefab; // 對應副物件（Z=0）
-    public Sprite itemIcon;            // **[新增]：用於 UI 按鈕的圖片/图标**
 }
 
 public class ItemSelector : MonoBehaviour
@@ -31,28 +30,7 @@ public class ItemSelector : MonoBehaviour
         {
             var btnObj = Instantiate(buttonPrefab, content);
 
-            // --- [新增] 設定按鈕圖片 ---
-            // 尝试获取按钮本身或其子物体中的 Image 组件，用于显示图标。
-            // 如果您的图标 Image 是 Text 之外的第一个 Image 子物体，这通常是可行的。
-            Image buttonIcon = btnObj.GetComponentInChildren<Image>();
-
-            // 确保我们找到了 Image 组件，并且在 ItemPair 中有设置图片
-            if (buttonIcon != null && item.itemIcon != null)
-            {
-                buttonIcon.sprite = item.itemIcon;
-                // 确保图片不被按钮默认颜色覆盖
-                buttonIcon.color = Color.white;
-            }
-            else if (buttonIcon == null)
-            {
-                Debug.LogWarning($"ItemSelector 警告：按钮 {buttonPrefab.name} 缺少 Image 组件！无法显示图片。");
-            }
-            else if (item.itemIcon == null)
-            {
-                Debug.LogWarning($"物品 {item.mainPrefab.name} 没有设置图标 (itemIcon)！");
-            }
-
-            // --- [保留] 設定按鈕文字 ---
+            // 設定按鈕文字
             Text buttonText = btnObj.GetComponentInChildren<Text>();
             if (buttonText != null)
                 buttonText.text = item.mainPrefab.name;
