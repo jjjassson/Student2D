@@ -477,16 +477,22 @@ MonoBehaviour:
   items:
   - mainPrefab: {fileID: 1741327578946951208, guid: 3a36655ad0dc1c649a39c37bad2ec4df, type: 3}
     secondaryPrefab: {fileID: 1741327578946951208, guid: 0599412a0fba683438bfb0d9d29c5e67, type: 3}
+    uiSprite: {fileID: 21300000, guid: 65d89c0662a90534484c264420d126bb, type: 3}
   - mainPrefab: {fileID: 5313776425928589905, guid: 2bc811b2207777c4fa960fc80230bec2, type: 3}
     secondaryPrefab: {fileID: 5313776425928589905, guid: f44c42f8fe0ed5e46a4b9e377d78be1f, type: 3}
+    uiSprite: {fileID: 21300000, guid: 0e6fe33b0e8f5ba41b30f0e1bd29f801, type: 3}
   - mainPrefab: {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
     secondaryPrefab: {fileID: 1352439419651427092, guid: 687b058df5334834d9619903dfa9c47b, type: 3}
+    uiSprite: {fileID: 21300000, guid: e22560716f82dd942b1f7b494858cad6, type: 3}
   - mainPrefab: {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
     secondaryPrefab: {fileID: 577509353761043554, guid: d28c51899d16e234fb206af67be272b7, type: 3}
+    uiSprite: {fileID: 21300000, guid: 2b503acfc7aa3d24f890a3efbd164b00, type: 3}
   - mainPrefab: {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
     secondaryPrefab: {fileID: 2013447679602650498, guid: e0be80d121d262840a4667b816e50cbb, type: 3}
+    uiSprite: {fileID: 21300000, guid: e371d3c76bbfdd440bcd82395798378e, type: 3}
   - mainPrefab: {fileID: 1517892091243198008, guid: ead64bc1536c61b4993e0a70e644e595, type: 3}
     secondaryPrefab: {fileID: 1517892091243198008, guid: 4b8c3793f40de4649bc6121680860e9e, type: 3}
+    uiSprite: {fileID: 21300000, guid: 65d89c0662a90534484c264420d126bb, type: 3}
   content: {fileID: 316745537}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
   placer: {fileID: 538996395}
