@@ -8,27 +8,39 @@ public class RoundManager : MonoBehaviour
     public static RoundManager Instance { get; private set; }
 
     [Header("階段時間設定")]
-    [Tooltip("每個玩家提供的放置時間 (例如 4 人 x 5 秒 = 20 秒)")]
-    public float placementTimePerPlayer = 5f;
-    [Tooltip("回合正式開始後的遊玩時間限制 (例如 30 秒)")]
-    public float roundDuration = 30f;
+    [Tooltip("單次放置階段的持續時間 (例如 10 秒)")]
+    public float placementTimePerPlayer = 10f;
+
+    [Tooltip("回合開始後的總遊玩時間限制 (設為 0 表示無時間限制，直到全員死亡)")]
+    public float roundDuration = 0f;
+
     [Tooltip("回合結束後等待時間")]
     public float intermissionDelay = 3f;
-    [Tooltip("放置結束後，開始衝刺前的倒數時間")]
-    public float startCountdownTime = 3f;
+
+    [Tooltip("單次放置階段之間的冷卻休息時間 (僅在多輪放置時啟用)")]
+    public float interPlacementDelay = 5f;
 
     private int roundNumber = 0;
-    private bool isRoundActive = false;
+    private int placementPhaseCount = 0; // 追蹤本回合內放置階段的次數
+    private bool isRoundActive = false; // 保持 private
+    private bool isPlacementPhase = false; // 標記是否處於放置時間內
     private List<PlayerScore> activePlayers = new List<PlayerScore>();
 
-    // 📢 新增事件：通知 UI 或管理器目前是什麼階段
-    public event System.Action<float> OnPlacementStart; // 參數傳入總放置時間
+    // ✅ 新增 Public Property 讓外部可以讀取 IsRoundActive 狀態 (解決 CS0122 錯誤)
+    public bool IsRoundActive
+    {
+        get { return isRoundActive; }
+    }
+
+    // 📢 事件：通知 UI 或管理器目前是什麼階段
+    public event System.Action<float> OnPlacementStart; // 參數傳入單次放置時間
     public event System.Action OnPlacementEnd;
     public event System.Action<int> OnRoundStart;
     public event System.Action<int> OnRoundEnd;
-    public event System.Action<float> OnCountdownTick; // 通用倒數顯示 (給放置倒數或開始倒數用)
+    public event System.Action<float> OnCountdownTick; // 通用倒數顯示
+    public event System.Action<bool> OnPlacementAllowedChange; // 控制 ObjectPlacer 放置權限
 
-    private Coroutine roundTimerCoroutine;
+    private Coroutine roundCycleCoroutine;
 
     private void Awake()
     {
@@ -48,13 +60,14 @@ public class RoundManager : MonoBehaviour
 
     public void StartGame()
     {
+        // 假設 PlayerScore 腳本附加在 Tag 為 "Player" 的物件上
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
         activePlayers = playerObjects.Select(p => p.GetComponent<PlayerScore>())
                                      .Where(ps => ps != null).ToList();
 
         if (activePlayers.Count > 0)
         {
-            StartCoroutine(GameLoopSequence());
+            StartRound(); // 遊戲從第一回合開始
         }
         else
         {
@@ -62,87 +75,101 @@ public class RoundManager : MonoBehaviour
         }
     }
 
-    // 🔄 主要遊戲流程控制 (放置 -> 倒數 -> 遊玩)
-    private IEnumerator GameLoopSequence()
+    // 🔄 主要回合循環控制 (放置 -> 遊玩/死亡檢查 -> 下一輪放置 或 回合結束)
+    private IEnumerator RoundCycleSequence()
     {
         roundNumber++;
-        isRoundActive = false;
-        Debug.Log($"=== Round {roundNumber} 準備流程開始 ===");
+        placementPhaseCount = 0; // 重置放置次數
+        isRoundActive = true;
+        Debug.Log($"=== Round {roundNumber} 開始 (玩家已可自由行動) ===");
 
-        // ------------------------------------------------------------
-        // 1️⃣ 放置階段 (Placement Phase)
-        // ------------------------------------------------------------
-        // 計算總時間：玩家人數 * 每人時間
-        float totalPlacementTime = activePlayers.Count * placementTimePerPlayer;
-        Debug.Log($"進入放置階段：共 {activePlayers.Count} 人，時間 {totalPlacementTime} 秒");
-
-        OnPlacementStart?.Invoke(totalPlacementTime); // 通知外部顯示放置UI
-
-        // 執行放置階段的倒數
-        float pTimer = totalPlacementTime;
-        while (pTimer > 0)
+        // 1️⃣ 回合開始 (玩家復活、可移動)
+        foreach (var player in activePlayers)
         {
-            OnCountdownTick?.Invoke(pTimer); // 更新 UI 倒數
-            yield return new WaitForSeconds(1f);
-            pTimer -= 1f;
+            // 假設 PlayerScore 有 Revive 方法
+            if (player != null) player.Revive();
+        }
+        OnRoundStart?.Invoke(roundNumber);
+
+        // 2️⃣ 進入放置/遊玩循環
+        while (isRoundActive)
+        {
+            placementPhaseCount++;
+
+            // ------------------------------------------------------------
+            // 放置階段 (Placement Phase)
+            // ------------------------------------------------------------
+            yield return StartCoroutine(HandlePlacementPhase(placementPhaseCount));
+
+            // ------------------------------------------------------------
+            // 死亡檢查與退出條件
+            // ------------------------------------------------------------
+            bool allDead = activePlayers.All(p => p != null && !p.isAlive);
+            if (allDead)
+            {
+                // 所有人死亡，退出本回合循環，將在 EndRound 中處理下一回合
+                isRoundActive = false;
+                break;
+            }
+            else if (activePlayers.Count == 1)
+            {
+                // 單人模式，放置一次後即退出放置循環 (等待玩家死亡)
+                Debug.Log("單人模式：放置階段結束，等待玩家死亡。");
+                break;
+            }
+
+            // ------------------------------------------------------------
+            // 多人模式：放置間隔冷卻 (Inter-Placement Delay)
+            // ------------------------------------------------------------
+            Debug.Log($"放置間隔冷卻 {interPlacementDelay} 秒...");
+            OnCountdownTick?.Invoke(0); // 清空倒數顯示
+
+            // 禁用放置 (確保 ObjectPlacer 無法操作)
+            OnPlacementAllowedChange?.Invoke(false);
+            yield return new WaitForSeconds(interPlacementDelay);
+
+            // 如果有多人，且沒有全死，則繼續下一輪放置
         }
 
-        OnPlacementEnd?.Invoke(); // 通知外部關閉放置 UI / 禁止放置
-        Debug.Log("放置階段結束！");
-
-        // ------------------------------------------------------------
-        // 2️⃣ 準備衝刺倒數 (Ready Set Go)
-        // ------------------------------------------------------------
-        float cTimer = startCountdownTime;
-        while (cTimer > 0)
+        // 退出放置循環後，如果 Round Active 仍為 True (單人模式，放置完畢但未死亡)
+        if (isRoundActive)
         {
-            OnCountdownTick?.Invoke(cTimer);
-            yield return new WaitForSeconds(1f);
-            cTimer -= 1f;
+            // 等待直到所有玩家死亡
+            yield return new WaitUntil(() => activePlayers.All(p => p != null && !p.isAlive) || !isRoundActive);
         }
-        OnCountdownTick?.Invoke(0);
 
-        // ------------------------------------------------------------
-        // 3️⃣ 正式開始回合 (Gameplay Phase)
-        // ------------------------------------------------------------
-        StartRound();
+        // 3️⃣ 回合結束處理
+        EndRound();
+    }
+
+    // 放置階段的細節邏輯
+    private IEnumerator HandlePlacementPhase(int phaseNum)
+    {
+        isPlacementPhase = true;
+        Debug.Log($"進入放置階段 (第 {phaseNum} 輪)：時間 {placementTimePerPlayer} 秒");
+
+        OnPlacementAllowedChange?.Invoke(true); // 啟用放置並重置 ObjectPlacer 的放置狀態
+        OnPlacementStart?.Invoke(placementTimePerPlayer);
+
+        float pTimer = placementTimePerPlayer;
+        while (pTimer > 0 && isPlacementPhase && isRoundActive)
+        {
+            // 倒數計時
+            OnCountdownTick?.Invoke(pTimer);
+            pTimer -= Time.deltaTime;
+            yield return null;
+        }
+
+        isPlacementPhase = false;
+        OnPlacementEnd?.Invoke(); // 通知外部 UI 關閉
+        OnPlacementAllowedChange?.Invoke(false); // 禁用放置
+        Debug.Log($"第 {phaseNum} 輪放置階段結束！");
     }
 
     public void StartRound()
     {
-        Debug.Log($"=== Round {roundNumber} 正式開始！限時 {roundDuration} 秒 ===");
-
-        foreach (var player in activePlayers)
-        {
-            player.Revive();
-        }
-
-        isRoundActive = true;
-        OnRoundStart?.Invoke(roundNumber);
-
-        // ⏰ 啟動回合限時計時器
-        if (roundTimerCoroutine != null) StopCoroutine(roundTimerCoroutine);
-        roundTimerCoroutine = StartCoroutine(RoundTimer());
-    }
-
-    // ⏳ 回合限時邏輯
-    private IEnumerator RoundTimer()
-    {
-        float timer = roundDuration;
-        while (timer > 0 && isRoundActive)
-        {
-            // 這裡可以選擇是否要傳送剩餘時間給 UI
-            // OnCountdownTick?.Invoke(timer); 
-            yield return new WaitForSeconds(1f);
-            timer -= 1f;
-        }
-
-        // 如果時間到了回合還在進行中，強制結束
-        if (isRoundActive)
-        {
-            Debug.Log("時間到！回合強制結束。");
-            EndRound();
-        }
+        if (roundCycleCoroutine != null) StopCoroutine(roundCycleCoroutine);
+        roundCycleCoroutine = StartCoroutine(RoundCycleSequence());
     }
 
     public void EndRound()
@@ -150,7 +177,7 @@ public class RoundManager : MonoBehaviour
         if (!isRoundActive) return;
 
         isRoundActive = false;
-        if (roundTimerCoroutine != null) StopCoroutine(roundTimerCoroutine);
+        if (roundCycleCoroutine != null) StopCoroutine(roundCycleCoroutine);
 
         Debug.Log($"=== Round {roundNumber} 結束！ ===");
         OnRoundEnd?.Invoke(roundNumber);
@@ -160,28 +187,29 @@ public class RoundManager : MonoBehaviour
 
     private IEnumerator IntermissionSequence()
     {
-        Debug.Log($"休息 {intermissionDelay} 秒...");
+        Debug.Log($"休息 {intermissionDelay} 秒，準備回到 Round {roundNumber + 1} 的玩家生成位置...");
+
         yield return new WaitForSeconds(intermissionDelay);
 
-        // 重新開始新的回合流程 (回到放置階段)
-        StartCoroutine(GameLoopSequence());
+        // 進入新的回合流程 
+        StartRound();
     }
 
     public void NotifyPlayerDeath(PlayerScore player)
     {
         if (!isRoundActive) return;
 
-        bool allDead = activePlayers.All(p => !p.isAlive);
+        bool allDead = activePlayers.All(p => p != null && !p.isAlive);
         if (allDead)
         {
-            EndRound();
+            EndRound(); // 觸發 EndRound 進入 IntermissionSequence
         }
     }
 
     public void NotifyPlayerReachedGoal(PlayerScore player)
     {
         if (!isRoundActive) return;
-        // 這裡看你的規則，如果是有人到終點就結束，或全部人都到才結束
+        // 依據您的規則，如果有人到達終點也結束回合
         EndRound();
     }
 }
