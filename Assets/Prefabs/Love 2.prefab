@@ -13,12 +13,12 @@ GameObject:
   - component: {fileID: 4367003892734383533}
   - component: {fileID: 2052742077915230996}
   - component: {fileID: 2689930771702510549}
-  - component: {fileID: 6473054374949799907}
   - component: {fileID: 2528421839309393977}
+  - component: {fileID: 6473054374949799907}
   - component: {fileID: -4911026256382809188}
   - component: {fileID: 7690751106908425194}
   - component: {fileID: 1175190220767751985}
-  - component: {fileID: -5796804451862172791}
+  - component: {fileID: 4815165856107453856}
   m_Layer: 0
   m_Name: Love 2
   m_TagString: Player
@@ -120,8 +120,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+      - m_Target: {fileID: 2528421839309393977}
+        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -136,8 +136,8 @@ MonoBehaviour:
     m_ActionName: GamePlay/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+      - m_Target: {fileID: 2528421839309393977}
+        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -178,6 +178,23 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2528421839309393977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 162cf9ee2ce32534f8a093b089c1803c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 4
+  jumpForce: 1
+  gravityValue: -9.81
+  isSlowed: 0
+  isJumpReduced: 0
 --- !u!143 &6473054374949799907
 CharacterController:
   m_ObjectHideFlags: 0
@@ -204,23 +221,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2528421839309393977
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6906998413789825852}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 162cf9ee2ce32534f8a093b089c1803c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 4
-  jumpForce: 1
-  gravityValue: -9.81
-  isSlowed: 0
-  isJumpReduced: 0
 --- !u!114 &-4911026256382809188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30ca56c5f14190a42a62ac1389834af3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!54 &-5796804451862172791
+--- !u!54 &4815165856107453856
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
