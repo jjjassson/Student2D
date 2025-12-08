@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 7711840042101479308}
   - component: {fileID: -1411683847322103611}
   - component: {fileID: 4289916192405294093}
+  - component: {fileID: 3228906533048580241}
   - component: {fileID: -1390400581781408332}
   - component: {fileID: 8543219429221225133}
   m_Layer: 0
@@ -194,8 +195,10 @@ MonoBehaviour:
   moveSpeed: 4
   jumpForce: 1
   gravityValue: -9.81
+  maxZPosition: -3
   isSlowed: 0
   isJumpReduced: 0
+  reverseControl: 0
 --- !u!143 &6473054374949799907
 CharacterController:
   m_ObjectHideFlags: 0
@@ -277,6 +280,24 @@ MonoBehaviour:
   beamEndWidth: 0.1
   groundLightPrefab: {fileID: 0}
   groundLightSize: 1
+--- !u!114 &3228906533048580241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0992c6434de4cb49817ce3d6a0b145c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  smokeOnDuration: 10
+  smokeOffDuration: 30
+  detectionRadius: 10
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!54 &-1390400581781408332
 Rigidbody:
   m_ObjectHideFlags: 0
