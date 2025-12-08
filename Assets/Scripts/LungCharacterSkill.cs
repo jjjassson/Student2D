@@ -1,16 +1,15 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 // 只掛載於「肺」角色的物件上
 public class LungCharacterSkill : MonoBehaviour
 {
     [Header("【可調整】技能時間設定")]
     [Tooltip("煙霧開啟（啟用）持續的時間 (秒)。ON Period。")]
-    // 將 const 改為 public float
     public float smokeOnDuration = 30f;
 
     [Tooltip("煙霧關閉（禁用/冷卻）持續的時間 (秒)。OFF Period。")]
-    // 將 const 改為 public float
     public float smokeOffDuration = 30f;
 
     [Header("範圍偵測設定")]
@@ -37,7 +36,8 @@ public class LungCharacterSkill : MonoBehaviour
     // 負責技能循環的協程
     IEnumerator SmokeCycleCoroutine()
     {
-        // 遊戲開始後，先等待第一次關閉的週期 (OFF)
+        // 讓遊戲開始後有一個初始延遲 (等待第一次 OFF 週期結束)
+        // 如果 smokeOffDuration 設為 0，則立刻發動。
         yield return new WaitForSeconds(smokeOffDuration);
 
         while (true)
@@ -56,7 +56,9 @@ public class LungCharacterSkill : MonoBehaviour
         }
     }
 
-    // 發動煙霧的偵測與啟用邏輯 (省略了傳入 duration 參數)
+    /// <summary>
+    /// 在範圍內找到其他玩家，並呼叫他們的 SmokeToggle.EnableSmoke()。
+    /// </summary>
     void TriggerSmokeForDuration()
     {
         Debug.Log($"肺技能發動，煙霧 ON 持續 {smokeOnDuration} 秒。");
@@ -71,11 +73,11 @@ public class LungCharacterSkill : MonoBehaviour
         {
             if (hit.gameObject == this.gameObject)
             {
-                continue;
+                continue; // 自我免疫：排除肺角色自己
             }
 
-            // 使用 GetComponentInChildren 是因為 SmokeToggle 腳本掛載在 UI 子物件上
-            SmokeToggle smokeToggle = hit.GetComponentInChildren<SmokeToggle>();
+            // 關鍵查找：即使煙霧 UI 預設是禁用的，也能找到 SmokeToggle 腳本
+            SmokeToggle smokeToggle = hit.GetComponentInChildren<SmokeToggle>(true);
 
             if (smokeToggle != null)
             {
@@ -84,7 +86,9 @@ public class LungCharacterSkill : MonoBehaviour
         }
     }
 
-    // 停止煙霧的偵測與禁用邏輯
+    /// <summary>
+    /// 在範圍內找到其他玩家，並呼叫他們的 SmokeToggle.DisableSmoke()。
+    /// </summary>
     void StopSmokeForDuration()
     {
         Debug.Log($"煙霧效果結束，進入 OFF 週期，持續 {smokeOffDuration} 秒。");
@@ -100,10 +104,10 @@ public class LungCharacterSkill : MonoBehaviour
         {
             if (hit.gameObject == this.gameObject)
             {
-                continue;
+                continue; // 排除肺角色自己
             }
 
-            SmokeToggle smokeToggle = hit.GetComponentInChildren<SmokeToggle>();
+            SmokeToggle smokeToggle = hit.GetComponentInChildren<SmokeToggle>(true);
 
             if (smokeToggle != null)
             {
@@ -116,6 +120,7 @@ public class LungCharacterSkill : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
+        // 確保 Gizmos 在 2D 視圖中是可見的圓形
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }
