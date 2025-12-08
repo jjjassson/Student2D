@@ -29,14 +29,14 @@ public class LungCharacterSkill : MonoBehaviour
         }
         else
         {
-            Debug.LogError("請確保煙霧開啟時間 (ON) 大於 0，關閉時間 (OFF) 大於等於 0。");
+            Debug.LogError("LungCharacterSkill: 請確保煙霧開啟時間 (ON) 大於 0，關閉時間 (OFF) 大於等於 0。");
         }
     }
 
     // 負責技能循環的協程
     IEnumerator SmokeCycleCoroutine()
     {
-        // 讓遊戲開始後有一個初始延遲 (等待第一次 OFF 週期結束)
+        // 1. 讓遊戲開始後有一個初始延遲 (等待第一次 OFF 週期結束)
         // 如果 smokeOffDuration 設為 0，則立刻發動。
         yield return new WaitForSeconds(smokeOffDuration);
 
@@ -45,19 +45,19 @@ public class LungCharacterSkill : MonoBehaviour
             // --- 週期性啟動 (ON) ---
             TriggerSmokeForDuration();
 
-            // 等待煙霧開啟的 自定義秒數
+            // 2. 等待煙霧開啟的 自定義秒數
             yield return new WaitForSeconds(smokeOnDuration);
 
             // --- 週期性關閉 (OFF) ---
             StopSmokeForDuration();
 
-            // 等待煙霧關閉的 自定義秒數 (下次啟動前的間隔)
+            // 3. 等待煙霧關閉的 自定義秒數 (下次啟動前的間隔)
             yield return new WaitForSeconds(smokeOffDuration);
         }
     }
 
     /// <summary>
-    /// 在範圍內找到其他玩家，並呼叫他們的 SmokeToggle.EnableSmoke()。
+    /// 在範圍內找到其他玩家，並呼叫該玩家的煙霧物件的 SetActive(true)。
     /// </summary>
     void TriggerSmokeForDuration()
     {
@@ -76,24 +76,26 @@ public class LungCharacterSkill : MonoBehaviour
                 continue; // 自我免疫：排除肺角色自己
             }
 
-            // 關鍵查找：即使煙霧 UI 預設是禁用的，也能找到 SmokeToggle 腳本
+            // 查找目標物件上的 SmokeToggle 腳本
+            // 使用 true 參數確保能找到預設禁用的物件
             SmokeToggle smokeToggle = hit.GetComponentInChildren<SmokeToggle>(true);
 
             if (smokeToggle != null)
             {
-                smokeToggle.EnableSmoke();
+                // **核心控制：啟用 GameObject，觸發 SmokeToggle.OnEnable() 啟動粒子**
+                smokeToggle.gameObject.SetActive(true);
             }
         }
     }
 
     /// <summary>
-    /// 在範圍內找到其他玩家，並呼叫他們的 SmokeToggle.DisableSmoke()。
+    /// 在範圍內找到其他玩家，並呼叫該玩家的煙霧物件的 SetActive(false)。
     /// </summary>
     void StopSmokeForDuration()
     {
         Debug.Log($"煙霧效果結束，進入 OFF 週期，持續 {smokeOffDuration} 秒。");
 
-        // 再次偵測範圍，確保關閉的是當前範圍內的玩家
+        // 再次偵測範圍，確保關閉的是當前範圍內的所有玩家
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(
             transform.position,
             detectionRadius,
@@ -111,7 +113,8 @@ public class LungCharacterSkill : MonoBehaviour
 
             if (smokeToggle != null)
             {
-                smokeToggle.DisableSmoke();
+                // **核心控制：禁用 GameObject，觸發 SmokeToggle.OnDisable() 停止粒子**
+                smokeToggle.gameObject.SetActive(false);
             }
         }
     }
@@ -120,7 +123,6 @@ public class LungCharacterSkill : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-        // 確保 Gizmos 在 2D 視圖中是可見的圓形
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }

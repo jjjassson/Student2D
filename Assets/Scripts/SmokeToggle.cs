@@ -1,40 +1,41 @@
 using UnityEngine;
 
-// 專門用於控制煙霧 UI 顯示/隱藏的腳本
-// 掛載到煙霧 UI Image/Panel 物件上
+// 確保腳本掛載在帶有 Particle System 元件的物件上
 public class SmokeToggle : MonoBehaviour
 {
-    private GameObject smokeUI;
+    private ParticleSystem smokeParticleSystem;
 
     void Awake()
     {
-        // 確保引用到掛載這個腳本的物件
-        smokeUI = gameObject;
-        // 確保一開始是關閉的
-        smokeUI.SetActive(false);
-    }
+        // 只需要在初始化時取得 Particle System 元件
+        smokeParticleSystem = GetComponent<ParticleSystem>();
 
-    /// <summary>
-    /// 啟用煙霧效果 (30 秒開啟)
-    /// </summary>
-    public void EnableSmoke()
-    {
-        if (!smokeUI.activeSelf)
+        if (smokeParticleSystem == null)
         {
-            smokeUI.SetActive(true);
-            Debug.Log(smokeUI.name + " 煙霧已開啟。");
+            Debug.LogError("SmokeToggle 錯誤：腳本必須掛載在帶有 ParticleSystem 元件的物件上！");
         }
     }
 
-    /// <summary>
-    /// 關閉煙霧效果 (30 秒關閉)
-    /// </summary>
-    public void DisableSmoke()
+    // 當這個 GameObject 被啟用 (SetActive(true)) 時，就會執行這個函式
+    void OnEnable()
     {
-        if (smokeUI.activeSelf)
+        if (smokeParticleSystem != null)
         {
-            smokeUI.SetActive(false);
-            Debug.Log(smokeUI.name + " 煙霧已關閉。");
+            // **核心指令：物件一被啟用，立即開始發射粒子**
+            smokeParticleSystem.Play();
+            Debug.Log("【煙霧開啟成功】: OnEnable 觸發 Particle System.Play()。");
+        }
+    }
+
+    // 當這個 GameObject 被禁用 (SetActive(false)) 時，就會執行這個函式
+    void OnDisable()
+    {
+        if (smokeParticleSystem != null)
+        {
+            // **核心指令：物件被禁用，立即停止發射粒子**
+            // 使用 StopEmittingAndClear 確保畫面粒子立刻消失
+            smokeParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            Debug.Log("【煙霧關閉成功】: OnDisable 觸發 Particle System.Stop()。");
         }
     }
 }
