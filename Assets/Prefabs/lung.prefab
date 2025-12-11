@@ -275,11 +275,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxDistance: 20
-  beamColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  beamStartWidth: 0.1
-  beamEndWidth: 0.1
-  groundLightPrefab: {fileID: 0}
-  groundLightSize: 1
+  raycastOffset: {x: 0, y: 0.5, z: 0}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  groundLightPrefab: {fileID: 212684111394326416, guid: 1988a73dad0b205408be63e461f35863, type: 3}
+  shadowColor: {r: 0, g: 0, b: 0, a: 1}
+  shadowRadius: 0.5
+  surfaceOffset: 0.05
+  smoothingSpeed: 15
 --- !u!114 &3228906533048580241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -443,7 +447,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c7ca2a656410f8d41a78fbb80e84c4c0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.459
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c7ca2a656410f8d41a78fbb80e84c4c0, type: 3}
       propertyPath: m_LocalPosition.z

@@ -99,6 +99,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4163896789032608414, guid: 969086fc75e22fd42b4365dfe16010ad, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5307437976076524725}
+    - targetCorrespondingSourceObject: {fileID: 4163896789032608414, guid: 969086fc75e22fd42b4365dfe16010ad, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 711980176822488470}
   m_SourcePrefab: {fileID: 100100000, guid: 969086fc75e22fd42b4365dfe16010ad, type: 3}
 --- !u!1 &4021500633432609323 stripped
 GameObject:
@@ -119,3 +122,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   placer: {fileID: 0}
   prefabToPlace: {fileID: 0}
+--- !u!114 &711980176822488470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4021500633432609323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8807fc33be6130a46be866073f42faf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: {x: 2, y: 2, z: 2}
+  animationDuration: 0.15
+  enableColorChange: 1
+  hoverColor: {r: 1, g: 1, b: 1, a: 1}

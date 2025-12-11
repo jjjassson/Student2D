@@ -1,58 +1,140 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(LineRenderer))]
+// 此腳本專門用於在角色下方投射一個可配置的圓形光斑（Blob Shadow）
 public class CharacterLight : MonoBehaviour
 {
-    [Header("光線設定")]
-    public float maxDistance = 20f;           // 最大射線距離
-    public Color beamColor = Color.yellow;    // 光線顏色
-    public float beamStartWidth = 0.1f;       // 起點粗細
-    public float beamEndWidth = 0.1f;         // 末端粗細
+    [Header("投射設定")]
+    [Tooltip("射線從角色向下檢測的最大距離。")]
+    public float maxDistance = 20f;
+    [Tooltip("射線起點相對於角色中心（transform.position）的垂直偏移量，應設置在角色腳部上方。")]
+    public Vector3 raycastOffset = Vector3.up * 0.5f;
+    [Tooltip("Raycast 應該檢測的 Layer Mask。請確保排除光斑自身的 Layer。")]
+    public LayerMask hitMask = ~0; // 預設為 ~0 (檢測所有 Layer)
 
     [Header("地面光斑設定")]
-    public GameObject groundLightPrefab;      // 預製的圓形光斑
-    public float groundLightSize = 1f;        // 光斑大小
-    private GameObject groundLightInstance;
+    [Tooltip("用於顯示光斑的預製體（建議使用 Quad 並搭配圓形透明紋理）。")]
+    public GameObject groundLightPrefab;
+    [Tooltip("光斑的顏色（您要求為黑色，但可以調整）。")]
+    public Color shadowColor = Color.black;
+    [Tooltip("圓形光斑的半徑。")]
+    [Range(0.1f, 5f)]
+    public float shadowRadius = 0.5f;
+    [Tooltip("光斑與地面分離的距離，防止 Z-fighting。")]
+    public float surfaceOffset = 0.05f;
 
-    private LineRenderer line;
+    [Header("平滑追隨設定 (解決卡頓)")]
+    [Tooltip("光斑追隨目標位置的速度。值越高，追隨越快，值低則越平滑。建議 10-20。")]
+    public float smoothingSpeed = 15f;
+
+    // 私有變數
+    private GameObject groundLightInstance;
+    private Renderer groundLightRenderer;
+    private Vector3 targetPosition; // 存儲 Raycast 擊中的目標位置
 
     private void Awake()
     {
-        line = GetComponent<LineRenderer>();
-        line.positionCount = 2;
+        // --- 1. 檢查與初始化 ---
 
-        line.startWidth = beamStartWidth;
-        line.endWidth = beamEndWidth;
-
-        line.material = new Material(Shader.Find("Unlit/Color"));
-        line.material.color = beamColor;
-
-        // 生成光斑
-        if (groundLightPrefab != null)
+        if (groundLightPrefab == null)
         {
-            groundLightInstance = Instantiate(groundLightPrefab);
-            groundLightInstance.transform.localScale = Vector3.one * groundLightSize;
+            Debug.LogError("🔴 錯誤：請在 Inspector 中指定 'Ground Light Prefab' 欄位！");
+            return;
+        }
+
+        // 實例化光斑物件，位置在 LateUpdate 中單獨控制
+        groundLightInstance = Instantiate(groundLightPrefab);
+        groundLightInstance.transform.parent = null;
+
+        // 獲取 Renderer 元件
+        groundLightRenderer = groundLightInstance.GetComponent<Renderer>();
+        if (groundLightRenderer == null)
+        {
+            Debug.LogError("🔴 錯誤：光斑預製體上找不到 Renderer 元件！請確認 Prefab 設定。");
+        }
+
+        // 為光斑材質創建實例並初始化顏色
+        if (groundLightRenderer != null)
+        {
+            // 創建材質實例，避免影響共用材質的其他物件
+            groundLightRenderer.material = new Material(groundLightRenderer.sharedMaterial);
+            groundLightRenderer.material.SetColor("_Color", shadowColor);
         }
     }
 
-    private void Update()
+    // 使用 LateUpdate 確保在所有角色的移動（FixedUpdate/Update）完成後才更新光斑位置
+    private void LateUpdate()
     {
-        Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + Vector3.down * maxDistance;
+        // 確保核心元件存在
+        if (groundLightInstance == null || groundLightRenderer == null) return;
 
-        if (Physics.Raycast(startPos, Vector3.down, out RaycastHit hit, maxDistance))
+        // --- 2. 動態同步屬性 ---
+
+        // 同步大小
+        groundLightInstance.transform.localScale = Vector3.one * (shadowRadius * 2);
+
+        // 同步顏色
+        groundLightRenderer.material.SetColor("_Color", shadowColor);
+
+        // --- 3. 射線檢測與定位 ---
+
+        Vector3 startPos = transform.position + raycastOffset;
+        bool hitGround = false;
+
+        // 進行 Raycast 檢測
+        if (Physics.Raycast(startPos, Vector3.down, out RaycastHit hit, maxDistance, hitMask))
         {
-            endPos = hit.point;
+            hitGround = true;
 
-            // 更新地面光斑位置
-            if (groundLightInstance != null)
-            {
-                groundLightInstance.transform.position = hit.point + Vector3.up * 0.01f; // 避免 Z-fighting
-                groundLightInstance.transform.rotation = Quaternion.Euler(90, 0, 0); // 面向上方
-            }
+            // 計算 Raycast 擊中的目標位置
+            targetPosition = hit.point + hit.normal * surfaceOffset;
+
+            // 旋轉：讓光斑平面貼合地面的角度（處理斜坡）
+            groundLightInstance.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
         }
 
-        line.SetPosition(0, startPos);
-        line.SetPosition(1, endPos);
+        if (hitGround)
+        {
+            // 顯示光斑
+            if (!groundLightInstance.activeSelf) groundLightInstance.SetActive(true);
+
+            // 核心平滑邏輯：使用 Lerp 讓光斑位置平滑地趨近目標位置
+            groundLightInstance.transform.position = Vector3.Lerp(
+                groundLightInstance.transform.position,     // 起點：光斑當前位置
+                targetPosition,                             // 終點：Raycast 擊中的目標位置
+                Time.deltaTime * smoothingSpeed             // 插值量，實現流暢的跟隨
+            );
+        }
+        else
+        {
+            // 射線未擊中物體，隱藏光斑
+            if (groundLightInstance.activeSelf) groundLightInstance.SetActive(false);
+        }
+    }
+
+    // 當腳本被禁用時隱藏光斑
+    private void OnDisable()
+    {
+        if (groundLightInstance != null)
+        {
+            groundLightInstance.SetActive(false);
+        }
+    }
+
+    // 當腳本被啟用時顯示光斑
+    private void OnEnable()
+    {
+        if (groundLightInstance != null)
+        {
+            groundLightInstance.SetActive(true);
+        }
+    }
+
+    // 銷毀物件時清理光斑實例
+    private void OnDestroy()
+    {
+        if (groundLightInstance != null)
+        {
+            Destroy(groundLightInstance);
+        }
     }
 }
