@@ -16,9 +16,11 @@ public class CharacterLight : MonoBehaviour
     public GameObject groundLightPrefab;
     [Tooltip("光斑的顏色（您要求為黑色，但可以調整）。")]
     public Color shadowColor = Color.black;
-    [Tooltip("圓形光斑的半徑。")]
-    [Range(0.1f, 5f)]
-    public float shadowRadius = 0.5f;
+
+    // --- 修改處 1：將半徑 (Radius) 改為 尺寸 (Size) 以支援長寬獨立調整 ---
+    [Tooltip("光斑的尺寸 (X: 寬度, Y: 長度/高度)")]
+    public Vector2 shadowSize = new Vector2(1f, 1f);
+
     [Tooltip("光斑與地面分離的距離，防止 Z-fighting。")]
     public float surfaceOffset = 0.05f;
 
@@ -69,8 +71,9 @@ public class CharacterLight : MonoBehaviour
 
         // --- 2. 動態同步屬性 ---
 
-        // 同步大小
-        groundLightInstance.transform.localScale = Vector3.one * (shadowRadius * 2);
+        // --- 修改處 2：分別應用 X 和 Y 的縮放 ---
+        // 這裡設定 scale.z 為 1，因為 Quad 通常是平面的，Z 軸縮放不影響視覺
+        groundLightInstance.transform.localScale = new Vector3(shadowSize.x, shadowSize.y, 1f);
 
         // 同步顏色
         groundLightRenderer.material.SetColor("_Color", shadowColor);
@@ -90,6 +93,10 @@ public class CharacterLight : MonoBehaviour
 
             // 旋轉：讓光斑平面貼合地面的角度（處理斜坡）
             groundLightInstance.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+
+            // 額外旋轉修正：如果你發現拉長後方向不對（例如想要順著角色方向拉長），
+            // 可以取消註解下面這行來讓光斑跟隨角色的面向：
+            // groundLightInstance.transform.rotation *= transform.rotation; 
         }
 
         if (hitGround)

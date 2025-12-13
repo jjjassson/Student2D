@@ -276,9 +276,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxDistance: 20
   raycastOffset: {x: 0, y: 0.5, z: 0}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   groundLightPrefab: {fileID: 212684111394326416, guid: 1988a73dad0b205408be63e461f35863, type: 3}
   shadowColor: {r: 0, g: 0, b: 0, a: 1}
-  shadowRadius: 0.5
+  shadowSize: {x: 0.3, y: 0.3}
+  surfaceOffset: 0.05
+  smoothingSpeed: 15
 --- !u!54 &2029966966954495403
 Rigidbody:
   m_ObjectHideFlags: 0

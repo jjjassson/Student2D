@@ -786,9 +786,9 @@ MonoBehaviour:
   mainCamera: {fileID: 963194227}
   placeDepth: 10
   scrollSpeed: 2
-  minDepth: 1
-  maxDepth: 50
-  worldMinZ: -18
+  minDepth: 5
+  maxDepth: 30
+  worldMinZ: -13
   worldMaxZ: 0
   selectedObjectPrefab: {fileID: 0}
   secondaryObjectPrefab: {fileID: 0}
