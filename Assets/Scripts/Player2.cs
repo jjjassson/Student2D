@@ -18,6 +18,9 @@ public class Player2 : MonoBehaviour
     [HideInInspector] public bool isSlowed = false;
     [HideInInspector] public bool isJumpReduced = false;
 
+    // 🧩 🆕 全方向反轉狀態（與 Player1 一致）
+    [HideInInspector] public bool isInverted = false;
+
     // 🧩 預設參數記錄
     private float defaultMoveSpeed;
     private float defaultJumpForce;
@@ -29,7 +32,9 @@ public class Player2 : MonoBehaviour
         defaultJumpForce = jumpForce;
     }
 
-    // ===== 接收 SlowZone / LowJumpZone 呼叫 =====
+    // ============================================================
+    // SlowZone / LowJumpZone（與 Player1 一致）
+    // ============================================================
     public void ApplySpeedMultiplier(float multiplier)
     {
         moveSpeed = defaultMoveSpeed * multiplier;
@@ -54,7 +59,22 @@ public class Player2 : MonoBehaviour
         isJumpReduced = false;
     }
 
-    // ===== 玩家輸入 =====
+    // ============================================================
+    // 🆕 操作反轉（與 Player1 一致）
+    // ============================================================
+    public void InvertMovement()
+    {
+        isInverted = true;
+    }
+
+    public void ResetInverted()
+    {
+        isInverted = false;
+    }
+
+    // ============================================================
+    // 玩家輸入
+    // ============================================================
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
@@ -68,7 +88,9 @@ public class Player2 : MonoBehaviour
         }
     }
 
-    // ===== 更新移動 =====
+    // ============================================================
+    // 更新移動（⚠ 只允許 X 軸）
+    // ============================================================
     private void Update()
     {
         groundedPlayer = controller.isGrounded;
@@ -76,15 +98,20 @@ public class Player2 : MonoBehaviour
         if (groundedPlayer && velocity.y < 0)
             velocity.y = 0f;
 
-        // 🧭 只允許 X 軸移動
+        // ⚠ 只取 X 軸（保留你的原始限制）
         Vector3 move = new Vector3(moveInput.x, 0, 0);
+
+        // 🆕 反轉操作
+        if (isInverted)
+            move *= -1f;
+
         controller.Move(move * Time.deltaTime * moveSpeed);
 
-        // 🌀 重力
+        // 重力
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // 🧭 面向左右移動方向
+        // 面向左右
         if (Mathf.Abs(move.x) > 0.01f)
         {
             Quaternion targetRot = Quaternion.LookRotation(move, Vector3.up);
@@ -94,5 +121,17 @@ public class Player2 : MonoBehaviour
                 720f * Time.deltaTime
             );
         }
+    }
+
+    // ============================================================
+    // PlatformDisappear（與 Player1 一致）
+    // ============================================================
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.collider == null) return;
+
+        PlatformDisappear platform = hit.collider.GetComponent<PlatformDisappear>();
+        if (platform != null)
+            platform.OnStepped();
     }
 }
