@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
+using UnityEngine.UI; // 雖然這裡主要用 OnGUI，但保留引用沒關係
 
 public class ObjectPlacer : MonoBehaviour
 {
@@ -12,27 +12,30 @@ public class ObjectPlacer : MonoBehaviour
     public float maxDepth = 50f;
 
     [Header("Z軸深度限制 (世界座標)")]
-    // 新增：世界座標 Z 軸的最小/最大限制
     public float worldMinZ = -18f;
     public float worldMaxZ = 0f;
+
+    [Header("UI 顯示設定 (這裡調整字體大小)")]
+    [Tooltip("左上角深度資訊的字體大小")]
+    public int debugInfoFontSize = 40; // 預設改大到 40
+
+    [Tooltip("螢幕下方狀態文字的字體大小")]
+    public int statusTextFontSize = 60; // 預設改大到 60
 
     [Header("放置物件")]
     public GameObject selectedObjectPrefab;
     public GameObject secondaryObjectPrefab;
 
     private float lastDepthDisplayTime;
-    private const float INITIAL_PLACE_DEPTH = 10f; // 用於放置後的深度歸零
+    private const float INITIAL_PLACE_DEPTH = 10f;
 
-    // 新增：放置限制控制
-    private bool isPlacementAllowed = false; // 是否在放置時間內 (由 RoundManager 控制)
-    private bool hasPlacedThisPhase = true; // 本輪放置階段是否已放置
+    private bool isPlacementAllowed = false;
+    private bool hasPlacedThisPhase = true;
 
     private RoundManager roundManager;
 
     void Start()
     {
-        // ... (保持不變)
-
         roundManager = RoundManager.Instance;
         if (roundManager != null)
         {
@@ -49,30 +52,29 @@ public class ObjectPlacer : MonoBehaviour
             mainCamera = Camera.main;
         }
 
-        // 初始化深度
         placeDepth = INITIAL_PLACE_DEPTH;
     }
 
     void OnDestroy()
     {
-        // ... (保持不變)
+        if (roundManager != null)
+        {
+            roundManager.OnPlacementStart -= SetPlacementCooldown;
+            roundManager.OnPlacementAllowedChange -= SetPlacementAllowed;
+        }
     }
 
-    // 從 RoundManager 接收事件，重置單次放置限制
     private void SetPlacementCooldown(float placementTime)
     {
-        hasPlacedThisPhase = false; // 新一輪放置開始時，重置放置標記 (允許放置)
-        // 新增：每次放置階段開始時，將深度重設為初始值
+        hasPlacedThisPhase = false;
         placeDepth = INITIAL_PLACE_DEPTH;
-        lastDepthDisplayTime = Time.time; // 顯示深度
+        lastDepthDisplayTime = Time.time;
         Debug.Log($"放置階段開始，深度已重設為 {placeDepth:F2}");
     }
 
-    // 設置是否允許放置
     private void SetPlacementAllowed(bool isAllowed)
     {
         isPlacementAllowed = isAllowed;
-
         if (!isAllowed)
         {
             hasPlacedThisPhase = true;
@@ -85,13 +87,11 @@ public class ObjectPlacer : MonoBehaviour
         float scrollValue = Mouse.current.scroll.ReadValue().y;
         if (scrollValue != 0)
         {
-            // 使用 Time.deltaTime 使滾輪速度與幀率無關
             placeDepth -= scrollValue * scrollSpeed * Time.deltaTime;
             placeDepth = Mathf.Clamp(placeDepth, minDepth, maxDepth);
-            lastDepthDisplayTime = Time.time; // 更新顯示時間
+            lastDepthDisplayTime = Time.time;
         }
 
-        // 檢查是否處於允許放置階段 且 尚未在本階段放置 (單次放置限制)
         if (!isPlacementAllowed || hasPlacedThisPhase) return;
 
         // --- 執行放置 (滑鼠左鍵) ---
@@ -103,90 +103,92 @@ public class ObjectPlacer : MonoBehaviour
                 return;
             }
 
-            // 1. 座標計算 (從螢幕座標轉換到世界座標)
             Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
             Vector3 worldPos = mainCamera.ScreenToWorldPoint(
                 new Vector3(mouseScreenPos.x, mouseScreenPos.y, placeDepth)
             );
 
-            // 2. 🎯 Z 軸限制邏輯 (應用您的要求：限制在 worldMinZ 到 worldMaxZ 之間)
             float clampedZ = Mathf.Clamp(worldPos.z, worldMinZ, worldMaxZ);
             worldPos.z = clampedZ;
 
-            // 3. 執行放置
-            GameObject mainObj = Instantiate(selectedObjectPrefab, worldPos, Quaternion.identity);
+            Instantiate(selectedObjectPrefab, worldPos, Quaternion.identity);
 
-            // 4. 放置副物件 (Z=0, 但我們應該使用 worldMaxZ=0 來確保一致性)
             if (secondaryObjectPrefab != null)
             {
-                Vector3 secondaryPos = new Vector3(worldPos.x, worldPos.y, worldMaxZ); // 使用 worldMaxZ (通常為 0)
+                Vector3 secondaryPos = new Vector3(worldPos.x, worldPos.y, worldMaxZ);
                 Instantiate(secondaryObjectPrefab, secondaryPos, Quaternion.identity);
             }
 
-            // 5. ✅ 放置完成後，設定本輪已放置
             hasPlacedThisPhase = true;
-
-            // 6. ❌ 放置完成後，將深度重設為初始值 (等待下一輪開始時才允許使用滾輪調整)
             placeDepth = INITIAL_PLACE_DEPTH;
-            lastDepthDisplayTime = 0f; // 停止顯示深度，直到下一輪開始調整
+            lastDepthDisplayTime = 0f;
 
-            Debug.Log($"物件 {selectedObjectPrefab.name} 放置完成。世界座標 Z={worldPos.z:F2} (已被限制在 {worldMinZ} 到 {worldMaxZ} 之間)。本輪放置結束，需等待下一輪。");
+            Debug.Log($"物件 {selectedObjectPrefab.name} 放置完成。Z={worldPos.z:F2}");
         }
     }
 
-    // --- 螢幕上顯示目前深度 & 狀態 ---
+    // --- 螢幕上顯示目前深度 & 狀態 (UI 修改處) ---
     void OnGUI()
     {
+        // 1. 設定左上角資訊文字樣式
         GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.fontSize = 20;
+        style.fontSize = debugInfoFontSize; // 使用變數控制大小
         style.normal.textColor = Color.yellow;
+        style.fontStyle = FontStyle.Bold; // 加粗比較明顯
 
         // 顯示深度 (僅在調整後顯示 2 秒)
         if (Time.time - lastDepthDisplayTime < 2f)
         {
-            GUI.Label(new Rect(10, 10, 300, 40), $"目前深度：{placeDepth:F2}", style);
+            // 加大顯示範圍 (Rect)，避免字變大後被切掉
+            GUI.Label(new Rect(20, 20, 500, 100), $"目前深度：{placeDepth:F2}", style);
 
             // 額外顯示 Z 軸限制
             GUIStyle limitStyle = new GUIStyle(style);
             limitStyle.normal.textColor = Color.cyan;
-            GUI.Label(new Rect(10, 40, 400, 40), $"世界 Z 軸限制: {worldMinZ:F1} 到 {worldMaxZ:F1}", limitStyle);
+            // Y 軸位置也要往下移，避免跟上面重疊
+            GUI.Label(new Rect(20, 20 + debugInfoFontSize + 10, 600, 100), $"世界 Z 軸限制: {worldMinZ:F1} 到 {worldMaxZ:F1}", limitStyle);
         }
 
-        // 顯示放置狀態
-        // ... (保持不變)
+        // 2. 設定下方狀態文字樣式
         GUIStyle statusStyle = new GUIStyle(GUI.skin.label);
-        statusStyle.fontSize = 25;
+        statusStyle.fontSize = statusTextFontSize; // 使用變數控制大小
+        statusStyle.alignment = TextAnchor.MiddleCenter; // 設定置中對齊
+        statusStyle.fontStyle = FontStyle.Bold; // 加粗
+
+        // 計算螢幕下方的位置 (Rect)
+        float labelWidth = 800f; // 寬度加大
+        float labelHeight = 150f; // 高度加大
+        float xPos = (Screen.width - labelWidth) / 2;
+        float yPos = Screen.height - labelHeight - 20; // 距離底部 20px
+
+        Rect statusRect = new Rect(xPos, yPos, labelWidth, labelHeight);
 
         if (isPlacementAllowed)
         {
             if (hasPlacedThisPhase)
             {
                 statusStyle.normal.textColor = Color.red;
-                GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height - 50, 300, 40), "已放置。等待下一輪...", statusStyle);
+                GUI.Label(statusRect, "已放置。等待下一輪...", statusStyle);
             }
             else
             {
                 statusStyle.normal.textColor = Color.green;
-                GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height - 50, 300, 40), "建造中... (按滑鼠左鍵放置)", statusStyle);
+                GUI.Label(statusRect, "建造中... (按滑鼠左鍵放置)", statusStyle);
             }
         }
         else if (roundManager != null && roundManager.IsRoundActive)
         {
             statusStyle.normal.textColor = Color.gray;
-            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height - 50, 300, 40), "遊玩中/冷卻中...", statusStyle);
+            GUI.Label(statusRect, "遊玩中/冷卻中...", statusStyle);
         }
     }
 
-    // ... (SelectObjectFromButton 和 DeselectObject 保持不變)
     public void SelectObjectFromButton(GameObject mainPrefab, GameObject secondaryPrefab = null)
     {
         if (mainPrefab == null) return;
-
         selectedObjectPrefab = mainPrefab;
         secondaryObjectPrefab = secondaryPrefab;
-
-        Debug.Log($"選擇主物件：{mainPrefab.name}" +
-                    (secondaryPrefab != null ? $", 副物件：{secondaryPrefab.name}" : ", 無副物件"));
+        Debug.Log($"選擇主物件：{mainPrefab.name}");
     }
 
     public void DeselectObject()

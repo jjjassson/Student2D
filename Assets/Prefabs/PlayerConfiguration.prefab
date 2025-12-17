@@ -59,7 +59,7 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: KeyBoard
+  m_DefaultControlScheme: Controller
   m_DefaultActionMap: GamePlay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -76,4 +76,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerSetupMenuPrefab: {fileID: 2818716792385140960, guid: 6122f7566a13d544e8f2d77da0a9b7c5, type: 3}
-  input: {fileID: 2334968695883939920}

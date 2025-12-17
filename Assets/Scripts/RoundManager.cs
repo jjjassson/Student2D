@@ -5,19 +5,13 @@ using System.Linq;
 
 public class RoundManager : MonoBehaviour
 {
+    // ... (前面的變數保持不變) ...
     public static RoundManager Instance { get; private set; }
 
     [Header("階段時間設定")]
-    [Tooltip("單次放置階段的持續時間 (例如 10 秒)")]
     public float placementTimePerPlayer = 10f;
-
-    [Tooltip("遊玩階段的時間限制 (例如 30 秒)。設為 0 表示無時間限制。")]
     public float roundDuration = 30f;
-
-    [Tooltip("回合結束後等待時間 (顯示結算或等待重生的時間)")]
     public float intermissionDelay = 3f;
-
-    [Tooltip("單次放置階段之間的冷卻休息時間 (僅在多輪放置時啟用)")]
     public float interPlacementDelay = 5f;
 
     private int roundNumber = 0;
@@ -26,28 +20,21 @@ public class RoundManager : MonoBehaviour
     private bool isPlacementPhase = false;
     private List<PlayerScore> activePlayers = new List<PlayerScore>();
 
-    public bool IsRoundActive
-    {
-        get { return isRoundActive; }
-    }
+    public bool IsRoundActive => isRoundActive;
 
     // 事件系統
     public event System.Action<float> OnPlacementStart;
     public event System.Action OnPlacementEnd;
     public event System.Action<int> OnRoundStart;
     public event System.Action<int> OnRoundEnd;
-    public event System.Action<float> OnCountdownTick; // UI 倒數顯示用
+    public event System.Action<float> OnCountdownTick;
     public event System.Action<bool> OnPlacementAllowedChange;
 
     private Coroutine roundCycleCoroutine;
 
     private void Awake()
     {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -63,17 +50,11 @@ public class RoundManager : MonoBehaviour
         activePlayers = playerObjects.Select(p => p.GetComponent<PlayerScore>())
                                      .Where(ps => ps != null).ToList();
 
-        if (activePlayers.Count > 0)
-        {
-            StartRound();
-        }
-        else
-        {
-            Debug.LogError("找不到 PlayerScore！請確認 Tag 與 Script。");
-        }
+        if (activePlayers.Count > 0) StartRound();
+        else Debug.LogError("找不到 PlayerScore！請確認 Tag 與 Script。");
     }
 
-    // 🔄 核心回合邏輯
+    // 🔄 核心回合邏輯 (修改重點在這裡)
     private IEnumerator RoundCycleSequence()
     {
         roundNumber++;
@@ -81,18 +62,14 @@ public class RoundManager : MonoBehaviour
         isRoundActive = true;
         Debug.Log($"=== Round {roundNumber} 開始 (玩家復活並回到重生點) ===");
 
-        // 1️⃣ 回合開始：復活所有玩家 (這裡會讓玩家回到重生點)
+        // 1️⃣ 回合開始：復活所有玩家
         foreach (var player in activePlayers)
         {
-            if (player != null)
-            {
-                // 請確保 PlayerScore.Revive() 裡面有 transform.position = spawnPoint 的邏輯
-                player.Revive();
-            }
+            if (player != null) player.Revive();
         }
         OnRoundStart?.Invoke(roundNumber);
 
-        // 2️⃣ 進入放置循環 (如果是單人模式，這裡只會跑一次)
+        // 2️⃣ 進入放置循環
         while (isRoundActive)
         {
             placementPhaseCount++;
@@ -100,15 +77,16 @@ public class RoundManager : MonoBehaviour
             // --- 放置階段 ---
             yield return StartCoroutine(HandlePlacementPhase(placementPhaseCount));
 
-            // --- 檢查是否已經全滅 ---
+            // --- 檢查是否已經全滅 (修正處) ---
             if (CheckIfAllDead())
             {
-                isRoundActive = false;
-                break; // 直接跳出，進入結算
+                Debug.Log("💀 放置階段全員死亡，跳過剩餘階段");
+                // ❌ 移除這行： isRoundActive = false; 
+                // 原因：如果這裡設為 false，下面的 EndRound() 會因為判斷 !isRoundActive 而直接 return，導致無法重生。
+                break;
             }
             else if (activePlayers.Count == 1)
             {
-                // 單人模式：放置一次後，直接進入「生存計時」
                 Debug.Log("單人模式：放置結束，進入生存挑戰！");
                 break;
             }
@@ -120,52 +98,51 @@ public class RoundManager : MonoBehaviour
             yield return new WaitForSeconds(interPlacementDelay);
         }
 
-        // 3️⃣ 生存階段計時 (這是你原本缺少的部分)
-        // 如果跳出了放置循環，且回合還是 Active (代表還有人活著)，就開始倒數 30 秒
+        // 3️⃣ 生存階段計時
+        // 如果在放置階段全滅，程式會跑到這裡。
+        // 因為我們剛剛移除了 isRoundActive = false，所以這裡的 if (isRoundActive) 會是 true，得以進入檢查。
         if (isRoundActive)
         {
-            float timer = 0f;
-            Debug.Log($"生存計時開始：限時 {roundDuration} 秒");
-
-            while (isRoundActive)
+            // 如果已經全滅，這裡的第一個檢查就會攔截並跳出，不會真的跑 30 秒
+            if (CheckIfAllDead())
             {
-                // A. 每一幀都檢查有沒有死光
-                if (CheckIfAllDead())
+                // 全員已死，什麼都不做，直接讓它往下跑到 EndRound
+            }
+            else
+            {
+                // 只有還有人活著才會開始倒數
+                float timer = 0f;
+                Debug.Log($"生存計時開始：限時 {roundDuration} 秒");
+
+                while (isRoundActive)
                 {
-                    Debug.Log("💀 玩家死亡，回合提早結束");
-                    break;
-                }
-
-                // B. 計時邏輯
-                if (roundDuration > 0)
-                {
-                    timer += Time.deltaTime;
-                    float timeLeft = Mathf.Max(0, roundDuration - timer);
-
-                    // 更新 UI 倒數
-                    OnCountdownTick?.Invoke(timeLeft);
-
-                    // 時間到！
-                    if (timer >= roundDuration)
+                    if (CheckIfAllDead())
                     {
-                        Debug.Log("⏰ 時間到！強制結束回合 (視同死亡)");
-
-                        // 這裡可以選擇是否要「殺死」玩家來播放死亡動畫
-                        // foreach (var p in activePlayers) { if(p.isAlive) p.Die(); }
-
-                        break; // 跳出迴圈，直接執行 EndRound
+                        Debug.Log("💀 玩家死亡，回合提早結束");
+                        break;
                     }
-                }
 
-                yield return null; // 等待下一幀
+                    if (roundDuration > 0)
+                    {
+                        timer += Time.deltaTime;
+                        float timeLeft = Mathf.Max(0, roundDuration - timer);
+                        OnCountdownTick?.Invoke(timeLeft);
+
+                        if (timer >= roundDuration)
+                        {
+                            Debug.Log("⏰ 時間到！強制結束回合");
+                            break;
+                        }
+                    }
+                    yield return null;
+                }
             }
         }
 
-        // 4️⃣ 觸發回合結束
+        // 4️⃣ 觸發回合結束 (現在無論何時死，都能正確執行這裡了)
         EndRound();
     }
 
-    // 輔助檢查方法
     private bool CheckIfAllDead()
     {
         return activePlayers.All(p => p != null && !p.isAlive);
@@ -200,9 +177,11 @@ public class RoundManager : MonoBehaviour
 
     public void EndRound()
     {
-        if (!isRoundActive) return; // 避免重複呼叫
+        // ⚠️ 這裡原本的邏輯擋住了放置階段死亡的重置
+        // 因為剛剛我們移除了 loop 裡的 isRoundActive = false，所以現在即使放置階段死掉，isRoundActive 仍為 true，這裡就能通過。
+        if (!isRoundActive) return;
 
-        isRoundActive = false;
+        isRoundActive = false; // 在這裡統一關閉
         if (roundCycleCoroutine != null) StopCoroutine(roundCycleCoroutine);
 
         Debug.Log($"=== Round {roundNumber} 結束！準備重置 ===");
@@ -213,25 +192,13 @@ public class RoundManager : MonoBehaviour
 
     private IEnumerator IntermissionSequence()
     {
-        // 顯示 0 秒給 UI
         OnCountdownTick?.Invoke(0);
-
         Debug.Log($"休息 {intermissionDelay} 秒...");
         yield return new WaitForSeconds(intermissionDelay);
-
-        // 重新開始下一回合 (這會觸發 StartRound -> Revive -> 回到重生點)
         StartRound();
     }
 
-    // 供外部 (PlayerScore) 呼叫
-    public void NotifyPlayerDeath(PlayerScore player)
-    {
-        // 這裡不需要做太多事，因為 RoundCycleSequence 的 while 迴圈會自動檢測到死亡
-        // 但如果想要「一死就立刻觸發」，可以保留這個方法來雙重確認
-    }
-
-    public void NotifyPlayerReachedGoal(PlayerScore player)
-    {
-        if (isRoundActive) EndRound();
-    }
+    // ... (Notify 方法保持不變) ...
+    public void NotifyPlayerDeath(PlayerScore player) { }
+    public void NotifyPlayerReachedGoal(PlayerScore player) { if (isRoundActive) EndRound(); }
 }

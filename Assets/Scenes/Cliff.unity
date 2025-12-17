@@ -790,6 +790,8 @@ MonoBehaviour:
   maxDepth: 30
   worldMinZ: -13
   worldMaxZ: 0
+  debugInfoFontSize: 30
+  statusTextFontSize: 40
   selectedObjectPrefab: {fileID: 0}
   secondaryObjectPrefab: {fileID: 0}
 --- !u!4 &538996396
