@@ -215,11 +215,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 162cf9ee2ce32534f8a093b089c1803c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
+  moveSpeed: 5
   jumpForce: 1
   gravityValue: -9.81
   isSlowed: 0
   isJumpReduced: 0
+  isInverted: 0
 --- !u!114 &6569110624159686450
 MonoBehaviour:
   m_ObjectHideFlags: 0
