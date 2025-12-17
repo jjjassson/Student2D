@@ -7,9 +7,9 @@ public class StretchPlatform : MonoBehaviour
 {
     [Header("伸縮設定")]
     [Tooltip("平台最小高度")]
-    public float minScaleY = 0.5f;
+    public float minScaleX = 0.5f;
     [Tooltip("平台最大高度")]
-    public float maxScaleY = 2f;
+    public float maxScaleX = 2f;
     [Tooltip("伸縮速度")]
     public float stretchSpeed = 1f;
 
@@ -35,19 +35,19 @@ public class StretchPlatform : MonoBehaviour
         Vector3 scale = transform.localScale;
         if (isExpanding)
         {
-            scale.y += Time.deltaTime * stretchSpeed;
-            if (scale.y >= maxScaleY)
+            scale.x += Time.deltaTime * stretchSpeed;
+            if (scale.x >= maxScaleX)
             {
-                scale.y = maxScaleY;
+                scale.x = maxScaleX;
                 isExpanding = false;
             }
         }
         else
         {
-            scale.y -= Time.deltaTime * stretchSpeed;
-            if (scale.y <= minScaleY)
+            scale.x -= Time.deltaTime * stretchSpeed;
+            if (scale.x <= minScaleX)
             {
-                scale.y = minScaleY;
+                scale.x = minScaleX;
                 isExpanding = true;
             }
         }
