@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Collections.Generic; // 確保有這個 using
+using System.Collections.Generic;
 
 [System.Serializable]
 public class ItemPair
@@ -18,30 +18,34 @@ public class ItemSelector : MonoBehaviour
 
     [Header("UI 設置")]
     public Transform content;
-    public GameObject buttonPrefab; // 這個 Prefab 現在應該帶有 UIScaleHover.cs
+    public GameObject buttonPrefab; // 帶有 UIScaleHover.cs 的按鈕預製物
 
-    [Header("控制器")]
+    [Header("控制器參考")]
     public ObjectPlacer placer;
-
-    // **移除：** 與 ButtonAnimator 相關的屬性/列表
-    // **移除：** 與 Smoothing Time 相關的屬性
+    public PlayerCursorController playerCursor; // 拖入畫面上的 PlayerCursor 物件
 
     void Start()
     {
+        // 自動防錯：如果沒拖入則嘗試尋找
         if (placer == null)
             placer = FindObjectOfType<ObjectPlacer>();
 
+        if (playerCursor == null)
+            playerCursor = FindObjectOfType<PlayerCursorController>();
+
         foreach (var item in items)
         {
+            // 生成按鈕
             var btnObj = Instantiate(buttonPrefab, content);
 
-            // --- 圖像/文字設定邏輯 (保持不變) ---
+            // --- 處理按鈕圖案與文字顯示 ---
             Image buttonImage = btnObj.GetComponent<Image>();
             if (item.uiSprite != null && buttonImage != null)
             {
                 buttonImage.sprite = item.uiSprite;
                 buttonImage.preserveAspect = true;
 
+                // 如果有 Sprite，通常不需要顯示文字，刪除子物件中的 Text
                 Text buttonText = btnObj.GetComponentInChildren<Text>();
                 if (buttonText != null)
                 {
@@ -50,12 +54,13 @@ public class ItemSelector : MonoBehaviour
             }
             else
             {
+                // 沒有圖片時顯示 Prefab 名稱
                 Text buttonText = btnObj.GetComponentInChildren<Text>();
                 if (buttonText != null)
                     buttonText.text = item.mainPrefab.name;
             }
-            // ------------------------------------
 
+            // --- 設置按鈕組件 ---
             Button buttonComponent = btnObj.GetComponent<Button>();
             if (buttonComponent == null)
             {
@@ -63,16 +68,23 @@ public class ItemSelector : MonoBehaviour
                 continue;
             }
 
-            // 左鍵點擊：設置為主物件和空副物件
+            // --- [左鍵點擊邏輯] ---
             buttonComponent.onClick.AddListener(() =>
             {
+                // 1. 設定要放置的物件
                 placer.selectedObjectPrefab = item.mainPrefab;
                 placer.secondaryObjectPrefab = null;
+
+                // 2. 更新游標圖案
+                if (playerCursor != null)
+                {
+                    playerCursor.ChangeCursorSprite(item.uiSprite);
+                }
+
                 Debug.Log($"選擇主物件：{item.mainPrefab.name}, 副物件：無 (左鍵)");
             });
 
-
-            // 設置 EventTrigger 處理右鍵點擊
+            // --- [右鍵點擊邏輯 (使用 EventTrigger)] ---
             EventTrigger trigger = btnObj.GetComponent<EventTrigger>();
             if (trigger == null)
             {
@@ -88,17 +100,21 @@ public class ItemSelector : MonoBehaviour
                 PointerEventData ped = (PointerEventData)data;
                 if (ped.button == PointerEventData.InputButton.Right)
                 {
+                    // 1. 設定要放置的物件 (含副物件)
                     placer.selectedObjectPrefab = item.mainPrefab;
                     placer.secondaryObjectPrefab = item.secondaryPrefab;
+
+                    // 2. 更新游標圖案
+                    if (playerCursor != null)
+                    {
+                        playerCursor.ChangeCursorSprite(item.uiSprite);
+                    }
 
                     Debug.Log($"選擇主物件：{item.mainPrefab.name}" +
                               (item.secondaryPrefab != null ? $", 副物件：{item.secondaryPrefab.name}" : ", 無副物件") + " (右鍵)");
                 }
             });
             trigger.triggers.Add(rightClickEntry);
-
-            // **移除：** PointerEnter 和 PointerExit 的 EventTrigger 註冊，
-            // **因為 UIScaleHover.cs 已經使用內建接口 IPointerEnterHandler/IPointerExitHandler 處理了。**
         }
     }
 }

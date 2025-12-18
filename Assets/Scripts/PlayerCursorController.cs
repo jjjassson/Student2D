@@ -1,11 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI; // 必須引用 UI
 
 public class PlayerCursorController : MonoBehaviour
 {
     public int playerId = 0;
     public RectTransform cursorUI;
     public float moveSpeed = 500f;
+
+    private Image cursorImage; // 儲存 Image 元件參考
+    private Sprite defaultSprite; // 初始的游標圖案
 
     private Vector2 moveInput;
     private Vector2 mouseInput;
@@ -14,8 +18,22 @@ public class PlayerCursorController : MonoBehaviour
     void Awake()
     {
         controls = new GameControls();
+        cursorImage = cursorUI.GetComponent<Image>();
+        if (cursorImage != null) defaultSprite = cursorImage.sprite;
     }
 
+    // 新增：供外部呼叫更換圖片的方法
+    public void ChangeCursorSprite(Sprite newSprite)
+    {
+        if (cursorImage == null) return;
+
+        if (newSprite != null)
+            cursorImage.sprite = newSprite;
+        else
+            cursorImage.sprite = defaultSprite; // 如果傳入 null 就換回預設
+    }
+
+    // ... 保持原本的 OnEnable, Update, OnDisable 邏輯不變 ...
     void OnEnable()
     {
         controls.Player.Enable();
