@@ -785,12 +785,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 963194227}
-  placeDepth: 10
-  scrollSpeed: 2
-  minDepth: 5
-  maxDepth: 30
-  worldMinZ: -13
-  worldMaxZ: 0
+  enableBoundaries: 1
+  xRange: {x: -20, y: 20}
+  zRange: {x: -20, y: 20}
   debugInfoFontSize: 30
   statusTextFontSize: 40
   selectedObjectPrefab: {fileID: 0}
@@ -2857,7 +2854,7 @@ Transform:
   m_GameObject: {fileID: 1820953578}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 28.439753, y: -19.013239, z: 2}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

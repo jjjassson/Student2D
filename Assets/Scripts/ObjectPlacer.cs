@@ -1,36 +1,31 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI; // 雖然這裡主要用 OnGUI，但保留引用沒關係
 
 public class ObjectPlacer : MonoBehaviour
 {
     [Header("放置設定")]
     public Camera mainCamera;
-    public float placeDepth = 10f; // 初始深度
-    public float scrollSpeed = 2f;
-    public float minDepth = 1f;
-    public float maxDepth = 50f;
 
-    [Header("Z軸深度限制 (世界座標)")]
-    public float worldMinZ = -18f;
-    public float worldMaxZ = 0f;
+    [Header("高度設定")]
+    [Tooltip("在此設定物件放置的固定高度 (例如 0 或 1)")]
+    public float placementHeight = 0f; // 這裡控制 Y 軸高度
 
-    [Header("UI 顯示設定 (這裡調整字體大小)")]
-    [Tooltip("左上角深度資訊的字體大小")]
-    public int debugInfoFontSize = 40; // 預設改大到 40
+    [Header("邊界限制 (X/Z軸)")]
+    public bool enableBoundaries = false;
+    public Vector2 xRange = new Vector2(-20, 20);
+    public Vector2 zRange = new Vector2(-20, 20);
 
-    [Tooltip("螢幕下方狀態文字的字體大小")]
-    public int statusTextFontSize = 60; // 預設改大到 60
+    [Header("UI 顯示設定")]
+    public int debugInfoFontSize = 40;
+    public int statusTextFontSize = 60;
 
     [Header("放置物件")]
     public GameObject selectedObjectPrefab;
     public GameObject secondaryObjectPrefab;
 
-    private float lastDepthDisplayTime;
-    private const float INITIAL_PLACE_DEPTH = 10f;
-
     private bool isPlacementAllowed = false;
     private bool hasPlacedThisPhase = true;
+    private Vector3 currentHoverPos;
 
     private RoundManager roundManager;
 
@@ -44,15 +39,10 @@ public class ObjectPlacer : MonoBehaviour
         }
         else
         {
-            Debug.LogError("ObjectPlacer 找不到 RoundManager 實例！請確保 RoundManager 在場景中！");
+            Debug.LogError("ObjectPlacer 找不到 RoundManager 實例！");
         }
 
-        if (mainCamera == null)
-        {
-            mainCamera = Camera.main;
-        }
-
-        placeDepth = INITIAL_PLACE_DEPTH;
+        if (mainCamera == null) mainCamera = Camera.main;
     }
 
     void OnDestroy()
@@ -67,101 +57,92 @@ public class ObjectPlacer : MonoBehaviour
     private void SetPlacementCooldown(float placementTime)
     {
         hasPlacedThisPhase = false;
-        placeDepth = INITIAL_PLACE_DEPTH;
-        lastDepthDisplayTime = Time.time;
-        Debug.Log($"放置階段開始，深度已重設為 {placeDepth:F2}");
+        Debug.Log($"放置階段開始，本次固定高度為 Y={placementHeight}");
     }
 
     private void SetPlacementAllowed(bool isAllowed)
     {
         isPlacementAllowed = isAllowed;
-        if (!isAllowed)
-        {
-            hasPlacedThisPhase = true;
-        }
+        if (!isAllowed) hasPlacedThisPhase = true;
     }
 
     void Update()
     {
-        // --- 深度調整 (滾輪) ---
-        float scrollValue = Mouse.current.scroll.ReadValue().y;
-        if (scrollValue != 0)
-        {
-            placeDepth -= scrollValue * scrollSpeed * Time.deltaTime;
-            placeDepth = Mathf.Clamp(placeDepth, minDepth, maxDepth);
-            lastDepthDisplayTime = Time.time;
-        }
-
         if (!isPlacementAllowed || hasPlacedThisPhase) return;
 
-        // --- 執行放置 (滑鼠左鍵) ---
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        // 1. 建立射線與地板平面 (用來抓 X 和 Z)
+        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        // 這裡平面設為 0 是為了準確抓取滑鼠在地板上的投影位置
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+
+        // 2. 檢測滑鼠位置
+        if (groundPlane.Raycast(ray, out float enter))
         {
-            if (selectedObjectPrefab == null)
+            // 取得射線在地板上的點
+            Vector3 hitPoint = ray.GetPoint(enter);
+
+            // 【關鍵修改】強制將 Y 軸替換為你設定的高度
+            hitPoint.y = placementHeight;
+
+            // 邊界限制
+            if (enableBoundaries)
             {
-                Debug.LogWarning("尚未選擇任何放置物件！");
-                return;
+                hitPoint.x = Mathf.Clamp(hitPoint.x, xRange.x, xRange.y);
+                hitPoint.z = Mathf.Clamp(hitPoint.z, zRange.x, zRange.y);
             }
 
-            Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
-            Vector3 worldPos = mainCamera.ScreenToWorldPoint(
-                new Vector3(mouseScreenPos.x, mouseScreenPos.y, placeDepth)
-            );
+            // 更新 UI 顯示用座標
+            currentHoverPos = hitPoint;
 
-            float clampedZ = Mathf.Clamp(worldPos.z, worldMinZ, worldMaxZ);
-            worldPos.z = clampedZ;
-
-            Instantiate(selectedObjectPrefab, worldPos, Quaternion.identity);
-
-            if (secondaryObjectPrefab != null)
+            // 3. 執行放置
+            if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                Vector3 secondaryPos = new Vector3(worldPos.x, worldPos.y, worldMaxZ);
-                Instantiate(secondaryObjectPrefab, secondaryPos, Quaternion.identity);
+                if (selectedObjectPrefab == null)
+                {
+                    Debug.LogWarning("尚未選擇任何放置物件！");
+                    return;
+                }
+
+                Instantiate(selectedObjectPrefab, hitPoint, Quaternion.identity);
+
+                if (secondaryObjectPrefab != null)
+                {
+                    // 若有副物件，位置也相同 (或依你的需求調整)
+                    Instantiate(secondaryObjectPrefab, hitPoint, Quaternion.identity);
+                }
+
+                hasPlacedThisPhase = true;
+                Debug.Log($"物件放置完成：{hitPoint}");
             }
-
-            hasPlacedThisPhase = true;
-            placeDepth = INITIAL_PLACE_DEPTH;
-            lastDepthDisplayTime = 0f;
-
-            Debug.Log($"物件 {selectedObjectPrefab.name} 放置完成。Z={worldPos.z:F2}");
         }
     }
 
-    // --- 螢幕上顯示目前深度 & 狀態 (UI 修改處) ---
     void OnGUI()
     {
-        // 1. 設定左上角資訊文字樣式
         GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.fontSize = debugInfoFontSize; // 使用變數控制大小
+        style.fontSize = debugInfoFontSize;
         style.normal.textColor = Color.yellow;
-        style.fontStyle = FontStyle.Bold; // 加粗比較明顯
+        style.fontStyle = FontStyle.Bold;
 
-        // 顯示深度 (僅在調整後顯示 2 秒)
-        if (Time.time - lastDepthDisplayTime < 2f)
+        if (isPlacementAllowed && !hasPlacedThisPhase)
         {
-            // 加大顯示範圍 (Rect)，避免字變大後被切掉
-            GUI.Label(new Rect(20, 20, 500, 100), $"目前深度：{placeDepth:F2}", style);
+            GUI.Label(new Rect(20, 20, 600, 100), $"預覽位置: {currentHoverPos}", style);
 
-            // 額外顯示 Z 軸限制
-            GUIStyle limitStyle = new GUIStyle(style);
-            limitStyle.normal.textColor = Color.cyan;
-            // Y 軸位置也要往下移，避免跟上面重疊
-            GUI.Label(new Rect(20, 20 + debugInfoFontSize + 10, 600, 100), $"世界 Z 軸限制: {worldMinZ:F1} 到 {worldMaxZ:F1}", limitStyle);
+            // 顯示當前設定的高度
+            GUIStyle hintStyle = new GUIStyle(style);
+            hintStyle.fontSize = (int)(debugInfoFontSize * 0.8f);
+            hintStyle.normal.textColor = Color.cyan;
+            GUI.Label(new Rect(20, 20 + debugInfoFontSize + 10, 600, 100), $"目前固定高度 Y = {placementHeight}", hintStyle);
         }
 
-        // 2. 設定下方狀態文字樣式
         GUIStyle statusStyle = new GUIStyle(GUI.skin.label);
-        statusStyle.fontSize = statusTextFontSize; // 使用變數控制大小
-        statusStyle.alignment = TextAnchor.MiddleCenter; // 設定置中對齊
-        statusStyle.fontStyle = FontStyle.Bold; // 加粗
+        statusStyle.fontSize = statusTextFontSize;
+        statusStyle.alignment = TextAnchor.MiddleCenter;
+        statusStyle.fontStyle = FontStyle.Bold;
 
-        // 計算螢幕下方的位置 (Rect)
-        float labelWidth = 800f; // 寬度加大
-        float labelHeight = 150f; // 高度加大
-        float xPos = (Screen.width - labelWidth) / 2;
-        float yPos = Screen.height - labelHeight - 20; // 距離底部 20px
-
-        Rect statusRect = new Rect(xPos, yPos, labelWidth, labelHeight);
+        float labelWidth = 800f;
+        float labelHeight = 150f;
+        Rect statusRect = new Rect((Screen.width - labelWidth) / 2, Screen.height - labelHeight - 20, labelWidth, labelHeight);
 
         if (isPlacementAllowed)
         {
@@ -173,13 +154,13 @@ public class ObjectPlacer : MonoBehaviour
             else
             {
                 statusStyle.normal.textColor = Color.green;
-                GUI.Label(statusRect, "建造中... (按滑鼠左鍵放置)", statusStyle);
+                GUI.Label(statusRect, "點擊放置物件", statusStyle);
             }
         }
         else if (roundManager != null && roundManager.IsRoundActive)
         {
             statusStyle.normal.textColor = Color.gray;
-            GUI.Label(statusRect, "遊玩中/冷卻中...", statusStyle);
+            GUI.Label(statusRect, "遊玩中...", statusStyle);
         }
     }
 
@@ -188,13 +169,11 @@ public class ObjectPlacer : MonoBehaviour
         if (mainPrefab == null) return;
         selectedObjectPrefab = mainPrefab;
         secondaryObjectPrefab = secondaryPrefab;
-        Debug.Log($"選擇主物件：{mainPrefab.name}");
     }
 
     public void DeselectObject()
     {
         selectedObjectPrefab = null;
         secondaryObjectPrefab = null;
-        Debug.Log("取消選擇物件");
     }
 }
