@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2052742077915230996}
   - component: {fileID: 2689930771702510549}
   - component: {fileID: 4618876987514644776}
+  - component: {fileID: 6270926127351869700}
   - component: {fileID: 6473054374949799907}
   - component: {fileID: -4911026256382809188}
   - component: {fileID: 7690751106908425194}
@@ -188,7 +189,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6906998413789825852}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a273bf6eb02b91d428e9afe947d799d2, type: 3}
   m_Name: 
@@ -200,6 +201,32 @@ MonoBehaviour:
   isSlowed: 0
   isJumpReduced: 0
   reverseControl: 0
+--- !u!114 &6270926127351869700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae2b42b6eb6dc6446943abd7e9eef1f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 4
+  jumpForce: 1
+  gravityValue: -9.81
+  maxZPosition: -3
+  attractRadius: 6
+  attractForce: 6
+  minAttractForce: 1.5
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  attractEnabled: 1
+  isSlowed: 0
+  isJumpReduced: 0
+  isInverted: 0
 --- !u!143 &6473054374949799907
 CharacterController:
   m_ObjectHideFlags: 0
