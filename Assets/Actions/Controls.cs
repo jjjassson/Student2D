@@ -108,6 +108,24 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PlaceObject"",
+                    ""type"": ""Button"",
+                    ""id"": ""184bcd99-76ed-407b-96b7-0491586a4597"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveCursor"",
+                    ""type"": ""Value"",
+                    ""id"": ""1c15779c-2ead-43af-ad1b-1d139581613d"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -264,6 +282,28 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aa786f6d-8ab5-412c-ba8c-85749cba33d7"",
+                    ""path"": ""<Gamepad>/rightStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Controller"",
+                    ""action"": ""PlaceObject"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""511b7bb2-aea0-4f3c-877f-d11b49cbbd64"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Controller"",
+                    ""action"": ""MoveCursor"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -302,6 +342,8 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         m_GamePlay = asset.FindActionMap("GamePlay", throwIfNotFound: true);
         m_GamePlay_Movement = m_GamePlay.FindAction("Movement", throwIfNotFound: true);
         m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
+        m_GamePlay_PlaceObject = m_GamePlay.FindAction("PlaceObject", throwIfNotFound: true);
+        m_GamePlay_MoveCursor = m_GamePlay.FindAction("MoveCursor", throwIfNotFound: true);
     }
 
     ~@Controls()
@@ -384,6 +426,8 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     private List<IGamePlayActions> m_GamePlayActionsCallbackInterfaces = new List<IGamePlayActions>();
     private readonly InputAction m_GamePlay_Movement;
     private readonly InputAction m_GamePlay_Jump;
+    private readonly InputAction m_GamePlay_PlaceObject;
+    private readonly InputAction m_GamePlay_MoveCursor;
     /// <summary>
     /// Provides access to input actions defined in input action map "GamePlay".
     /// </summary>
@@ -403,6 +447,14 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "GamePlay/Jump".
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
+        /// <summary>
+        /// Provides access to the underlying input action "GamePlay/PlaceObject".
+        /// </summary>
+        public InputAction @PlaceObject => m_Wrapper.m_GamePlay_PlaceObject;
+        /// <summary>
+        /// Provides access to the underlying input action "GamePlay/MoveCursor".
+        /// </summary>
+        public InputAction @MoveCursor => m_Wrapper.m_GamePlay_MoveCursor;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -435,6 +487,12 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @PlaceObject.started += instance.OnPlaceObject;
+            @PlaceObject.performed += instance.OnPlaceObject;
+            @PlaceObject.canceled += instance.OnPlaceObject;
+            @MoveCursor.started += instance.OnMoveCursor;
+            @MoveCursor.performed += instance.OnMoveCursor;
+            @MoveCursor.canceled += instance.OnMoveCursor;
         }
 
         /// <summary>
@@ -452,6 +510,12 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @PlaceObject.started -= instance.OnPlaceObject;
+            @PlaceObject.performed -= instance.OnPlaceObject;
+            @PlaceObject.canceled -= instance.OnPlaceObject;
+            @MoveCursor.started -= instance.OnMoveCursor;
+            @MoveCursor.performed -= instance.OnMoveCursor;
+            @MoveCursor.canceled -= instance.OnMoveCursor;
         }
 
         /// <summary>
@@ -545,5 +609,19 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "PlaceObject" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPlaceObject(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MoveCursor" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveCursor(InputAction.CallbackContext context);
     }
 }

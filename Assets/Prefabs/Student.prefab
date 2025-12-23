@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -1268921124903140623}
   - component: {fileID: 4910276222442573437}
   - component: {fileID: 1054088428401668663}
+  - component: {fileID: 2808868947928543228}
   - component: {fileID: 7325852913734568443}
   - component: {fileID: 2647529110979158369}
   m_Layer: 0
@@ -152,6 +153,14 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: e65b5dd5-9a38-4bfe-b5c6-3d4cdedd6cca
     m_ActionName: GamePlay/Jump[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 184bcd99-76ed-407b-96b7-0491586a4597
+    m_ActionName: GamePlay/PlaceObject
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1c15779c-2ead-43af-ad1b-1d139581613d
+    m_ActionName: GamePlay/MoveCursor
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Controller
   m_DefaultActionMap: GamePlay
@@ -284,6 +293,24 @@ MonoBehaviour:
   shadowSize: {x: 0.3, y: 0.3}
   surfaceOffset: 0.05
   smoothingSpeed: 15
+--- !u!114 &2808868947928543228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 419202ccae696584fb6e009f9fca4256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridSize: 1
+  moveSpeed: 10
+  xRange: {x: -18, y: 18}
+  zRange: {x: -10, y: 10}
+  selectedObjectPrefab: {fileID: 0}
+  secondaryObjectPrefab: {fileID: 0}
 --- !u!54 &7325852913734568443
 Rigidbody:
   m_ObjectHideFlags: 0

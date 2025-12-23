@@ -22,6 +22,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "PlaceObject",
+                    "type": "Button",
+                    "id": "184bcd99-76ed-407b-96b7-0491586a4597",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MoveCursor",
+                    "type": "Value",
+                    "id": "1c15779c-2ead-43af-ad1b-1d139581613d",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -176,6 +194,28 @@
                     "processors": "",
                     "groups": ";KeyBoard2",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa786f6d-8ab5-412c-ba8c-85749cba33d7",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Controller",
+                    "action": "PlaceObject",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "511b7bb2-aea0-4f3c-877f-d11b49cbbd64",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Controller",
+                    "action": "MoveCursor",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
