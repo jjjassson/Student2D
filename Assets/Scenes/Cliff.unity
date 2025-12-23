@@ -785,10 +785,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 963194227}
-  placementHeight: 0
-  enableBoundaries: 1
-  xRange: {x: -20, y: 20}
-  zRange: {x: -20, y: 20}
   debugInfoFontSize: 30
   statusTextFontSize: 40
   selectedObjectPrefab: {fileID: 0}
