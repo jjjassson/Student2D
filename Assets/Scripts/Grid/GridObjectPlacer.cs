@@ -4,19 +4,14 @@ using UnityEngine.InputSystem;
 public class GridObjectPlacer : MonoBehaviour
 {
     [Header("網格設定")]
-    public float gridSize = 1.0f; // 每一格的大小
+    public float gridSize = 1.0f;
+    public Vector3 startPosition = Vector3.zero; // 初始位置
 
-    [Header("初始狀態設定")]
-    [Tooltip("遊戲開始時，游標預設出現的位置")]
-    public Vector3 startPosition = Vector3.zero; // <--- 新增這個變數
-
-    [Header("移動手感設定")]
-    [Tooltip("按住搖桿時，每隔幾秒移動一格")]
-    public float moveInterval = 0.2f;
-    [Tooltip("搖桿推超過多少才算有輸入")]
+    [Header("手感設定")]
+    public float moveInterval = 0.2f; // 移動冷卻時間
     public float inputThreshold = 0.5f;
 
-    [Header("活動範圍")]
+    [Header("範圍限制")]
     public Vector2 xRange = new Vector2(-18, 18);
     public Vector2 zRange = new Vector2(-10, 10);
 
@@ -27,25 +22,16 @@ public class GridObjectPlacer : MonoBehaviour
 
     private Vector2 currentInput;
     private float nextMoveTime = 0f;
-    private bool isPlacementAllowed = true;
+    private bool isPlacementAllowed = false; // 預設為 false，等 RoundManager 開啟
 
     void Start()
     {
-        // --- 修改處：使用你設定的初始位置 ---
-
-        // 1. 先讀取你設定的數值
-        Vector3 initPos = startPosition;
-
-        // 2. 強制對齊網格 (避免你手動輸入 1.2 這種小數點，導致後面全部歪掉)
-        float snappedX = Mathf.Round(initPos.x / gridSize) * gridSize;
-        float snappedZ = Mathf.Round(initPos.z / gridSize) * gridSize;
-
-        // 3. 設定初始座標 (強制 Y=0)
-        currentGridPos = new Vector3(snappedX, 0, snappedZ);
-
-        // 4. 確保初始位置在活動範圍內 (避免一開始就在邊界外)
-        currentGridPos.x = Mathf.Clamp(currentGridPos.x, xRange.x, xRange.y);
-        currentGridPos.z = Mathf.Clamp(currentGridPos.z, zRange.x, zRange.y);
+        // 初始化位置並對齊網格
+        currentGridPos = new Vector3(
+            Mathf.Round(startPosition.x / gridSize) * gridSize,
+            0,
+            Mathf.Round(startPosition.z / gridSize) * gridSize
+        );
     }
 
     void Update()
@@ -56,6 +42,7 @@ public class GridObjectPlacer : MonoBehaviour
         UpdateGhostPosition();
     }
 
+    // 搖桿移動邏輯
     private void HandleMovement()
     {
         if (Time.time < nextMoveTime || currentInput.magnitude < inputThreshold)
@@ -65,18 +52,14 @@ public class GridObjectPlacer : MonoBehaviour
         }
 
         Vector3 moveDir = Vector3.zero;
-
         if (Mathf.Abs(currentInput.x) > Mathf.Abs(currentInput.y))
-        {
             moveDir.x = Mathf.Sign(currentInput.x);
-        }
         else
-        {
             moveDir.z = Mathf.Sign(currentInput.y);
-        }
 
         currentGridPos += moveDir * gridSize;
 
+        // 限制範圍 & 強制 Y=0
         currentGridPos.x = Mathf.Clamp(currentGridPos.x, xRange.x, xRange.y);
         currentGridPos.z = Mathf.Clamp(currentGridPos.z, zRange.x, zRange.y);
         currentGridPos.y = 0;
@@ -86,25 +69,25 @@ public class GridObjectPlacer : MonoBehaviour
 
     private void UpdateGhostPosition()
     {
-        if (ghostObject != null)
-        {
-            ghostObject.transform.position = currentGridPos;
-        }
+        if (ghostObject != null) ghostObject.transform.position = currentGridPos;
     }
 
-    public void UpdateBuildingData(BuildingData newData)
+    // --- 供外部 (Inventory) 呼叫 ---
+    public void SetBuildingData(BuildingData newData)
     {
         currentData = newData;
 
         if (ghostObject != null) Destroy(ghostObject);
 
-        if (currentData != null && currentData.prefab != null)
+        if (currentData != null && currentData.mainPrefab != null)
         {
-            ghostObject = Instantiate(currentData.prefab, currentGridPos, Quaternion.identity);
+            ghostObject = Instantiate(currentData.mainPrefab, currentGridPos, Quaternion.identity);
+            // 移除 Ghost 的碰撞體，只留視覺
             foreach (var c in ghostObject.GetComponentsInChildren<Collider>()) c.enabled = false;
         }
     }
 
+    // --- Input System 事件 ---
     public void OnMoveCursor(InputAction.CallbackContext context)
     {
         currentInput = context.ReadValue<Vector2>();
@@ -120,20 +103,26 @@ public class GridObjectPlacer : MonoBehaviour
 
     private void PlaceObject()
     {
-        if (currentData == null || currentData.prefab == null) return;
-        Instantiate(currentData.prefab, currentGridPos, Quaternion.identity);
-        Debug.Log($"放置於格子: {currentGridPos}");
+        if (currentData == null || currentData.mainPrefab == null) return;
+
+        // 1. 放置主物件
+        Instantiate(currentData.mainPrefab, currentGridPos, Quaternion.identity);
+
+        // 2. 放置副物件 (固定 Z=0)
+        if (currentData.secondaryPrefab != null)
+        {
+            Vector3 secondaryPos = new Vector3(currentGridPos.x, 0, 0);
+            Instantiate(currentData.secondaryPrefab, secondaryPos, Quaternion.identity);
+        }
+
+        Debug.Log($"放置於: {currentGridPos}");
+        // 這裡可以加入音效或特效
     }
 
-    private void OnDrawGizmos()
+    // --- 給 RoundManager 控制開關 ---
+    public void SetPlacementAllowed(bool allowed)
     {
-        Gizmos.color = Color.yellow;
-        Vector3 center = new Vector3((xRange.x + xRange.y) / 2, 0, (zRange.x + zRange.y) / 2);
-        Vector3 size = new Vector3(xRange.y - xRange.x, 0.1f, zRange.y - zRange.x);
-        Gizmos.DrawWireCube(center, size);
-
-        // 畫出初始位置 (紅色球)，方便你在編輯器看
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(startPosition, 0.3f);
+        isPlacementAllowed = allowed;
+        if (ghostObject != null) ghostObject.SetActive(allowed);
     }
 }
