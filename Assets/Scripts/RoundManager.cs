@@ -13,10 +13,6 @@ public class RoundManager : MonoBehaviour
     public float intermissionDelay = 3f;
     public float interPlacementDelay = 5f;
 
-    [Header("隨機物品設定 (新功能)")]
-    [Tooltip("請把做好的 BuildingData (房子、樹...) 全部拖進來")]
-    public BuildingData[] itemPool;
-
     private int roundNumber = 0;
     private int placementPhaseCount = 0;
     private bool isRoundActive = false;
@@ -49,6 +45,7 @@ public class RoundManager : MonoBehaviour
 
     public void StartGame()
     {
+        // 重新抓取場景上的玩家（確保有人加入）
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
         activePlayers = playerObjects.Select(p => p.GetComponent<PlayerScore>())
                                      .Where(ps => ps != null).ToList();
@@ -57,6 +54,7 @@ public class RoundManager : MonoBehaviour
         else Debug.LogError("找不到 PlayerScore！請確認 Tag 與 Script。");
     }
 
+    // 🔄 核心回合邏輯
     private IEnumerator RoundCycleSequence()
     {
         roundNumber++;
@@ -65,14 +63,14 @@ public class RoundManager : MonoBehaviour
 
         Debug.Log($"=== Round {roundNumber} 開始 ===");
 
-        // 復活玩家
+        // 1️⃣ 回合開始：復活所有玩家
         foreach (var player in activePlayers)
         {
             if (player != null) player.Revive();
         }
         OnRoundStart?.Invoke(roundNumber);
 
-        // 放置循環
+        // 2️⃣ 進入放置循環 (Placement Loop)
         while (isRoundActive)
         {
             placementPhaseCount++;
@@ -80,27 +78,29 @@ public class RoundManager : MonoBehaviour
             // --- 執行放置階段 ---
             yield return StartCoroutine(HandlePlacementPhase(placementPhaseCount));
 
-            // 檢查全滅
+            // --- 檢查點 A：放置階段是否全滅？ ---
             if (CheckIfAllDead())
             {
-                Debug.Log("💀 放置階段全員死亡，直接結算");
-                break;
+                Debug.Log("💀 放置階段全員死亡，跳過生存階段，直接結算");
+                break; // 跳出 while 迴圈，直接前往 EndRound
             }
 
-            // 單人模式檢查
+            // --- 單人模式檢查 ---
             if (activePlayers.Count == 1)
             {
-                break;
+                Debug.Log("單人模式：放置結束，進入生存挑戰！");
+                break; // 跳出 while，進入下方的生存計時
             }
 
-            // 放置間隔休息
+            // --- 放置間隔休息 ---
             Debug.Log($"放置間隔冷卻 {interPlacementDelay} 秒...");
             OnCountdownTick?.Invoke(0);
             OnPlacementAllowedChange?.Invoke(false);
             yield return new WaitForSeconds(interPlacementDelay);
         }
 
-        // 生存階段
+        // 3️⃣ 生存階段計時 (Survival Phase)
+        // 只有在「還有活人」且「回合仍激活」時才執行
         if (isRoundActive && !CheckIfAllDead())
         {
             float timer = 0f;
@@ -108,7 +108,12 @@ public class RoundManager : MonoBehaviour
 
             while (isRoundActive)
             {
-                if (CheckIfAllDead()) break;
+                // 檢查點 B：生存期間是否全滅？
+                if (CheckIfAllDead())
+                {
+                    Debug.Log("💀 生存階段全員死亡，回合提早結束");
+                    break;
+                }
 
                 if (roundDuration > 0)
                 {
@@ -126,6 +131,8 @@ public class RoundManager : MonoBehaviour
             }
         }
 
+        // 4️⃣ 觸發回合結束
+        // 無論是放置死、生存死、還是時間到，統一在這裡處理
         EndRound();
     }
 
@@ -139,20 +146,20 @@ public class RoundManager : MonoBehaviour
         isPlacementPhase = true;
         Debug.Log($"進入放置階段：{placementTimePerPlayer} 秒");
 
-        // ★★★ 新增：發牌給所有玩家 ★★★
-        DistributeRandomItems();
-
-        // ★★★ 新增：允許所有玩家移動游標 ★★★
-        SetAllPlayersPlacement(true);
-
         OnPlacementAllowedChange?.Invoke(true);
         OnPlacementStart?.Invoke(placementTimePerPlayer);
 
         float pTimer = placementTimePerPlayer;
 
+        // 🔥 修正重點：在放置計時中，每一幀都檢查是否全滅
         while (pTimer > 0 && isPlacementPhase && isRoundActive)
         {
-            if (CheckIfAllDead()) break;
+            // 如果這時候全滅，不需要等到時間跑完，直接中斷
+            if (CheckIfAllDead())
+            {
+                Debug.Log("放置階段偵測到全滅，提早結束倒數");
+                break;
+            }
 
             OnCountdownTick?.Invoke(pTimer);
             pTimer -= Time.deltaTime;
@@ -160,45 +167,8 @@ public class RoundManager : MonoBehaviour
         }
 
         isPlacementPhase = false;
-
-        // ★★★ 新增：時間到，禁止移動 ★★★
-        SetAllPlayersPlacement(false);
-
         OnPlacementEnd?.Invoke();
         OnPlacementAllowedChange?.Invoke(false);
-    }
-
-    // --- 新增的功能函式 ---
-
-    // 隨機發牌
-    private void DistributeRandomItems()
-    {
-        // 抓取所有有 PlayerInventory 的玩家
-        PlayerInventory[] players = FindObjectsOfType<PlayerInventory>();
-
-        if (itemPool.Length == 0)
-        {
-            Debug.LogError("RoundManager 卡池是空的！請在 Inspector 拖入 BuildingData。");
-            return;
-        }
-
-        foreach (var player in players)
-        {
-            // 隨機抽一張
-            int randomIndex = Random.Range(0, itemPool.Length);
-            player.EquipItem(itemPool[randomIndex]);
-        }
-        Debug.Log("已隨機發放物品");
-    }
-
-    // 控制所有玩家能不能放置/移動
-    private void SetAllPlayersPlacement(bool allowed)
-    {
-        PlayerInventory[] players = FindObjectsOfType<PlayerInventory>();
-        foreach (var p in players)
-        {
-            p.SetPlacementState(allowed);
-        }
     }
 
     public void StartRound()
@@ -209,11 +179,17 @@ public class RoundManager : MonoBehaviour
 
     public void EndRound()
     {
+        // 這裡的邏輯是正確的：只有 active 的回合才需要執行結束流程
         if (!isRoundActive) return;
-        isRoundActive = false;
+
+        isRoundActive = false; // 標記回合結束
+
+        Debug.Log($"=== Round {roundNumber} 結束！準備重置 ===");
         OnRoundEnd?.Invoke(roundNumber);
 
+        // 停止目前的循環，準備進入休息後重啟
         if (roundCycleCoroutine != null) StopCoroutine(roundCycleCoroutine);
+
         StartCoroutine(IntermissionSequence());
     }
 
@@ -222,9 +198,18 @@ public class RoundManager : MonoBehaviour
         OnCountdownTick?.Invoke(0);
         Debug.Log($"休息 {intermissionDelay} 秒...");
         yield return new WaitForSeconds(intermissionDelay);
-        StartRound();
+        StartRound(); // 重新開始下一回合
     }
 
-    public void NotifyPlayerDeath(PlayerScore player) { }
-    public void NotifyPlayerReachedGoal(PlayerScore player) { if (isRoundActive) EndRound(); }
+    public void NotifyPlayerDeath(PlayerScore player)
+    {
+        // 這裡雖然目前是空的，但透過上面的 CheckIfAllDead 輪詢已經足夠處理
+        // 如果想要更優化效能，可以在這裡檢查 CheckIfAllDead()
+        // 但目前的寫法已經很穩健
+    }
+
+    public void NotifyPlayerReachedGoal(PlayerScore player)
+    {
+        if (isRoundActive) EndRound();
+    }
 }
