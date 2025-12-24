@@ -528,7 +528,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectFolder:
   - {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
-  - {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
+  - {fileID: 5211147423697017715, guid: 60ba087a0cbb71649bf45205f061ddf0, type: 3}
+  placementTime: 10
+  survivalTime: 20
+  intermissionDelay: 1
 --- !u!4 &322635969
 Transform:
   m_ObjectHideFlags: 0
@@ -1631,7 +1634,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 34fb51c7fef29234591386dce9255cbb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.184308
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 34fb51c7fef29234591386dce9255cbb, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2204,7 +2207,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9b019d812293c5842b96106bbf544620, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1.184308
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9b019d812293c5842b96106bbf544620, type: 3}
       propertyPath: m_LocalPosition.z

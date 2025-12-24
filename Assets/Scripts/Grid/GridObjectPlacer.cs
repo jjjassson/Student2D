@@ -1,41 +1,38 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class GridObjectPlacer : MonoBehaviour
 {
-    [Header("ºô®æ³]©w")]
+    [Header("ç¶²æ ¼è¨­å®š")]
     public float gridSize = 1.0f;
-
-    [Header("ªì©lª¬ºA³]©w")]
-    // ¨Ì·Ó§Aªº­n¨D¡A³o¸Ì¹w³]¬° (0,0,0)
     public Vector3 startPosition = Vector3.zero;
 
-    [Header("²¾°Ê¤â·P³]©w")]
+    [Header("ç§»å‹•æ‰‹æ„Ÿè¨­å®š")]
     public float moveInterval = 0.2f;
     public float inputThreshold = 0.5f;
-
-    [Header("¬¡°Ê½d³ò")]
     public Vector2 xRange = new Vector2(-18, 18);
     public Vector2 zRange = new Vector2(-10, 10);
 
-    // --- ¤º³¡ÅÜ¼Æ ---
-    private GameObject currentPrefab; // ­×§ï¡Gª½±µÀx¦s Prefab
+    // --- å…§éƒ¨è®Šæ•¸ ---
+    private GameObject currentPrefab;
     private GameObject ghostObject;
     private Vector3 currentGridPos;
-
-    private Vector2 currentInput; // ³o¸Ì±N·|±µ¦¬¥k·n±ìªº°T¸¹
+    private Vector2 currentInput;
     private float nextMoveTime = 0f;
-    private bool isPlacementAllowed = false; // ¹w³]Ãö³¬¡Aµ¥ RoundManager µoµP¤~¶}±Ò
+
+    // é›–ç„¶è®Šæ•¸å« Allowedï¼Œä½†æˆ‘å€‘åªç”¨å®ƒä¾†é–‹é—œã€Œæ¸¸æ¨™ç§»å‹•ã€ï¼Œä¸é–è§’è‰²ç§»å‹•
+    private bool isPlacementMode = false;
 
     void Update()
     {
-        if (!isPlacementAllowed) return;
-
-        HandleMovement();
-        UpdateGhostPosition();
+        // åªæœ‰åœ¨æ”¾ç½®æ¨¡å¼ä¸‹æ‰è¨ˆç®—æ¸¸æ¨™ç§»å‹•
+        if (isPlacementMode)
+        {
+            HandleMovement();
+            UpdateGhostPosition();
+        }
     }
 
-    // --- §Aªº®Ö¤ß²¾°ÊÅŞ¿è («O«ù¤£ÅÜ) ---
     private void HandleMovement()
     {
         if (Time.time < nextMoveTime || currentInput.magnitude < inputThreshold)
@@ -45,16 +42,12 @@ public class GridObjectPlacer : MonoBehaviour
         }
 
         Vector3 moveDir = Vector3.zero;
-
-        // §PÂ_²¾°Ê¤è¦V
         if (Mathf.Abs(currentInput.x) > Mathf.Abs(currentInput.y))
             moveDir.x = Mathf.Sign(currentInput.x);
         else
             moveDir.z = Mathf.Sign(currentInput.y);
 
         currentGridPos += moveDir * gridSize;
-
-        // ­­¨î½d³ò & ±j¨î Y=0
         currentGridPos.x = Mathf.Clamp(currentGridPos.x, xRange.x, xRange.y);
         currentGridPos.z = Mathf.Clamp(currentGridPos.z, zRange.x, zRange.y);
         currentGridPos.y = 0;
@@ -70,43 +63,51 @@ public class GridObjectPlacer : MonoBehaviour
         }
     }
 
-    // --- ³Q RoundManager ©I¥sªº¨ç¦¡ ---
+    // --- è¢« Manager å‘¼å«ï¼šç™¼ç‰Œ ---
     public void AssignNewObject(GameObject prefab)
     {
         currentPrefab = prefab;
-
-        // 1. ²M²zÂÂªº
         if (ghostObject != null) Destroy(ghostObject);
 
-        // 2. ­«¸m¦ì¸m¨ì§A«ü©wªº StartPosition (0,0,0)
-        // ¨Ã¶i¦æºô®æ¹ï»ô­pºâ
+        // é‡ç½®æ¸¸æ¨™åˆ°åˆå§‹é» (0,0,0)
         float snappedX = Mathf.Round(startPosition.x / gridSize) * gridSize;
         float snappedZ = Mathf.Round(startPosition.z / gridSize) * gridSize;
         currentGridPos = new Vector3(snappedX, 0, snappedZ);
 
-        // 3. ¥Í¦¨¹wÄıª«¥ó (Ghost)
         if (currentPrefab != null)
         {
             ghostObject = Instantiate(currentPrefab, currentGridPos, Quaternion.identity);
-            // ²¾°£¸I¼²Åé¥u¯dµøÄ±
             foreach (var c in ghostObject.GetComponentsInChildren<Collider>()) c.enabled = false;
         }
 
-        isPlacementAllowed = true;
+        // æ³¨æ„ï¼šé€™è£¡ä¸ä¸»å‹•é–‹ isPlacementModeï¼Œç”± Manager çµ±ä¸€æ§åˆ¶
     }
 
-    // --- Input System ¸j©w°Ï ---
+    // --- è¢« Manager å‘¼å«ï¼šé–‹é—œæ”¾ç½®æ¨¡å¼ ---
+    public void SetPlacementMode(bool active)
+    {
+        isPlacementMode = active;
 
-    // ½Ğ¦b PlayerInput ªº Events ¸Ì¸j©w "RightStick" ¨ì³o¸Ì
+        if (!active)
+        {
+            // ğŸ”¥ é‡é»ä¿®æ”¹ï¼šç•¶æ™‚é–“åˆ°è¢«é—œé–‰æ™‚ï¼Œå¦‚æœé¬¼å½±é‚„åœ¨ï¼Œå°±å¼·åˆ¶æ”¾ç½®ï¼
+            if (ghostObject != null)
+            {
+                PlaceObject();
+            }
+        }
+    }
+
+    // --- Input System ç¶å®š ---
     public void OnMoveCursor(InputAction.CallbackContext context)
     {
+        // é€™è£¡åªè®€å–æ•¸å€¼ï¼Œå®Œå…¨ä¸å¹²æ“¾ä½ çš„è§’è‰²ç§»å‹•è…³æœ¬ (CharacterController)
         currentInput = context.ReadValue<Vector2>();
     }
 
-    // ½Ğ¦b PlayerInput ªº Events ¸Ì¸j©w "RightStickPress" ¨ì³o¸Ì
     public void OnPlaceObject(InputAction.CallbackContext context)
     {
-        if (context.performed && isPlacementAllowed)
+        if (context.performed && isPlacementMode)
         {
             PlaceObject();
         }
@@ -114,24 +115,16 @@ public class GridObjectPlacer : MonoBehaviour
 
     private void PlaceObject()
     {
-        if (currentPrefab == null) return;
+        if (currentPrefab == null || ghostObject == null) return;
 
+        // ç”Ÿæˆå¯¦é«”
         Instantiate(currentPrefab, currentGridPos, Quaternion.identity);
-        Debug.Log($"©ñ¸m©ó®æ¤l: {currentGridPos}");
 
-        // ©ñ¸m«á¬İ§A­n¤£­nÃö³¬¥\¯à¡A©Î¾P·´ Ghost
+        // éŠ·æ¯€é¬¼å½±
         Destroy(ghostObject);
-        isPlacementAllowed = false;
-    }
+        ghostObject = null; // ç¢ºä¿ä¸æœƒè¢«é‡è¤‡æ”¾ç½®
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Vector3 center = new Vector3((xRange.x + xRange.y) / 2, 0, (zRange.x + zRange.y) / 2);
-        Vector3 size = new Vector3(xRange.y - xRange.x, 0.1f, zRange.y - zRange.x);
-        Gizmos.DrawWireCube(center, size);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(startPosition, 0.3f);
+        // é—œé–‰æ”¾ç½®æ¨¡å¼ (é€™å›åˆå®Œæˆäº†)
+        isPlacementMode = false;
     }
 }

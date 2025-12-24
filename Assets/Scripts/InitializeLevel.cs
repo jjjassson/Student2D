@@ -33,6 +33,7 @@ public class InitializeLevel : MonoBehaviour
             {
                 targetSpawnPoint = player1Spawn;
             }
+
             else if (prefab.GetComponent<Player2>() != null)
             {
                 targetSpawnPoint = player2Spawn;
