@@ -481,7 +481,7 @@ MonoBehaviour:
   - mainPrefab: {fileID: 5211147423697017715, guid: 60ba087a0cbb71649bf45205f061ddf0, type: 3}
     secondaryPrefab: {fileID: 5211147423697017715, guid: 778a926bf273268448db1e85e3a91324, type: 3}
     uiSprite: {fileID: 21300000, guid: 53a67fee930a78646a0bbb5a4895aa81, type: 3}
-  - mainPrefab: {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
+  - mainPrefab: {fileID: 7867894473069641729, guid: 38035bd16acba1944a87c5984271e116, type: 3}
     secondaryPrefab: {fileID: 1352439419651427092, guid: 687b058df5334834d9619903dfa9c47b, type: 3}
     uiSprite: {fileID: 21300000, guid: dbe3623d9f8c63949856b858d6f416f6, type: 3}
   - mainPrefab: {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
