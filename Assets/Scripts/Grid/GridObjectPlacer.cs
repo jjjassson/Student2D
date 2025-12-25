@@ -14,18 +14,20 @@ public class GridObjectPlacer : MonoBehaviour
     public Vector2 zRange = new Vector2(-10, 10);
 
     // --- 內部變數 ---
-    private GameObject currentPrefab;
-    private GameObject ghostObject;
-    private Vector3 currentGridPos;
+    private GameObject currentMainPrefab;
+    private GameObject currentSecondaryPrefab; // 新增：副物件 Prefab
+
+    private GameObject mainGhostObject;      // 修改：主鬼影
+    private GameObject secondaryGhostObject; // 新增：副鬼影
+
+    private Vector3 currentGridPos; // 這是主物件的座標
     private Vector2 currentInput;
     private float nextMoveTime = 0f;
 
-    // 雖然變數叫 Allowed，但我們只用它來開關「游標移動」，不鎖角色移動
     private bool isPlacementMode = false;
 
     void Update()
     {
-        // 只有在放置模式下才計算游標移動
         if (isPlacementMode)
         {
             HandleMovement();
@@ -55,32 +57,59 @@ public class GridObjectPlacer : MonoBehaviour
         nextMoveTime = Time.time + moveInterval;
     }
 
+    // --- 核心邏輯：更新鬼影位置 ---
     private void UpdateGhostPosition()
     {
-        if (ghostObject != null)
+        // 1. 更新主物件 (跟隨游標)
+        if (mainGhostObject != null)
         {
-            ghostObject.transform.position = currentGridPos;
+            mainGhostObject.transform.position = currentGridPos;
+        }
+
+        // 2. 更新副物件 (X 跟隨主物件, Z 強制歸零)
+        if (secondaryGhostObject != null)
+        {
+            // 🔥 這裡實作你的需求：Z 都在 0 位置
+            Vector3 secondaryPos = new Vector3(currentGridPos.x, 0, 0);
+            secondaryGhostObject.transform.position = secondaryPos;
         }
     }
 
-    // --- 被 Manager 呼叫：發牌 ---
-    public void AssignNewObject(GameObject prefab)
+    // --- 被 Manager 呼叫：發牌 (接收兩個物件) ---
+    public void AssignNewObjectPair(GameObject main, GameObject secondary)
     {
-        currentPrefab = prefab;
-        if (ghostObject != null) Destroy(ghostObject);
+        currentMainPrefab = main;
+        currentSecondaryPrefab = secondary;
 
-        // 重置游標到初始點 (0,0,0)
+        // 清除舊鬼影
+        if (mainGhostObject != null) Destroy(mainGhostObject);
+        if (secondaryGhostObject != null) Destroy(secondaryGhostObject);
+
+        // 重置游標到初始點
         float snappedX = Mathf.Round(startPosition.x / gridSize) * gridSize;
         float snappedZ = Mathf.Round(startPosition.z / gridSize) * gridSize;
         currentGridPos = new Vector3(snappedX, 0, snappedZ);
 
-        if (currentPrefab != null)
+        // 生成主鬼影
+        if (currentMainPrefab != null)
         {
-            ghostObject = Instantiate(currentPrefab, currentGridPos, Quaternion.identity);
-            foreach (var c in ghostObject.GetComponentsInChildren<Collider>()) c.enabled = false;
+            mainGhostObject = Instantiate(currentMainPrefab, currentGridPos, Quaternion.identity);
+            DisableColliders(mainGhostObject);
         }
 
-        // 注意：這裡不主動開 isPlacementMode，由 Manager 統一控制
+        // 生成副鬼影 (如果有的話)
+        if (currentSecondaryPrefab != null)
+        {
+            Vector3 secondaryPos = new Vector3(currentGridPos.x, 0, 0); // 初始位置也要 Z=0
+            secondaryGhostObject = Instantiate(currentSecondaryPrefab, secondaryPos, Quaternion.identity);
+            DisableColliders(secondaryGhostObject);
+        }
+    }
+
+    // 輔助：關閉鬼影的 Collider
+    private void DisableColliders(GameObject obj)
+    {
+        foreach (var c in obj.GetComponentsInChildren<Collider>()) c.enabled = false;
     }
 
     // --- 被 Manager 呼叫：開關放置模式 ---
@@ -90,18 +119,16 @@ public class GridObjectPlacer : MonoBehaviour
 
         if (!active)
         {
-            // 🔥 重點修改：當時間到被關閉時，如果鬼影還在，就強制放置！
-            if (ghostObject != null)
+            // 時間到，強制放置
+            if (mainGhostObject != null)
             {
                 PlaceObject();
             }
         }
     }
 
-    // --- Input System 綁定 ---
     public void OnMoveCursor(InputAction.CallbackContext context)
     {
-        // 這裡只讀取數值，完全不干擾你的角色移動腳本 (CharacterController)
         currentInput = context.ReadValue<Vector2>();
     }
 
@@ -115,16 +142,24 @@ public class GridObjectPlacer : MonoBehaviour
 
     private void PlaceObject()
     {
-        if (currentPrefab == null || ghostObject == null) return;
+        // 至少要有主物件才能放
+        if (currentMainPrefab == null || mainGhostObject == null) return;
 
-        // 生成實體
-        Instantiate(currentPrefab, currentGridPos, Quaternion.identity);
+        // 1. 生成主實體
+        Instantiate(currentMainPrefab, currentGridPos, Quaternion.identity);
 
-        // 銷毀鬼影
-        Destroy(ghostObject);
-        ghostObject = null; // 確保不會被重複放置
+        // 2. 生成副實體 (如果有)
+        if (currentSecondaryPrefab != null)
+        {
+            // 🔥 確認放置時 Z 也是 0
+            Vector3 placePos = new Vector3(currentGridPos.x, 0, 0);
+            Instantiate(currentSecondaryPrefab, placePos, Quaternion.identity);
+        }
 
-        // 關閉放置模式 (這回合完成了)
+        // 3. 銷毀鬼影
+        if (mainGhostObject != null) { Destroy(mainGhostObject); mainGhostObject = null; }
+        if (secondaryGhostObject != null) { Destroy(secondaryGhostObject); secondaryGhostObject = null; }
+
         isPlacementMode = false;
     }
 }
