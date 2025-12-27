@@ -493,8 +493,8 @@ MonoBehaviour:
   - mainPrefab: {fileID: 1517892091243198008, guid: ead64bc1536c61b4993e0a70e644e595, type: 3}
     secondaryPrefab: {fileID: 1517892091243198008, guid: 4b8c3793f40de4649bc6121680860e9e, type: 3}
     uiSprite: {fileID: 21300000, guid: 7e51628c340e6f8479c65b393b418b4a, type: 3}
-  - mainPrefab: {fileID: 6087040520651959449, guid: edc5526268f66f84bb6a9d262948e51c, type: 3}
-    secondaryPrefab: {fileID: 1517892091243198008, guid: 4b8c3793f40de4649bc6121680860e9e, type: 3}
+  - mainPrefab: {fileID: 706543145372646846, guid: c74dda073318b3c42b8493e6f8cf8e37, type: 3}
+    secondaryPrefab: {fileID: 706543145372646846, guid: a49e605637b430242b02387c03c24aff, type: 3}
     uiSprite: {fileID: 21300000, guid: 7e51628c340e6f8479c65b393b418b4a, type: 3}
   content: {fileID: 316745537}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
@@ -548,6 +548,10 @@ MonoBehaviour:
   placementTime: 10
   survivalTime: 20
   intermissionDelay: 1
+  uiFontSize: 60
+  placementColor: {r: 0, g: 1, b: 0, a: 1}
+  survivalColor: {r: 1, g: 0, b: 0, a: 1}
+  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &322635969
 Transform:
   m_ObjectHideFlags: 0
