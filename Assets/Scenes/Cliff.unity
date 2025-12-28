@@ -1497,7 +1497,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &761600127
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2764,10 +2764,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39a95ea443dda804bbd89f0e4dea7063, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  replayPanel: {fileID: 0}
-  replayDisplay: {fileID: 0}
+  replayPanel: {fileID: 761600126}
+  replayDisplay: {fileID: 547666473}
   replayCamera: {fileID: 34052058}
-  autoCloseDelay: 3
+  restartDelay: 2
 --- !u!4 &1475726023
 Transform:
   m_ObjectHideFlags: 0

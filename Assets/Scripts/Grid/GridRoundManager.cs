@@ -73,6 +73,22 @@ public class GridRoundManager : MonoBehaviour
         StartCoroutine(StartGameRoutine());
     }
 
+    // 🔥 新增：強制停止遊戲循環的方法
+    // 這會在 GoalPoint 觸發時被呼叫，防止進入下一回合
+    public void StopGameLoop()
+    {
+        Debug.Log("遊戲結束，停止所有計時與循環。");
+
+        // 殺死 StartGameRoutine 和 RoundCycleSequence
+        StopAllCoroutines();
+
+        IsRoundActive = false;
+
+        // 更新 UI 狀態讓玩家知道結束了
+        SetPhaseStatus("遊戲結束 - 精彩回放", Color.cyan);
+        uiTimeLeft = 0;
+    }
+
     IEnumerator StartGameRoutine()
     {
         yield return new WaitForSeconds(1.0f);
@@ -111,7 +127,7 @@ public class GridRoundManager : MonoBehaviour
             if (p.score != null) p.score.Revive();
             ResetPlayerPosition(p);
 
-            // 啟動玩家錄影
+            // 啟動玩家錄影 (維持只錄玩家)
             ReplayRecorder recorder = p.placer.GetComponent<ReplayRecorder>();
             if (recorder != null)
             {
@@ -119,7 +135,7 @@ public class GridRoundManager : MonoBehaviour
             }
         }
 
-        // 🔥 啟動鏡頭錄影 (讓重播時畫面一模一樣)
+        // 啟動鏡頭錄影
         if (mainCamRecorder != null)
         {
             mainCamRecorder.StartRecording();
@@ -222,7 +238,6 @@ public class GridRoundManager : MonoBehaviour
     {
         if (players.Count == 0) return;
 
-        // 1. 下方顯示：階段狀態與倒數
         GUIStyle statusStyle = new GUIStyle(GUI.skin.label);
         statusStyle.fontSize = uiFontSize;
         statusStyle.alignment = TextAnchor.MiddleCenter;
@@ -240,8 +255,6 @@ public class GridRoundManager : MonoBehaviour
         }
         GUI.Label(statusRect, displayText, statusStyle);
 
-
-        // 2. 上方顯示：Round 數字
         GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
         roundStyle.fontSize = uiRoundFontSize;
         roundStyle.alignment = TextAnchor.UpperCenter;

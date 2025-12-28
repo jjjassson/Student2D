@@ -12,8 +12,8 @@ public class ReplayManager : MonoBehaviour
     public RawImage replayDisplay;
 
     [Header("重播攝影機")]
-    public Camera replayCamera; // 這是專門負責重播的那台攝影機
-    public float autoCloseDelay = 4.0f;
+    public Camera replayCamera;
+    public float restartDelay = 2.0f; // 重播播完後，停頓幾秒再重播
 
     // 內部資料結構
     private class GhostRunner
@@ -30,11 +30,11 @@ public class ReplayManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
-        if (replayPanel) replayPanel.SetActive(false);
-        if (replayCamera) replayCamera.gameObject.SetActive(false);
+        // 🔥 修改 1：移除了所有 SetActive(false) 的程式碼
+        // 現在遊戲開始時，Panel 的開關狀態完全由你在 Unity Editor 裡決定
+        // 如果你希望一開始是關的，請在 Editor 裡把勾勾取消
     }
 
-    // 這裡我們不再需要 winnerRecorder，因為鏡頭路徑已經固定了
     public void StartGlobalReplay()
     {
         if (replayCoroutine != null) StopCoroutine(replayCoroutine);
@@ -43,10 +43,8 @@ public class ReplayManager : MonoBehaviour
 
     IEnumerator ExactReplayRoutine()
     {
-        // 1. 取得所有玩家的錄影資料
+        // 1. 取得資料
         ReplayRecorder[] allRecorders = FindObjectsOfType<ReplayRecorder>();
-
-        // 🔥 2. 取得主攝影機的錄影資料
         CameraRecorder mainCamRecorder = FindObjectOfType<CameraRecorder>();
         List<CameraRecorder.CameraFrame> camFrames = null;
 
@@ -56,21 +54,20 @@ public class ReplayManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("找不到 CameraRecorder！無法重現運鏡。");
+            Debug.LogError("找不到 CameraRecorder！");
             yield break;
         }
 
-        // 3. 準備 UI 與重播攝影機
+        // 🔥 修改 2：只有在到達終點觸發重播時，才強制開啟 Panel
         if (replayPanel) replayPanel.SetActive(true);
         if (replayCamera) replayCamera.gameObject.SetActive(true);
 
-        // 清除舊的分身
+        // 清除舊分身
         foreach (var g in activeGhosts) Destroy(g);
         activeGhosts.Clear();
 
-        // 4. 生成所有分身
+        // 2. 生成分身
         List<GhostRunner> runners = new List<GhostRunner>();
-
         foreach (var recorder in allRecorders)
         {
             List<ReplayRecorder.ReplayFrame> data = recorder.GetReplayData();
@@ -79,51 +76,48 @@ public class ReplayManager : MonoBehaviour
 
             GameObject ghost = Instantiate(recorder.myGhostPrefab, data[0].position, data[0].rotation);
             activeGhosts.Add(ghost);
-
             runners.Add(new GhostRunner { ghostObject = ghost, frames = data });
         }
 
-        Debug.Log($"開始重播：鏡頭影格數 {camFrames.Count}");
+        Debug.Log("開始無限循環重播...");
 
-        // 5. 開始同步播放 (以鏡頭的影格數為準)
-        int currentFrameIndex = 0;
-        int maxFrames = camFrames.Count;
-
-        while (currentFrameIndex < maxFrames)
+        // 🔥 修改 3：無限迴圈 (While True)
+        // 這會讓重播一直重複播放，永遠不會進入「關閉 Panel」的階段
+        while (true)
         {
-            // A. 更新每一隻鬼的位置
-            foreach (var runner in runners)
+            int currentFrameIndex = 0;
+            int maxFrames = camFrames.Count;
+
+            // 播放一次完整的錄影
+            while (currentFrameIndex < maxFrames)
             {
-                if (currentFrameIndex < runner.frames.Count)
+                // 更新鬼的位置
+                foreach (var runner in runners)
                 {
-                    runner.ghostObject.transform.position = runner.frames[currentFrameIndex].position;
-                    runner.ghostObject.transform.rotation = runner.frames[currentFrameIndex].rotation;
+                    if (currentFrameIndex < runner.frames.Count)
+                    {
+                        runner.ghostObject.transform.position = runner.frames[currentFrameIndex].position;
+                        runner.ghostObject.transform.rotation = runner.frames[currentFrameIndex].rotation;
+                    }
                 }
+
+                // 更新攝影機位置
+                if (replayCamera != null)
+                {
+                    replayCamera.transform.position = camFrames[currentFrameIndex].position;
+                    replayCamera.transform.rotation = camFrames[currentFrameIndex].rotation;
+                    replayCamera.fieldOfView = camFrames[currentFrameIndex].fieldOfView;
+                }
+
+                currentFrameIndex++;
+                yield return new WaitForFixedUpdate();
             }
 
-            // 🔥 B. 更新重播攝影機的位置 (完全照抄主攝影機剛剛的動作)
-            if (replayCamera != null)
-            {
-                replayCamera.transform.position = camFrames[currentFrameIndex].position;
-                replayCamera.transform.rotation = camFrames[currentFrameIndex].rotation;
-                replayCamera.fieldOfView = camFrames[currentFrameIndex].fieldOfView;
-            }
+            // 播完一次後，等待幾秒
+            yield return new WaitForSeconds(restartDelay);
 
-            currentFrameIndex++;
-            yield return new WaitForFixedUpdate();
+            // 迴圈會回到開頭，currentFrameIndex 歸零，重新再播一次
+            // 這樣 Panel 就會一直開著，直到你手動關閉遊戲
         }
-
-        Debug.Log("重播結束");
-        yield return new WaitForSeconds(autoCloseDelay);
-        CloseReplay();
-    }
-
-    public void CloseReplay()
-    {
-        if (replayPanel) replayPanel.SetActive(false);
-        if (replayCamera) replayCamera.gameObject.SetActive(false);
-        foreach (var g in activeGhosts) if (g != null) Destroy(g);
-        activeGhosts.Clear();
-        replayCoroutine = null;
     }
 }
