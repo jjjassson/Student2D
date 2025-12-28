@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4910276222442573437}
   - component: {fileID: 4453877786576868511}
   - component: {fileID: 2436664888891313532}
+  - component: {fileID: 4419970396775765614}
   m_Layer: 0
   m_Name: drunk
   m_TagString: Player
@@ -355,6 +356,19 @@ MonoBehaviour:
   inputThreshold: 0.5
   xRange: {x: -18, y: 18}
   zRange: {x: -15, y: -3}
+--- !u!114 &4419970396775765614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a7446dc77ac9104e9e0a2838ee0e4af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myGhostPrefab: {fileID: 7494884942635635710, guid: 211e20f71e76cb44ca751660e6fa26db, type: 3}
 --- !u!1001 &4299423997242926200
 PrefabInstance:
   m_ObjectHideFlags: 0

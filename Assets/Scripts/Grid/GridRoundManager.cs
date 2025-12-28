@@ -25,11 +25,15 @@ public class GridRoundManager : MonoBehaviour
 
     [Header("UI 設定")]
     public int uiFontSize = 60;
-    public int uiRoundFontSize = 80;    // 🔥 新增：回合文字的大小
-    public Color roundTextColor = Color.white; // 🔥 新增：回合文字的顏色
+    public int uiRoundFontSize = 80;    // 回合文字的大小
+    public Color roundTextColor = Color.white; // 回合文字的顏色
     public Color placementColor = Color.green;
     public Color survivalColor = Color.red;
     public Color defaultColor = Color.yellow;
+
+    [Header("攝影機錄影")]
+    [Tooltip("請將掛有 CameraRecorder 的主攝影機拖進來")]
+    public CameraRecorder mainCamRecorder;
 
     // --- 內部資料結構 ---
     private class PlayerData
@@ -84,6 +88,12 @@ public class GridRoundManager : MonoBehaviour
             players.Add(data);
         }
 
+        // 自動尋找主攝影機錄影機 (防止忘記拉)
+        if (mainCamRecorder == null)
+        {
+            mainCamRecorder = FindObjectOfType<CameraRecorder>();
+        }
+
         if (players.Count > 0) StartCoroutine(RoundCycleSequence());
         else Debug.LogError("錯誤：找不到玩家！");
     }
@@ -95,13 +105,31 @@ public class GridRoundManager : MonoBehaviour
         Debug.Log($"=== Round {roundNumber} 開始 ===");
         OnRoundStart?.Invoke(roundNumber);
 
-        // 1️⃣ 復活與發牌
+        // 1️⃣ 復活、重置位置與 **開始錄影**
         foreach (var p in players)
         {
             if (p.score != null) p.score.Revive();
             ResetPlayerPosition(p);
+
+            // 啟動玩家錄影
+            ReplayRecorder recorder = p.placer.GetComponent<ReplayRecorder>();
+            if (recorder != null)
+            {
+                recorder.StartNewRecording();
+            }
         }
 
+        // 🔥 啟動鏡頭錄影 (讓重播時畫面一模一樣)
+        if (mainCamRecorder != null)
+        {
+            mainCamRecorder.StartRecording();
+        }
+        else
+        {
+            Debug.LogWarning("注意：沒有設定 CameraRecorder，重播時鏡頭不會動！");
+        }
+
+        // 發牌邏輯
         if (itemFolder.Count > 0)
         {
             GridItemPair selectedPair = itemFolder[Random.Range(0, itemFolder.Count)];
@@ -189,15 +217,12 @@ public class GridRoundManager : MonoBehaviour
         return true;
     }
 
-    // --- 🔥 修改後的 OnGUI 顯示邏輯 ---
+    // --- OnGUI 顯示邏輯 ---
     void OnGUI()
     {
-        // 如果還沒開始或找不到玩家，就不顯示
         if (players.Count == 0) return;
 
-        // ----------------------------------------------------
-        // 1. 顯示【下方】的階段狀態與倒數 (原有的)
-        // ----------------------------------------------------
+        // 1. 下方顯示：階段狀態與倒數
         GUIStyle statusStyle = new GUIStyle(GUI.skin.label);
         statusStyle.fontSize = uiFontSize;
         statusStyle.alignment = TextAnchor.MiddleCenter;
@@ -216,19 +241,14 @@ public class GridRoundManager : MonoBehaviour
         GUI.Label(statusRect, displayText, statusStyle);
 
 
-        // ----------------------------------------------------
-        // 2. 🔥 新增：顯示【上方】的 Round 數字
-        // ----------------------------------------------------
+        // 2. 上方顯示：Round 數字
         GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
-        roundStyle.fontSize = uiRoundFontSize;  // 使用獨立的字體大小
-        roundStyle.alignment = TextAnchor.UpperCenter; // 設定為上方置中
+        roundStyle.fontSize = uiRoundFontSize;
+        roundStyle.alignment = TextAnchor.UpperCenter;
         roundStyle.fontStyle = FontStyle.Bold;
-        roundStyle.normal.textColor = roundTextColor; // 設定顏色
+        roundStyle.normal.textColor = roundTextColor;
 
-        // 顯示在螢幕上方，距離頂部 30 pixel
         Rect roundRect = new Rect(0, 30, Screen.width, 150);
-
-        // 顯示文字：Round X
         GUI.Label(roundRect, $"Round {roundNumber}", roundStyle);
     }
 }
