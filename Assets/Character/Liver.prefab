@@ -350,11 +350,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 1
-  startPosition: {x: 0, y: 0, z: 0}
+  startPosition: {x: 0, y: 0, z: -5}
   moveInterval: 0.2
   inputThreshold: 0.5
   xRange: {x: -18, y: 18}
-  zRange: {x: -3, y: 10}
+  zRange: {x: -15, y: -3}
 --- !u!120 &5692252024087338914
 LineRenderer:
   serializedVersion: 2

@@ -155,11 +155,35 @@ MonoBehaviour:
     m_ActionId: e65b5dd5-9a38-4bfe-b5c6-3d4cdedd6cca
     m_ActionName: GamePlay/Jump[/Keyboard/space]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2808868947928543228}
+        m_TargetAssemblyTypeName: GridObjectPlacer, Assembly-CSharp
+        m_MethodName: OnPlaceObject
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 184bcd99-76ed-407b-96b7-0491586a4597
     m_ActionName: GamePlay/PlaceObject
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2808868947928543228}
+        m_TargetAssemblyTypeName: GridObjectPlacer, Assembly-CSharp
+        m_MethodName: OnMoveCursor
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 1c15779c-2ead-43af-ad1b-1d139581613d
     m_ActionName: GamePlay/MoveCursor
   m_NeverAutoSwitchControlSchemes: 0
@@ -326,11 +350,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 1
-  startPosition: {x: 0, y: 0, z: 0}
+  startPosition: {x: 0, y: 0, z: -5}
   moveInterval: 0.2
   inputThreshold: 0.5
   xRange: {x: -18, y: 18}
-  zRange: {x: -3, y: 10}
+  zRange: {x: -15, y: -3}
 --- !u!54 &7325852913734568443
 Rigidbody:
   m_ObjectHideFlags: 0
