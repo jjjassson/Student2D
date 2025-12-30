@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4367003892734383533}
   - component: {fileID: 2052742077915230996}
   - component: {fileID: 2689930771702510549}
+  - component: {fileID: 2793279027742026058}
   - component: {fileID: 5090386111462536045}
   - component: {fileID: 2528421839309393977}
   - component: {fileID: 6473054374949799907}
@@ -122,8 +123,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2528421839309393977}
-        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
+      - m_Target: {fileID: 2793279027742026058}
+        m_TargetAssemblyTypeName: Love2, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -138,8 +139,8 @@ MonoBehaviour:
     m_ActionName: GamePlay/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2528421839309393977}
-        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
+      - m_Target: {fileID: 2793279027742026058}
+        m_TargetAssemblyTypeName: Love2, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -188,6 +189,24 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2793279027742026058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cadfa82b1371ca640b8be85c3144b1e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 4
+  jumpForce: 1
+  gravityValue: -9.81
+  isSlowed: 0
+  isJumpReduced: 0
+  isInverted: 0
 --- !u!114 &5090386111462536045
 MonoBehaviour:
   m_ObjectHideFlags: 0
