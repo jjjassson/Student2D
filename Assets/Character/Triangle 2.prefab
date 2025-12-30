@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4910276222442573437}
   - component: {fileID: 2029966966954495403}
   - component: {fileID: -3692550276557612392}
+  - component: {fileID: 6360194700050009758}
   m_Layer: 0
   m_Name: Triangle 2
   m_TagString: Player
@@ -355,6 +356,19 @@ MonoBehaviour:
   inputThreshold: 0.5
   xRange: {x: -18, y: 18}
   zRange: {x: -15, y: -3}
+--- !u!114 &6360194700050009758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a7446dc77ac9104e9e0a2838ee0e4af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myGhostPrefab: {fileID: 6906998413789825852, guid: 0e9a16383dd589e4e93c7966d986324b, type: 3}
 --- !u!1001 &630916948280818568
 PrefabInstance:
   m_ObjectHideFlags: 0

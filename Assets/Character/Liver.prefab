@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: -6382191396721401047}
   - component: {fileID: 7612618359096112877}
   - component: {fileID: -7641591645548881791}
+  - component: {fileID: 2008257711188611105}
   - component: {fileID: 5692252024087338914}
   m_Layer: 0
   m_Name: Liver
@@ -355,6 +356,19 @@ MonoBehaviour:
   inputThreshold: 0.5
   xRange: {x: -18, y: 18}
   zRange: {x: -15, y: -3}
+--- !u!114 &2008257711188611105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906998413789825852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a7446dc77ac9104e9e0a2838ee0e4af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myGhostPrefab: {fileID: 6906998413789825852, guid: 8e07952380b8d024882d5bee8d6b339c, type: 3}
 --- !u!120 &5692252024087338914
 LineRenderer:
   serializedVersion: 2
