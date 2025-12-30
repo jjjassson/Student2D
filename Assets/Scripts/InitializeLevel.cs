@@ -25,23 +25,37 @@ public class InitializeLevel : MonoBehaviour
             if (prefab == null) continue;
 
             // ====================================================
-            // 1. 保留你原本的生成點判斷邏輯
+            // 1. 生成點判斷邏輯 (已擴充所有角色)
             // ====================================================
             Transform targetSpawnPoint;
 
-            if (prefab.GetComponent<Player1>() != null)
+            // 檢查是否為 Player 1 系列的角色
+            if (prefab.GetComponent<Player1>() != null ||
+                prefab.GetComponent<Drunk1>() != null ||
+                prefab.GetComponent<Liver1>() != null ||
+                prefab.GetComponent<Love1>() != null ||
+                prefab.GetComponent<Lung1>() != null ||
+                prefab.GetComponent<Student1>() != null ||
+                prefab.GetComponent<Triangle1>() != null)
             {
                 targetSpawnPoint = player1Spawn;
             }
-
-            else if (prefab.GetComponent<Player2>() != null)
+            // 檢查是否為 Player 2 系列的角色
+            else if (prefab.GetComponent<Player2>() != null ||
+                     prefab.GetComponent<Drunk2>() != null ||
+                     prefab.GetComponent<Liver2>() != null ||
+                     prefab.GetComponent<Love2>() != null ||
+                     prefab.GetComponent<Lung2>() != null ||
+                     prefab.GetComponent<Student2>() != null ||
+                     prefab.GetComponent<Triangle2>() != null)
             {
                 targetSpawnPoint = player2Spawn;
             }
             else
             {
-                // 預設 fallback
+                // 預設 fallback (如果都不是，預設給 P1)
                 targetSpawnPoint = player1Spawn;
+                Debug.LogWarning($"⚠️ 無法識別角色類型: {prefab.name}，將預設生成在 Player1 位置");
             }
 
             // ====================================================
