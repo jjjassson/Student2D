@@ -7,8 +7,8 @@ using System.Collections.Generic;
 public class GridItemPair
 {
     public string itemName = "New Item";
-    public GameObject mainPrefab;
-    public GameObject secondaryPrefab;
+    public GameObject mainPrefab;      // 主物件
+    public GameObject secondaryPrefab; // 副物件 (Z軸固定)
 }
 
 public class GridRoundManager : MonoBehaviour
@@ -32,7 +32,7 @@ public class GridRoundManager : MonoBehaviour
     public Color defaultColor = Color.yellow;
 
     [Header("攝影機錄影")]
-    [Tooltip("請將掛有 CameraRecorder 的主攝影機拖進來")]
+    [Tooltip("請將掛有 CameraRecorder 的主攝影機拖進來，若無會自動抓取")]
     public CameraRecorder mainCamRecorder;
 
     // --- 內部資料結構 ---
@@ -49,7 +49,7 @@ public class GridRoundManager : MonoBehaviour
     // --- 狀態變數 ---
     private int roundNumber = 0;
     public bool IsRoundActive { get; private set; } = false;
-    private bool isGameOver = false; // 🔥 新增：判斷遊戲是否已結束 (進入回放)
+    private bool isGameOver = false; // 判斷遊戲是否已結束 (進入回放)
 
     // UI 顯示用的變數
     private string uiCurrentPhaseText = ""; // 目前階段文字
@@ -85,7 +85,7 @@ public class GridRoundManager : MonoBehaviour
         StopAllCoroutines();
 
         IsRoundActive = false;
-        isGameOver = true; // 🔥 設定為 True，用來隱藏 Round 文字
+        isGameOver = true; // 設定為 True，用來隱藏 Round 文字
 
         // 更新 UI 狀態讓玩家知道結束了
         SetPhaseStatus("遊戲結束 - 精彩回放", Color.cyan);
@@ -148,13 +148,17 @@ public class GridRoundManager : MonoBehaviour
             Debug.LogWarning("注意：沒有設定 CameraRecorder，重播時鏡頭不會動！");
         }
 
-        // 發牌邏輯
+        // 🔥 發牌邏輯 (已修改：每人隨機獨立抽一張)
         if (itemFolder.Count > 0)
         {
-            GridItemPair selectedPair = itemFolder[Random.Range(0, itemFolder.Count)];
             foreach (var p in players)
             {
-                p.placer.AssignNewObjectPair(selectedPair.mainPrefab, selectedPair.secondaryPrefab);
+                // 1. 針對「這位玩家」隨機抽一組
+                // (因為是在迴圈內抽，所以每個人可能會抽到不一樣的，也可能剛好抽到一樣的)
+                GridItemPair randomPair = itemFolder[Random.Range(0, itemFolder.Count)];
+
+                // 2. 將抽到的這組給這位玩家
+                p.placer.AssignNewObjectPair(randomPair.mainPrefab, randomPair.secondaryPrefab);
             }
         }
 
@@ -259,7 +263,7 @@ public class GridRoundManager : MonoBehaviour
         }
         GUI.Label(statusRect, displayText, statusStyle);
 
-        // 2. 顯示 Round 幾 (🔥 只有在遊戲尚未結束時才顯示)
+        // 2. 顯示 Round 幾 (只有在遊戲尚未結束時才顯示)
         if (!isGameOver)
         {
             GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
