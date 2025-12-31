@@ -49,6 +49,7 @@ public class GridRoundManager : MonoBehaviour
     // --- 狀態變數 ---
     private int roundNumber = 0;
     public bool IsRoundActive { get; private set; } = false;
+    private bool isGameOver = false; // 🔥 新增：判斷遊戲是否已結束 (進入回放)
 
     // UI 顯示用的變數
     private string uiCurrentPhaseText = ""; // 目前階段文字
@@ -70,10 +71,11 @@ public class GridRoundManager : MonoBehaviour
 
     private void Start()
     {
+        isGameOver = false; // 確保開始時狀態正確
         StartCoroutine(StartGameRoutine());
     }
 
-    // 🔥 新增：強制停止遊戲循環的方法
+    // 🔥 強制停止遊戲循環的方法
     // 這會在 GoalPoint 觸發時被呼叫，防止進入下一回合
     public void StopGameLoop()
     {
@@ -83,6 +85,7 @@ public class GridRoundManager : MonoBehaviour
         StopAllCoroutines();
 
         IsRoundActive = false;
+        isGameOver = true; // 🔥 設定為 True，用來隱藏 Round 文字
 
         // 更新 UI 狀態讓玩家知道結束了
         SetPhaseStatus("遊戲結束 - 精彩回放", Color.cyan);
@@ -238,6 +241,7 @@ public class GridRoundManager : MonoBehaviour
     {
         if (players.Count == 0) return;
 
+        // 1. 顯示階段文字 (例如：生存挑戰、遊戲結束-精彩回放)
         GUIStyle statusStyle = new GUIStyle(GUI.skin.label);
         statusStyle.fontSize = uiFontSize;
         statusStyle.alignment = TextAnchor.MiddleCenter;
@@ -255,13 +259,17 @@ public class GridRoundManager : MonoBehaviour
         }
         GUI.Label(statusRect, displayText, statusStyle);
 
-        GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
-        roundStyle.fontSize = uiRoundFontSize;
-        roundStyle.alignment = TextAnchor.UpperCenter;
-        roundStyle.fontStyle = FontStyle.Bold;
-        roundStyle.normal.textColor = roundTextColor;
+        // 2. 顯示 Round 幾 (🔥 只有在遊戲尚未結束時才顯示)
+        if (!isGameOver)
+        {
+            GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
+            roundStyle.fontSize = uiRoundFontSize;
+            roundStyle.alignment = TextAnchor.UpperCenter;
+            roundStyle.fontStyle = FontStyle.Bold;
+            roundStyle.normal.textColor = roundTextColor;
 
-        Rect roundRect = new Rect(0, 30, Screen.width, 150);
-        GUI.Label(roundRect, $"Round {roundNumber}", roundStyle);
+            Rect roundRect = new Rect(0, 30, Screen.width, 150);
+            GUI.Label(roundRect, $"Round {roundNumber}", roundStyle);
+        }
     }
 }
