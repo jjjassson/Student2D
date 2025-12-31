@@ -29,10 +29,7 @@ public class ReplayManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-
-        // 🔥 修改 1：移除了所有 SetActive(false) 的程式碼
-        // 現在遊戲開始時，Panel 的開關狀態完全由你在 Unity Editor 裡決定
-        // 如果你希望一開始是關的，請在 Editor 裡把勾勾取消
+        // 面板開關狀態維持你在 Editor 的設定
     }
 
     public void StartGlobalReplay()
@@ -51,6 +48,7 @@ public class ReplayManager : MonoBehaviour
         if (mainCamRecorder != null)
         {
             camFrames = mainCamRecorder.GetData();
+            // 🔥 改回來了：這裡不再關閉主攝影機，讓它保持原狀
         }
         else
         {
@@ -58,7 +56,7 @@ public class ReplayManager : MonoBehaviour
             yield break;
         }
 
-        // 🔥 修改 2：只有在到達終點觸發重播時，才強制開啟 Panel
+        // 2. 開啟面板與重播攝影機
         if (replayPanel) replayPanel.SetActive(true);
         if (replayCamera) replayCamera.gameObject.SetActive(true);
 
@@ -66,7 +64,7 @@ public class ReplayManager : MonoBehaviour
         foreach (var g in activeGhosts) Destroy(g);
         activeGhosts.Clear();
 
-        // 2. 生成分身
+        // 3. 生成分身並隱藏本尊
         List<GhostRunner> runners = new List<GhostRunner>();
         foreach (var recorder in allRecorders)
         {
@@ -74,15 +72,25 @@ public class ReplayManager : MonoBehaviour
             if (data == null || data.Count == 0) continue;
             if (recorder.myGhostPrefab == null) continue;
 
+            // 生成分身
             GameObject ghost = Instantiate(recorder.myGhostPrefab, data[0].position, data[0].rotation);
+
+            // 強制移除分身的物理組件 (避免鬼跟鬼互撞)
+            Rigidbody rb = ghost.GetComponent<Rigidbody>();
+            if (rb != null) Destroy(rb);
+            Collider[] cols = ghost.GetComponentsInChildren<Collider>();
+            foreach (var c in cols) Destroy(c);
+
             activeGhosts.Add(ghost);
             runners.Add(new GhostRunner { ghostObject = ghost, frames = data });
+
+            // 🔥🔥 關鍵：只隱藏場上的玩家本尊 🔥🔥
+            recorder.gameObject.SetActive(false);
         }
 
-        Debug.Log("開始無限循環重播...");
+        Debug.Log("本尊已隱藏，開始無限循環重播...");
 
-        // 🔥 修改 3：無限迴圈 (While True)
-        // 這會讓重播一直重複播放，永遠不會進入「關閉 Panel」的階段
+        // 4. 無限循環播放
         while (true)
         {
             int currentFrameIndex = 0;
@@ -115,9 +123,6 @@ public class ReplayManager : MonoBehaviour
 
             // 播完一次後，等待幾秒
             yield return new WaitForSeconds(restartDelay);
-
-            // 迴圈會回到開頭，currentFrameIndex 歸零，重新再播一次
-            // 這樣 Panel 就會一直開著，直到你手動關閉遊戲
         }
     }
 }
