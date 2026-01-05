@@ -630,7 +630,7 @@ MonoBehaviour:
     mainPrefab: {fileID: 1517892091243198008, guid: ead64bc1536c61b4993e0a70e644e595, type: 3}
     secondaryPrefab: {fileID: 1517892091243198008, guid: 4b8c3793f40de4649bc6121680860e9e, type: 3}
   placementTime: 10
-  survivalTime: 20
+  survivalTime: 15
   intermissionDelay: 1
   uiFontSize: 60
   uiRoundFontSize: 80

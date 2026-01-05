@@ -452,7 +452,7 @@ MonoBehaviour:
   - itemName: "\u684C\u5B50"
     mainPrefab: {fileID: 1517892091243198008, guid: ead64bc1536c61b4993e0a70e644e595, type: 3}
     secondaryPrefab: {fileID: 1517892091243198008, guid: 4b8c3793f40de4649bc6121680860e9e, type: 3}
-  placementTime: 10
+  placementTime: 20
   survivalTime: 20
   intermissionDelay: 1
   uiFontSize: 60
@@ -1829,6 +1829,7 @@ GameObject:
   - component: {fileID: 994738958}
   - component: {fileID: 994738957}
   - component: {fileID: 994738956}
+  - component: {fileID: 994738960}
   m_Layer: 0
   m_Name: Goal
   m_TagString: Goal
@@ -1917,12 +1918,24 @@ Transform:
   m_GameObject: {fileID: 994738955}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 21, y: 0, z: -7.6755}
+  m_LocalPosition: {x: 21, y: 1, z: -7.6755}
   m_LocalScale: {x: 0.8382539, y: 1, z: 3.022898}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &994738960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 994738955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e34b8d788fd04449b0cc9c06d20281, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1006005962
 GameObject:
   m_ObjectHideFlags: 0

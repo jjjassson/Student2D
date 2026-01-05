@@ -31,6 +31,33 @@ public class PlayerConfigurationManager : MonoBehaviour
     {
         if (pi == null) return;
 
+        // ?????? 【新增防火牆邏輯】 ??????
+        // 檢查 GridRoundManager 是否存在。如果存在，代表現在是「遊戲進行中」。
+        // 在遊戲進行中，不應該有"新"的玩家加入。
+        // 如果這時候有新的 PlayerInput 觸發 (通常是 Replay 鬼魂)，我們直接殺掉它的 Input。
+        if (GridRoundManager.Instance != null)
+        {
+            // 檢查這個 Input 的 Index 是否已經在我們的名單內
+            // 如果不在名單內，代表它是外來者 (鬼魂)
+            bool isExistingPlayer = playerConfigs.Any(p => p.PlayerIndex == pi.playerIndex);
+
+            if (!isExistingPlayer)
+            {
+                Debug.LogWarning($"[系統攔截] 偵測到遊戲中生成了帶有 PlayerInput 的物件: {pi.gameObject.name}。已移除 Input 元件以防止控制器錯亂。");
+
+                // 1. 關閉 Input 以防萬一
+                pi.DeactivateInput();
+
+                // 2. 銷毀該物件身上的 PlayerInput 元件 (保留物件本身，只殺 Input)
+                Destroy(pi);
+
+                // 3. 直接返回，不執行後面的加入邏輯
+                return;
+            }
+        }
+        // ?????? ----------------------- ??????
+
+
         // 如果該索引的玩家已存在，就不重複處理
         if (playerConfigs.Any(p => p.PlayerIndex == pi.playerIndex))
             return;

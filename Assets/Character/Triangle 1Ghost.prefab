@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2689930771702510549}
   m_Layer: 0
   m_Name: Triangle 1Ghost
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
