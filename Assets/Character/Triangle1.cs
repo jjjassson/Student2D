@@ -9,122 +9,120 @@ public class Triangle1 : MonoBehaviour
     public float jumpForce = 1f;
     public float gravityValue = -9.81f;
 
-    [Header("位置限制")]
-    [Tooltip("玩家 Z 軸能到達的最大值 (不能超過這條線)")]
-    public float maxZPosition = -3f;
+    [Header("Triangle 能力設定")]
+    [SerializeField] private float skillCooldown = 6.5f;
+    [SerializeField] private float boostDuration = 1.5f;
+    [SerializeField] private float speedMultiplier = 1.5f;
+
+    [Header("加速視覺效果")]
+    [SerializeField] private Color boostColor = Color.blue;
+    [SerializeField] private float blinkSpeed = 8f;
 
     private CharacterController controller;
+    private Renderer[] renderers;
+    private Color[] originalColors;
+
     private Vector2 moveInput;
     private Vector3 velocity;
     private bool groundedPlayer;
 
-    // 狀態
-    [HideInInspector] public bool isSlowed = false;
-    [HideInInspector] public bool isJumpReduced = false;
-
-    // 🆕 是否啟用反轉操作
-    [HideInInspector] public bool reverseControl = false;
-
-    // 預設參數記錄
     private float defaultMoveSpeed;
-    private float defaultJumpForce;
+    private float timer;
+    private bool boosting;
+
+    // 🔗 SlowZone 連動
+    [HideInInspector] public bool isSlowed = false;
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
+        renderers = GetComponentsInChildren<Renderer>();
+
+        originalColors = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+            originalColors[i] = renderers[i].material.color;
+
         defaultMoveSpeed = moveSpeed;
-        defaultJumpForce = jumpForce;
     }
 
-    // ===== SlowZone / LowJumpZone =====
-    public void ApplySpeedMultiplier(float multiplier)
-    {
-        moveSpeed = defaultMoveSpeed * multiplier;
-        isSlowed = multiplier < 1f;
-    }
-
-    public void ApplyJumpMultiplier(float multiplier)
-    {
-        jumpForce = defaultJumpForce * multiplier;
-        isJumpReduced = multiplier < 1f;
-    }
-
-    public void ResetSpeed()
-    {
-        moveSpeed = defaultMoveSpeed;
-        isSlowed = false;
-    }
-
-    public void ResetJump()
-    {
-        jumpForce = defaultJumpForce;
-        isJumpReduced = false;
-    }
-
-    // ===== 反轉操作控制 =====
-    public void SetReverse(bool active)
-    {
-        reverseControl = active;
-    }
-
-    // ===== 玩家輸入 =====
+    // ===== Input =====
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
-
-        // 🆕 套用反轉
-        if (reverseControl)
-            moveInput = -moveInput;
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
         if (context.performed && groundedPlayer)
-        {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravityValue);
-        }
     }
 
-    // ===== 更新移動 =====
     private void Update()
     {
-        groundedPlayer = controller.isGrounded;
+        HandleSkillTimer();
 
+        groundedPlayer = controller.isGrounded;
         if (groundedPlayer && velocity.y < 0)
             velocity.y = 0f;
 
         Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
-
-        controller.Move(move * Time.deltaTime * moveSpeed);
+        controller.Move(move * moveSpeed * Time.deltaTime);
 
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // 轉向
-        if (move.sqrMagnitude > 0.01f)
-        {
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                Quaternion.LookRotation(move, Vector3.up),
-                720f * Time.deltaTime
-            );
-        }
+        if (boosting)
+            BlinkColor();
+    }
 
-        // Z 軸限制
-        if (transform.position.z > maxZPosition)
+    // ===== Triangle 技能 =====
+    private void HandleSkillTimer()
+    {
+        timer += Time.deltaTime;
+
+        if (!boosting && timer >= skillCooldown)
         {
-            Vector3 clamp = transform.position;
-            clamp.z = maxZPosition;
-            transform.position = clamp;
+            boosting = true;
+            timer = 0f;
+
+            if (!isSlowed)
+                moveSpeed = defaultMoveSpeed * speedMultiplier;
+        }
+        else if (boosting && timer >= boostDuration)
+        {
+            boosting = false;
+            timer = 0f;
+            moveSpeed = defaultMoveSpeed;
+            ResetColor();
         }
     }
 
-    // ===== 觸發可踩平台 =====
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    // ===== 視覺 =====
+    private void BlinkColor()
     {
-        if (hit.collider == null) return;
+        float t = Mathf.PingPong(Time.time * blinkSpeed, 1f);
+        Color c = Color.Lerp(originalColors[0], boostColor, t);
 
-        PlatformDisappear platform = hit.collider.GetComponent<PlatformDisappear>();
-        if (platform != null) platform.OnStepped();
+        foreach (Renderer r in renderers)
+            r.material.color = c;
+    }
+
+    private void ResetColor()
+    {
+        for (int i = 0; i < renderers.Length; i++)
+            renderers[i].material.color = originalColors[i];
+    }
+
+    // ===== SlowZone 介面（給 SlowZone 呼叫）=====
+    public void ApplySpeedMultiplier(float multiplier)
+    {
+        isSlowed = multiplier < 1f;
+        moveSpeed = defaultMoveSpeed * multiplier;
+    }
+
+    public void ResetSpeed()
+    {
+        isSlowed = false;
+        moveSpeed = defaultMoveSpeed;
     }
 }

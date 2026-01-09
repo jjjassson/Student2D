@@ -231,7 +231,7 @@ MonoBehaviour:
   gravityValue: -9.81
   isSlowed: 0
   isJumpReduced: 0
-  isInverted: 0
+  reverseControl: 0
 --- !u!114 &5090386111462536045
 MonoBehaviour:
   m_ObjectHideFlags: 0
