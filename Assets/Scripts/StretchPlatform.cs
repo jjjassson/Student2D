@@ -54,16 +54,10 @@ public class StretchPlatform : MonoBehaviour
 
         transform.localScale = scale;
 
-        // ✅ 同步調整碰撞箱的大小與位置
-        UpdateColliderWithScale();
+       
     }
 
-    private void UpdateColliderWithScale()
-    {
-        // BoxCollider 尺寸依照 localScale 更新
-        boxCollider.size = Vector3.one; // 維持 1，讓 scale 直接影響實際碰撞體
-        boxCollider.center = new Vector3(0f, 0.5f * transform.localScale.y - 0.5f, 0f);
-    }
+    
 
     // ✅ 可選：玩家接觸測試（除錯用）
     private void OnCollisionEnter(Collision collision)
