@@ -2293,7 +2293,7 @@ MonoBehaviour:
         m_MethodName: SetCharacter
         m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 6906998413789825852, guid: a311c990042a1364f929a1d0d20826ee, type: 3}
+          m_ObjectArgument: {fileID: 6906998413789825852, guid: d4318a9677b503d4c9e6ee3096b8040a, type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
