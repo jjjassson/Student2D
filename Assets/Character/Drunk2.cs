@@ -26,8 +26,6 @@ public class Drunk2 : MonoBehaviour
     [Header("附身技能設定")]
     public float possessRange = 3f;
     public float possessDuration = 10f;
-    [Tooltip("技能觸發鍵（預設 B）")]
-    public Key possessKey = Key.B;
 
     [Header("被附身者閃爍設定")]
     public Color flashColor = Color.cyan;
@@ -66,7 +64,6 @@ public class Drunk2 : MonoBehaviour
             myOriginalColors[i] = myRenderers[i].material.color;
     }
 
-    // ===== SlowZone / LowJumpZone =====
     public void ApplySpeedMultiplier(float multiplier)
     {
         moveSpeed = defaultMoveSpeed * multiplier;
@@ -91,7 +88,6 @@ public class Drunk2 : MonoBehaviour
         isJumpReduced = false;
     }
 
-    // ===== 操作反轉 =====
     public void InvertMovement()
     {
         isInverted = true;
@@ -102,29 +98,30 @@ public class Drunk2 : MonoBehaviour
         isInverted = false;
     }
 
-    // ===== 玩家輸入 =====
     public void OnMove(InputAction.CallbackContext context)
     {
         if (lockCasterMovement && isPossessing) return;
-
         moveInput = context.ReadValue<Vector2>();
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
         if (lockCasterMovement && isPossessing) return;
-
         if (context.performed && groundedPlayer)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravityValue);
         }
     }
 
-    // ===== 更新移動 =====
     private void Update()
     {
-        // 技能觸發
-        if (!isPossessing && cooldownTimer <= 0f && Keyboard.current[possessKey].wasPressedThisFrame)
+        groundedPlayer = controller.isGrounded;
+
+        if (groundedPlayer && velocity.y < 0)
+            velocity.y = 0f;
+
+        // 自動附身：冷卻完成且未附身時
+        if (!isPossessing && cooldownTimer <= 0f)
         {
             TryPossess();
         }
@@ -133,12 +130,7 @@ public class Drunk2 : MonoBehaviour
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
 
-        groundedPlayer = controller.isGrounded;
-
-        if (groundedPlayer && velocity.y < 0)
-            velocity.y = 0f;
-
-        // 如果附身期間鎖定施法者，moveInput設為0
+        // 移動
         Vector3 move = (lockCasterMovement && isPossessing) ? Vector3.zero : new Vector3(moveInput.x, 0, 0);
 
         if (isInverted)
@@ -168,7 +160,6 @@ public class Drunk2 : MonoBehaviour
         }
     }
 
-    // ===== PlatformDisappear =====
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hit.collider == null) return;
@@ -178,7 +169,6 @@ public class Drunk2 : MonoBehaviour
             platform.OnStepped();
     }
 
-    // ===== Possess 實作 =====
     void TryPossess()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, possessRange);
@@ -234,16 +224,6 @@ public class Drunk2 : MonoBehaviour
 
     void SetMyAlpha(float alpha)
     {
-        if (myRenderers == null)
-            myRenderers = GetComponentsInChildren<Renderer>();
-
-        if (myOriginalColors == null || myOriginalColors.Length != myRenderers.Length)
-        {
-            myOriginalColors = new Color[myRenderers.Length];
-            for (int i = 0; i < myRenderers.Length; i++)
-                myOriginalColors[i] = myRenderers[i].material.color;
-        }
-
         for (int i = 0; i < myRenderers.Length; i++)
         {
             Color c = myOriginalColors[i];

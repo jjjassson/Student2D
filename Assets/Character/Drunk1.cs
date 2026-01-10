@@ -29,8 +29,6 @@ public class Drunk1 : MonoBehaviour
     [Header("附身技能設定")]
     public float possessRange = 3f;
     public float possessDuration = 10f;
-    [Tooltip("技能觸發鍵（預設 B）")]
-    public Key possessKey = Key.B;
 
     [Header("被附身者閃爍設定")]
     public Color flashColor = Color.cyan;
@@ -100,7 +98,6 @@ public class Drunk1 : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        // 如果鎖定施法者，且正在附身，就不接受輸入
         if (lockCasterMovement && isPossessing) return;
 
         moveInput = context.ReadValue<Vector2>();
@@ -120,8 +117,13 @@ public class Drunk1 : MonoBehaviour
 
     private void Update()
     {
-        // 技能觸發
-        if (!isPossessing && cooldownTimer <= 0f && Keyboard.current[possessKey].wasPressedThisFrame)
+        groundedPlayer = controller.isGrounded;
+
+        if (groundedPlayer && velocity.y < 0)
+            velocity.y = 0f;
+
+        // 自動附身：當冷卻完成且未附身時
+        if (!isPossessing && cooldownTimer <= 0f)
         {
             TryPossess();
         }
@@ -130,14 +132,8 @@ public class Drunk1 : MonoBehaviour
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
 
-        groundedPlayer = controller.isGrounded;
-
-        if (groundedPlayer && velocity.y < 0)
-            velocity.y = 0f;
-
-        // 如果附身期間鎖定施法者，moveInput設為0
+        // 移動
         Vector3 move = (lockCasterMovement && isPossessing) ? Vector3.zero : new Vector3(moveInput.x, 0, moveInput.y);
-
         controller.Move(move * Time.deltaTime * moveSpeed);
 
         velocity.y += gravityValue * Time.deltaTime;
