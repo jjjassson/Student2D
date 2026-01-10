@@ -1,187 +1,130 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
 public class Drunk1 : MonoBehaviour
 {
-    [Header("能力設定")]
-    public float possessRange = 3f;
-    public float possessDuration = 10f;
-    public float cooldown = 30f;
+    [Header("角色基本參數")]
+    public float moveSpeed = 4f;
+    public float jumpForce = 1f;
+    public float gravityValue = -9.81f;
 
-    [Header("被附身者閃光設定")]
-    public Color flashColor = Color.cyan;
-    public float flashSpeed = 5f;
-
-    [Header("自身透明度設定")]
-    [Range(0f, 1f)]
-    public float selfAlphaDuringPossess = 0.3f;
-
-    [Header("輸入設定")]
-    public InputActionReference possessAction;
+    [Header("位置限制")]
+    [Tooltip("玩家 Z 軸能到達的最大值 (不能超過這條線)")]
+    public float maxZPosition = -3f;
 
     private CharacterController controller;
-    private MonoBehaviour selfPlayer;
-    private MonoBehaviour targetPlayer;
+    private Vector2 moveInput;
+    private Vector3 velocity;
+    private bool groundedPlayer;
 
-    private Renderer selfRenderer;
-    private Renderer targetRenderer;
+    // 狀態
+    [HideInInspector] public bool isSlowed = false;
+    [HideInInspector] public bool isJumpReduced = false;
 
-    private Color[] originalSelfColors;
-    private Color[] originalTargetColors;
+    // 🆕 是否啟用反轉操作 (很適合醉漢的設定)
+    [HideInInspector] public bool reverseControl = false;
 
-    private bool isPossessing;
-    private bool isOnCooldown;
+    // 預設參數記錄
+    private float defaultMoveSpeed;
+    private float defaultJumpForce;
 
-    private void Awake()
+    private void Start()
     {
         controller = GetComponent<CharacterController>();
-        selfPlayer = GetComponent<Player1>();
-        selfRenderer = GetComponentInChildren<Renderer>();
+        defaultMoveSpeed = moveSpeed;
+        defaultJumpForce = jumpForce;
     }
 
-    private void OnEnable()
+    // ===== SlowZone / LowJumpZone =====
+    public void ApplySpeedMultiplier(float multiplier)
     {
-        possessAction?.action.Enable();
+        moveSpeed = defaultMoveSpeed * multiplier;
+        isSlowed = multiplier < 1f;
     }
 
-    private void OnDisable()
+    public void ApplyJumpMultiplier(float multiplier)
     {
-        possessAction?.action.Disable();
+        jumpForce = defaultJumpForce * multiplier;
+        isJumpReduced = multiplier < 1f;
     }
 
+    public void ResetSpeed()
+    {
+        moveSpeed = defaultMoveSpeed;
+        isSlowed = false;
+    }
+
+    public void ResetJump()
+    {
+        jumpForce = defaultJumpForce;
+        isJumpReduced = false;
+    }
+
+    // ===== 反轉操作控制 =====
+    public void SetReverse(bool active)
+    {
+        reverseControl = active;
+    }
+
+    // ===== 玩家輸入 =====
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        moveInput = context.ReadValue<Vector2>();
+
+        // 🆕 套用反轉
+        if (reverseControl)
+            moveInput = -moveInput;
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed && groundedPlayer)
+        {
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravityValue);
+        }
+    }
+
+    // ===== 更新移動 =====
     private void Update()
     {
-        if (isPossessing || isOnCooldown) return;
+        groundedPlayer = controller.isGrounded;
 
-        if (possessAction != null && possessAction.action.WasPressedThisFrame())
-            TryPossess();
-    }
+        if (groundedPlayer && velocity.y < 0)
+            velocity.y = 0f;
 
-    private void TryPossess()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, possessRange);
+        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
 
-        foreach (var hit in hits)
+        controller.Move(move * Time.deltaTime * moveSpeed);
+
+        velocity.y += gravityValue * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+
+        // 轉向
+        if (move.sqrMagnitude > 0.01f)
         {
-            if (hit.gameObject == gameObject) continue;
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                Quaternion.LookRotation(move, Vector3.up),
+                720f * Time.deltaTime
+            );
+        }
 
-            Player1 p1 = hit.GetComponent<Player1>();
-            Player2 p2 = hit.GetComponent<Player2>();
-
-            if (p1 != null || p2 != null)
-            {
-                targetPlayer = (MonoBehaviour)(p1 != null ? p1 : p2);
-                targetRenderer = targetPlayer.GetComponentInChildren<Renderer>();
-                StartCoroutine(PossessRoutine());
-                break;
-            }
+        // Z 軸限制
+        if (transform.position.z > maxZPosition)
+        {
+            Vector3 clamp = transform.position;
+            clamp.z = maxZPosition;
+            transform.position = clamp;
         }
     }
 
-    private IEnumerator PossessRoutine()
+    // ===== 觸發可踩平台 =====
+    private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        isPossessing = true;
-        isOnCooldown = true;
+        if (hit.collider == null) return;
 
-        selfPlayer.enabled = false;
-        controller.enabled = false;
-
-        SaveOriginalColors();
-        StartVisualEffects();
-
-        yield return new WaitForSeconds(possessDuration);
-
-        EndPossession();
-        StartCoroutine(CooldownRoutine());
-    }
-
-    private void SaveOriginalColors()
-    {
-        if (selfRenderer != null)
-        {
-            originalSelfColors = new Color[selfRenderer.materials.Length];
-            for (int i = 0; i < selfRenderer.materials.Length; i++)
-                originalSelfColors[i] = selfRenderer.materials[i].color;
-        }
-
-        if (targetRenderer != null)
-        {
-            originalTargetColors = new Color[targetRenderer.materials.Length];
-            for (int i = 0; i < targetRenderer.materials.Length; i++)
-                originalTargetColors[i] = targetRenderer.materials[i].color;
-        }
-    }
-
-    private void StartVisualEffects()
-    {
-        if (targetRenderer != null)
-            StartCoroutine(TargetFlashRoutine());
-
-        if (selfRenderer != null)
-            StartCoroutine(SelfFadeRoutine());
-    }
-
-    private void EndPossession()
-    {
-        RestoreColors();
-
-        controller.enabled = true;
-        selfPlayer.enabled = true;
-        isPossessing = false;
-    }
-
-    private void RestoreColors()
-    {
-        if (selfRenderer != null && originalSelfColors != null)
-            for (int i = 0; i < selfRenderer.materials.Length; i++)
-                selfRenderer.materials[i].color = originalSelfColors[i];
-
-        if (targetRenderer != null && originalTargetColors != null)
-            for (int i = 0; i < targetRenderer.materials.Length; i++)
-                targetRenderer.materials[i].color = originalTargetColors[i];
-    }
-
-    private IEnumerator CooldownRoutine()
-    {
-        yield return new WaitForSeconds(cooldown);
-        isOnCooldown = false;
-    }
-
-    private IEnumerator TargetFlashRoutine()
-    {
-        float t = 0f;
-        while (isPossessing)
-        {
-            t += Time.deltaTime * flashSpeed;
-            float lerp = Mathf.PingPong(t, 1f);
-
-            for (int i = 0; i < targetRenderer.materials.Length; i++)
-                targetRenderer.materials[i].color =
-                    Color.Lerp(originalTargetColors[i], flashColor, lerp);
-
-            yield return null;
-        }
-    }
-
-    private IEnumerator SelfFadeRoutine()
-    {
-        while (isPossessing)
-        {
-            for (int i = 0; i < selfRenderer.materials.Length; i++)
-            {
-                Color c = originalSelfColors[i];
-                c.a = selfAlphaDuringPossess;
-                selfRenderer.materials[i].color = c;
-            }
-            yield return null;
-        }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, possessRange);
+        PlatformDisappear platform = hit.collider.GetComponent<PlatformDisappear>();
+        if (platform != null) platform.OnStepped();
     }
 }
