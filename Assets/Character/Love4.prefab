@@ -184,7 +184,7 @@ MonoBehaviour:
     m_ActionId: 1c15779c-2ead-43af-ad1b-1d139581613d
     m_ActionName: GamePlay/MoveCursor
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Controller
+  m_DefaultControlScheme: 
   m_DefaultActionMap: GamePlay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -204,6 +204,12 @@ MonoBehaviour:
   jumpForce: 1
   gravityValue: -9.81
   maxZPosition: -3
+  enableLoveForce: 1
+  attractRadius: 6
+  attractForce: 8
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 0
   isSlowed: 0
   isJumpReduced: 0
   reverseControl: 0

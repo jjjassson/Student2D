@@ -185,7 +185,7 @@ MonoBehaviour:
     m_ActionId: 1c15779c-2ead-43af-ad1b-1d139581613d
     m_ActionName: GamePlay/MoveCursor
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Controller
+  m_DefaultControlScheme: 
   m_DefaultActionMap: GamePlay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -224,13 +224,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 971a08258ff943741ad6c603588d0125, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  possessRange: 3
-  possessDuration: 10
-  cooldown: 30
-  flashColor: {r: 0, g: 1, b: 1, a: 1}
-  flashSpeed: 5
-  selfAlphaDuringPossess: 0.3
-  possessAction: {fileID: 0}
+  moveSpeed: 4
+  jumpForce: 1
+  gravityValue: -9.81
+  isSlowed: 0
+  isJumpReduced: 0
+  isInverted: 0
 --- !u!114 &-5307049005880033724
 MonoBehaviour:
   m_ObjectHideFlags: 0
