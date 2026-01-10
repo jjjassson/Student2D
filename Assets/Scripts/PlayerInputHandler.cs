@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users; // 記得引用這個，才能用 InputUser
 using static UnityEngine.InputSystem.InputAction;
 
 public class PlayerInputHandler : MonoBehaviour
@@ -9,21 +10,50 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void Awake()
     {
-        // 預先抓取 IMover，不需要每次移動都抓一次，提升效能
         mover = GetComponents<MonoBehaviour>().OfType<IMover>().FirstOrDefault();
     }
 
-    // 這個方法必須由 InitializeLevel 呼叫
+    // 這個方法必須由 InitializeLevel 或 復活邏輯 呼叫
     public void InitializePlayer(PlayerConfiguration config)
     {
-        // 修正重點：不再使用 config.Input (因為已經刪除了)
-        // 而是直接獲取掛在自己身上的 PlayerInput 組件
-        // 這個組件在 InitializeLevel 中已經被強制綁定到正確的手把上了
         var playerInput = GetComponent<PlayerInput>();
 
         if (playerInput != null)
         {
-            // 訂閱事件：使用 PlayerInput 組件的通用事件
+            // ==========================================
+            // ★★★ 關鍵修正開始：在這裡執行強制綁定 ★★★
+            // ==========================================
+
+            // 1. 關閉自動切換，防止 Unity 亂抓正在動的手把
+            playerInput.neverAutoSwitchControlSchemes = true;
+
+            // 2. 解除當前任何可能的錯誤配對
+            playerInput.user.UnpairDevices();
+
+            // 3. 拿出我們在 Menu 階段存好的「正確設備」(config.Device)
+            if (config.Device != null)
+            {
+                // 強制將這個 PlayerInput 與該設備結婚，至死不渝
+                InputUser.PerformPairingWithDevice(config.Device, playerInput.user);
+
+                // 再次確認切換到正確的方案 (例如 "Gamepad")
+                if (!string.IsNullOrEmpty(config.ControlScheme))
+                {
+                    playerInput.user.ActivateControlScheme(config.ControlScheme);
+                }
+
+                Debug.Log($"玩家 {config.PlayerIndex} 已強制綁定設備: {config.Device.displayName}");
+            }
+            else
+            {
+                Debug.LogError($"玩家 {config.PlayerIndex} 的 Config 中沒有 Device 資訊！");
+            }
+
+            // ==========================================
+            // ★★★ 關鍵修正結束 ★★★
+            // ==========================================
+
+            // 訂閱事件
             playerInput.onActionTriggered += Input_onActionTriggered;
         }
         else
@@ -34,8 +64,6 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void Input_onActionTriggered(CallbackContext context)
     {
-        // 判斷觸發的是哪個動作
-        // 請確保你的 Input Actions 裡面的 Action 名稱叫做 "Movement" (大小寫需一致)
         if (context.action.name == "Movement")
         {
             OnMove(context);
