@@ -122,8 +122,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7842110417829308745}
-        m_TargetAssemblyTypeName: Drunk2, Assembly-CSharp
+      - m_Target: {fileID: 9068183590197186705}
+        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -138,8 +138,8 @@ MonoBehaviour:
     m_ActionName: GamePlay/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7842110417829308745}
-        m_TargetAssemblyTypeName: Drunk2, Assembly-CSharp
+      - m_Target: {fileID: 9068183590197186705}
+        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -224,12 +224,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 971a08258ff943741ad6c603588d0125, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
-  jumpForce: 1
-  gravityValue: -9.81
-  isSlowed: 0
-  isJumpReduced: 0
-  isInverted: 0
+  possessRange: 3
+  possessDuration: 10
+  cooldown: 30
+  flashColor: {r: 0, g: 1, b: 1, a: 1}
+  flashSpeed: 5
+  selfAlphaDuringPossess: 0.3
+  possessAction: {fileID: 0}
 --- !u!114 &-5307049005880033724
 MonoBehaviour:
   m_ObjectHideFlags: 0
