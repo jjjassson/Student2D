@@ -14,8 +14,6 @@ GameObject:
   - component: {fileID: 2052742077915230996}
   - component: {fileID: 2689930771702510549}
   - component: {fileID: 7842110417829308745}
-  - component: {fileID: -5307049005880033724}
-  - component: {fileID: 9068183590197186705}
   - component: {fileID: 6473054374949799907}
   - component: {fileID: -3361647687107877429}
   - component: {fileID: -1268921124903140623}
@@ -122,8 +120,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9068183590197186705}
-        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
+      - m_Target: {fileID: 7842110417829308745}
+        m_TargetAssemblyTypeName: Drunk2, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -138,8 +136,8 @@ MonoBehaviour:
     m_ActionName: GamePlay/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9068183590197186705}
-        m_TargetAssemblyTypeName: Player2, Assembly-CSharp
+      - m_Target: {fileID: 7842110417829308745}
+        m_TargetAssemblyTypeName: Drunk2, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -225,44 +223,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 4
-  jumpForce: 1
-  gravityValue: -9.81
-  isSlowed: 0
-  isJumpReduced: 0
-  isInverted: 0
---- !u!114 &-5307049005880033724
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6906998413789825852}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bb4192f27cb93e4bbd8911c2c61fc94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 4
-  jumpForce: 1
-  gravityValue: -9.81
-  speedBoostMultiplier: 1.5
-  boostDuration: 6.5
-  boostInterval: 15
-  isSlowed: 0
-  isJumpReduced: 0
---- !u!114 &9068183590197186705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6906998413789825852}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 162cf9ee2ce32534f8a093b089c1803c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 5
   jumpForce: 1
   gravityValue: -9.81
   isSlowed: 0
