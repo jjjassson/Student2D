@@ -228,6 +228,14 @@ MonoBehaviour:
   isSlowed: 0
   isJumpReduced: 0
   isInverted: 0
+  possessRange: 3
+  possessDuration: 10
+  possessKey: 16
+  flashColor: {r: 0, g: 1, b: 1, a: 0.3764706}
+  flashSpeed: 6
+  ghostAlpha: 0.3
+  cooldown: 30
+  lockCasterMovement: 1
 --- !u!143 &6473054374949799907
 CharacterController:
   m_ObjectHideFlags: 0
