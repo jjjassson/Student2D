@@ -734,15 +734,15 @@ MonoBehaviour:
   - itemName: Chair
     mainPrefab: {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
     secondaryPrefab: {fileID: 577509353761043554, guid: d28c51899d16e234fb206af67be272b7, type: 3}
-  - itemName: "\u53E3\u7D05"
-    mainPrefab: {fileID: 5211147423697017715, guid: 60ba087a0cbb71649bf45205f061ddf0, type: 3}
-    secondaryPrefab: {fileID: 5211147423697017715, guid: 778a926bf273268448db1e85e3a91324, type: 3}
-  - itemName: "\u9999\u6C34"
-    mainPrefab: {fileID: 1741327578946951208, guid: 3a36655ad0dc1c649a39c37bad2ec4df, type: 3}
-    secondaryPrefab: {fileID: 1741327578946951208, guid: 0599412a0fba683438bfb0d9d29c5e67, type: 3}
   - itemName: "\u684C\u5B50"
     mainPrefab: {fileID: 1517892091243198008, guid: ead64bc1536c61b4993e0a70e644e595, type: 3}
     secondaryPrefab: {fileID: 1517892091243198008, guid: 4b8c3793f40de4649bc6121680860e9e, type: 3}
+  - itemName: "\u7BB1\u5B50"
+    mainPrefab: {fileID: 706543145372646846, guid: c74dda073318b3c42b8493e6f8cf8e37, type: 3}
+    secondaryPrefab: {fileID: 706543145372646846, guid: a49e605637b430242b02387c03c24aff, type: 3}
+  - itemName: "\u7D19\u9214"
+    mainPrefab: {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
+    secondaryPrefab: {fileID: 2013447679602650498, guid: e0be80d121d262840a4667b816e50cbb, type: 3}
   placementTime: 10
   survivalTime: 15
   intermissionDelay: 1
