@@ -227,8 +227,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42d8dfafc551eec49b369eee44faad33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
-  jumpForce: 1
+  moveSpeed: 5
+  jumpForce: 2
   gravityValue: -9.81
   maxZPosition: -3
   isSlowed: 0
