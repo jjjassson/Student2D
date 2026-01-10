@@ -14,13 +14,11 @@ GameObject:
   - component: {fileID: 2052742077915230996}
   - component: {fileID: 2689930771702510549}
   - component: {fileID: 1272390480194216048}
-  - component: {fileID: 4618876987514644776}
   - component: {fileID: 6473054374949799907}
   - component: {fileID: 6569110624159686450}
   - component: {fileID: 7711840042101479308}
   - component: {fileID: -1411683847322103611}
   - component: {fileID: 4289916192405294093}
-  - component: {fileID: 3228906533048580241}
   - component: {fileID: -1825125338068357859}
   - component: {fileID: -1390400581781408332}
   - component: {fileID: -8066266943524304604}
@@ -212,7 +210,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 2
+  m_Height: 1.2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1272390480194216048
@@ -229,25 +227,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   jumpForce: 2
-  gravityValue: -9.81
-  maxZPosition: -3
-  isSlowed: 0
-  isJumpReduced: 0
-  reverseControl: 0
---- !u!114 &4618876987514644776
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6906998413789825852}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a273bf6eb02b91d428e9afe947d799d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 5
-  jumpForce: 1
   gravityValue: -9.81
   maxZPosition: -3
   isSlowed: 0
@@ -338,24 +317,6 @@ MonoBehaviour:
   shadowSize: {x: 0.3, y: 0.3}
   surfaceOffset: 0.05
   smoothingSpeed: 15
---- !u!114 &3228906533048580241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6906998413789825852}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0992c6434de4cb49817ce3d6a0b145c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  smokeOnDuration: 10
-  smokeOffDuration: 30
-  detectionRadius: 10
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &-1825125338068357859
 MonoBehaviour:
   m_ObjectHideFlags: 0

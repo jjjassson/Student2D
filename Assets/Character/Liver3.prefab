@@ -224,7 +224,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  jumpForce: 2
+  jumpForce: 1.2
   gravityValue: -9.81
   maxZPosition: -3
   isSlowed: 0
