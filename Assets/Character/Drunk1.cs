@@ -18,36 +18,32 @@ public class Drunk1 : MonoBehaviour
     private Vector3 velocity;
     private bool groundedPlayer;
 
-    [HideInInspector] public bool isSlowed = false;
-    [HideInInspector] public bool isJumpReduced = false;
-    [HideInInspector] public bool reverseControl = false;
+    [HideInInspector] public bool isSlowed;
+    [HideInInspector] public bool isJumpReduced;
+    [HideInInspector] public bool reverseControl;
 
     private float defaultMoveSpeed;
     private float defaultJumpForce;
 
-    // ===== 🆕 Possess / Cooldown / Control =====
+    // ================= 附身技能 =================
     [Header("附身技能設定")]
     public float possessRange = 3f;
     public float possessDuration = 10f;
+    public float cooldown = 30f;
 
-    [Header("被附身者閃爍設定")]
+    [Header("被附身者閃爍")]
     public Color flashColor = Color.cyan;
     public float flashSpeed = 6f;
 
-    [Header("施法者半透明設定")]
+    [Header("施法者半透明")]
     [Range(0.1f, 1f)]
     public float ghostAlpha = 0.3f;
 
-    [Header("技能冷卻時間")]
-    public float cooldown = 30f;
-    private float cooldownTimer = 0f;
+    private float cooldownTimer;
+    private bool isPossessing;
 
-    [Header("附身期間鎖定施法者移動")]
-    public bool lockCasterMovement = true;
-
-    private bool isPossessing = false;
-    private GameObject possessedTarget;
-    private CharacterController targetController;
+    private Drunk1 possessedDrunk1;
+    private Drunk2 possessedDrunk2;
 
     private Renderer[] myRenderers;
     private Color[] myOriginalColors;
@@ -67,73 +63,37 @@ public class Drunk1 : MonoBehaviour
             myOriginalColors[i] = myRenderers[i].material.color;
     }
 
-    public void ApplySpeedMultiplier(float multiplier)
-    {
-        moveSpeed = defaultMoveSpeed * multiplier;
-        isSlowed = multiplier < 1f;
-    }
-
-    public void ApplyJumpMultiplier(float multiplier)
-    {
-        jumpForce = defaultJumpForce * multiplier;
-        isJumpReduced = multiplier < 1f;
-    }
-
-    public void ResetSpeed()
-    {
-        moveSpeed = defaultMoveSpeed;
-        isSlowed = false;
-    }
-
-    public void ResetJump()
-    {
-        jumpForce = defaultJumpForce;
-        isJumpReduced = false;
-    }
-
-    public void SetReverse(bool active)
-    {
-        reverseControl = active;
-    }
-
+    // ================= Input =================
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (lockCasterMovement && isPossessing) return;
-
         moveInput = context.ReadValue<Vector2>();
-        if (reverseControl)
-            moveInput = -moveInput;
+        if (reverseControl) moveInput = -moveInput;
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (lockCasterMovement && isPossessing) return;
-
         if (context.performed && groundedPlayer)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravityValue);
+
+            if (isPossessing)
+                ForwardJump();
         }
     }
 
+    // ================= Update =================
     private void Update()
     {
         groundedPlayer = controller.isGrounded;
+        if (groundedPlayer && velocity.y < 0) velocity.y = 0f;
 
-        if (groundedPlayer && velocity.y < 0)
-            velocity.y = 0f;
-
-        // 自動附身：當冷卻完成且未附身時
         if (!isPossessing && cooldownTimer <= 0f)
-        {
             TryPossess();
-        }
 
-        // 冷卻計時
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
 
-        // 移動
-        Vector3 move = (lockCasterMovement && isPossessing) ? Vector3.zero : new Vector3(moveInput.x, 0, moveInput.y);
+        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
         controller.Move(move * Time.deltaTime * moveSpeed);
 
         velocity.y += gravityValue * Time.deltaTime;
@@ -150,64 +110,54 @@ public class Drunk1 : MonoBehaviour
 
         if (transform.position.z > maxZPosition)
         {
-            Vector3 clamp = transform.position;
-            clamp.z = maxZPosition;
-            transform.position = clamp;
+            Vector3 p = transform.position;
+            p.z = maxZPosition;
+            transform.position = p;
         }
 
-        // 控制被附身者
-        if (isPossessing && possessedTarget != null && targetController != null)
-        {
-            Vector3 targetMove = new Vector3(moveInput.x, 0, moveInput.y);
-            targetController.Move(targetMove * Time.deltaTime * moveSpeed);
-            targetController.Move(Vector3.up * velocity.y * Time.deltaTime);
-        }
+        if (isPossessing)
+            ForwardMove(moveInput);
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        if (hit.collider == null) return;
-
-        PlatformDisappear platform = hit.collider.GetComponent<PlatformDisappear>();
-        if (platform != null) platform.OnStepped();
-    }
-
+    // ================= 附身邏輯 =================
     void TryPossess()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, possessRange);
-
         foreach (Collider hit in hits)
         {
             if (hit.gameObject == gameObject) continue;
-            if (!hit.GetComponent<CharacterController>()) continue;
 
-            possessedTarget = hit.gameObject;
-            targetController = possessedTarget.GetComponent<CharacterController>();
-            StartCoroutine(PossessCoroutine());
-            break;
+            possessedDrunk1 = hit.GetComponent<Drunk1>();
+            possessedDrunk2 = hit.GetComponent<Drunk2>();
+
+            if (possessedDrunk1 || possessedDrunk2)
+            {
+                StartCoroutine(PossessCoroutine(hit.gameObject));
+                break;
+            }
         }
     }
 
-    IEnumerator PossessCoroutine()
+    IEnumerator PossessCoroutine(GameObject target)
     {
         isPossessing = true;
         cooldownTimer = cooldown;
 
         SetMyAlpha(ghostAlpha);
 
-        targetRenderers = possessedTarget.GetComponentsInChildren<Renderer>();
+        targetRenderers = target.GetComponentsInChildren<Renderer>();
         targetOriginalColors = new Color[targetRenderers.Length];
         for (int i = 0; i < targetRenderers.Length; i++)
             targetOriginalColors[i] = targetRenderers[i].material.color;
 
-        float timer = 0f;
-        while (timer < possessDuration)
+        float t = 0f;
+        while (t < possessDuration)
         {
-            timer += Time.deltaTime;
-            float t = Mathf.Abs(Mathf.Sin(Time.time * flashSpeed));
+            t += Time.deltaTime;
+            float f = Mathf.Abs(Mathf.Sin(Time.time * flashSpeed));
             for (int i = 0; i < targetRenderers.Length; i++)
-                targetRenderers[i].material.color = Color.Lerp(targetOriginalColors[i], flashColor, t);
-
+                targetRenderers[i].material.color =
+                    Color.Lerp(targetOriginalColors[i], flashColor, f);
             yield return null;
         }
 
@@ -216,28 +166,39 @@ public class Drunk1 : MonoBehaviour
 
     void EndPossess()
     {
-        for (int i = 0; i < targetRenderers.Length; i++)
-            targetRenderers[i].material.color = targetOriginalColors[i];
-
         SetMyAlpha(1f);
-        possessedTarget = null;
-        targetController = null;
         isPossessing = false;
+        possessedDrunk1 = null;
+        possessedDrunk2 = null;
     }
 
-    void SetMyAlpha(float alpha)
+    // ================= Input 轉交 =================
+    void ForwardMove(Vector2 input)
+    {
+        if (possessedDrunk1)
+            possessedDrunk1.ReceivePossessMove(input);
+        if (possessedDrunk2)
+            possessedDrunk2.ReceivePossessMove(input);
+    }
+
+    void ForwardJump()
+    {
+        if (possessedDrunk1)
+            possessedDrunk1.ReceivePossessJump();
+        if (possessedDrunk2)
+            possessedDrunk2.ReceivePossessJump();
+    }
+
+    public void ReceivePossessMove(Vector2 input) { }
+    public void ReceivePossessJump() { }
+
+    void SetMyAlpha(float a)
     {
         for (int i = 0; i < myRenderers.Length; i++)
         {
             Color c = myOriginalColors[i];
-            c.a = alpha;
+            c.a = a;
             myRenderers[i].material.color = c;
         }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, possessRange);
     }
 }
