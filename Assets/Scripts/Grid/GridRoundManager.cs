@@ -94,7 +94,10 @@ public class GridRoundManager : MonoBehaviour
 
     IEnumerator StartGameRoutine()
     {
-        yield return new WaitForSeconds(1.0f);
+        // 🔥 關鍵修正 1：移除 WaitForSeconds(1.0f) 造成的延遲
+        // 只等待一幀，確保 InitializeLevel 把玩家生完就好，此時玩家絕對還來不及移動
+        yield return new WaitForEndOfFrame();
+
         GridObjectPlacer[] foundPlacers = FindObjectsOfType<GridObjectPlacer>();
         players.Clear();
         foreach (var placer in foundPlacers)
@@ -102,6 +105,8 @@ public class GridRoundManager : MonoBehaviour
             PlayerData data = new PlayerData();
             data.placer = placer;
             data.score = placer.GetComponent<PlayerScore>();
+
+            // 此時抓取座標最為精準
             data.spawnPoint = placer.transform.position;
             data.rb = placer.GetComponent<Rigidbody>();
             players.Add(data);
@@ -154,7 +159,6 @@ public class GridRoundManager : MonoBehaviour
             foreach (var p in players)
             {
                 // 1. 針對「這位玩家」隨機抽一組
-                // (因為是在迴圈內抽，所以每個人可能會抽到不一樣的，也可能剛好抽到一樣的)
                 GridItemPair randomPair = itemFolder[Random.Range(0, itemFolder.Count)];
 
                 // 2. 將抽到的這組給這位玩家
@@ -226,8 +230,23 @@ public class GridRoundManager : MonoBehaviour
 
     private void ResetPlayerPosition(PlayerData p)
     {
-        if (p.rb != null) { p.rb.velocity = Vector3.zero; p.rb.angularVelocity = Vector3.zero; }
-        if (p.placer != null) p.placer.transform.position = p.spawnPoint;
+        // 1. 消除物理動能
+        if (p.rb != null)
+        {
+            p.rb.velocity = Vector3.zero;
+            p.rb.angularVelocity = Vector3.zero;
+        }
+
+        // 🔥 關鍵修正 2：確保強迫位移不會被物理引擎(CharacterController)給彈回去
+        CharacterController cc = p.placer.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false; // 傳送前先關閉
+
+        if (p.placer != null)
+        {
+            p.placer.transform.position = p.spawnPoint;
+        }
+
+        if (cc != null) cc.enabled = true; // 傳送後再開啟
     }
 
     private bool CheckIfAllDead()

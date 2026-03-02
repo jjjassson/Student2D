@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PlayerCollision : MonoBehaviour
 {
@@ -16,12 +16,12 @@ public class PlayerCollision : MonoBehaviour
         if (other.CompareTag("Goal"))
         {
             score.ReachGoal();
-            gameObject.SetActive(false); // ©è¹F²×ÂI«á¤£¦A¨ü±±¨î
+            // ðŸ”¥ ç§»é™¤ gameObject.SetActive(false);
         }
         else if (other.CompareTag("DeathZone"))
         {
             score.FallDown();
-            gameObject.SetActive(false); // ¦º¤`«á¼È®É®ø¥¢
+            // ðŸ”¥ ç§»é™¤ gameObject.SetActive(false);
         }
     }
 }
