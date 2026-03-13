@@ -12,13 +12,13 @@ public class CharacterLight : MonoBehaviour
     public LayerMask hitMask = ~0; // 預設為 ~0 (檢測所有 Layer)
 
     [Header("地面光斑設定")]
-    [Tooltip("用於顯示光斑的預製體（建議使用 Quad 並搭配圓形透明紋理）。")]
+    [Tooltip("用於顯示光斑的預製體（這裡使用的是 Cylinder 圓柱體）。")]
     public GameObject groundLightPrefab;
     [Tooltip("光斑的顏色（您要求為黑色，但可以調整）。")]
     public Color shadowColor = Color.black;
 
     // --- 修改處 1：將半徑 (Radius) 改為 尺寸 (Size) 以支援長寬獨立調整 ---
-    [Tooltip("光斑的尺寸 (X: 寬度, Y: 長度/高度)")]
+    [Tooltip("光斑的尺寸 (X: 寬度, Y: 長度)。在 Inspector 中把 X 和 Y 設為一樣的數字就是正圓形。")]
     public Vector2 shadowSize = new Vector2(1f, 1f);
 
     [Tooltip("光斑與地面分離的距離，防止 Z-fighting。")]
@@ -71,9 +71,9 @@ public class CharacterLight : MonoBehaviour
 
         // --- 2. 動態同步屬性 ---
 
-        // --- 修改處 2：分別應用 X 和 Y 的縮放 ---
-        // 這裡設定 scale.z 為 1，因為 Quad 通常是平面的，Z 軸縮放不影響視覺
-        groundLightInstance.transform.localScale = new Vector3(shadowSize.x, shadowSize.y, 1f);
+        // --- 修改處 2：針對 Cylinder (圓柱體) 的縮放設定 ---
+        // X 和 Z 負責控制圓形的長寬大小，Y 負責厚度 (設為 0.01f 讓它強制保持扁平)
+        groundLightInstance.transform.localScale = new Vector3(shadowSize.x, 0.01f, shadowSize.y);
 
         // 同步顏色
         groundLightRenderer.material.SetColor("_Color", shadowColor);

@@ -677,7 +677,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2540997526965593834, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
       propertyPath: m_MaxPlayerCount
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2540997526965593834, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
       propertyPath: m_JoinAction.m_Action.m_Name
@@ -725,7 +725,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8712342617801318690, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
       propertyPath: MaxPlayers
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8712342617801318690, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
       propertyPath: defaultPrefabs.Array.size
