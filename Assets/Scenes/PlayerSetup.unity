@@ -242,7 +242,7 @@ GameObject:
   m_Component:
   - component: {fileID: 914429665}
   - component: {fileID: 914429664}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: "B\u9375\u89D2\u8272"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -725,6 +725,10 @@ PrefabInstance:
       propertyPath: MaxPlayers
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 8712342617801318690, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
+      propertyPath: specificJoinUIPrompt
+      value: 
+      objectReference: {fileID: 914429663}
     - target: {fileID: 8712342617801318690, guid: d9033534803771c4dbe62ee81f4b70e7, type: 3}
       propertyPath: defaultPrefabs.Array.size
       value: 0

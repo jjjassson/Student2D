@@ -10,10 +10,14 @@ public class PlayerConfigurationManager : MonoBehaviour
 
     private List<PlayerConfiguration> playerConfigs = new List<PlayerConfiguration>();
 
-    [SerializeField] private int MaxPlayers = 2;
+    [SerializeField] private int MaxPlayers = 4; // 這裡預設改為 4，可視需求在 Inspector 調整
 
     [Header("Optional: default prefabs per playerIndex (0 = Player1, 1 = Player2)")]
     [SerializeField] private List<GameObject> defaultPrefabs = new List<GameObject>();
+
+    [Header("UI Settings")]
+    [Tooltip("請將畫面上的『指定加入提示 UI (例如一行文字或圖案)』拖曳到這裡，絕對不要拖到整個 Canvas！")]
+    [SerializeField] private GameObject specificJoinUIPrompt;
 
     private void Awake()
     {
@@ -31,41 +35,27 @@ public class PlayerConfigurationManager : MonoBehaviour
     {
         if (pi == null) return;
 
-        // ?????? 【新增防火牆邏輯】 ??????
-        // 檢查 GridRoundManager 是否存在。如果存在，代表現在是「遊戲進行中」。
-        // 在遊戲進行中，不應該有"新"的玩家加入。
-        // 如果這時候有新的 PlayerInput 觸發 (通常是 Replay 鬼魂)，我們直接殺掉它的 Input。
+        // 【防火牆邏輯】：防止遊戲進行中產生鬼魂輸入
         if (GridRoundManager.Instance != null)
         {
-            // 檢查這個 Input 的 Index 是否已經在我們的名單內
-            // 如果不在名單內，代表它是外來者 (鬼魂)
             bool isExistingPlayer = playerConfigs.Any(p => p.PlayerIndex == pi.playerIndex);
 
             if (!isExistingPlayer)
             {
                 Debug.LogWarning($"[系統攔截] 偵測到遊戲中生成了帶有 PlayerInput 的物件: {pi.gameObject.name}。已移除 Input 元件以防止控制器錯亂。");
-
-                // 1. 關閉 Input 以防萬一
                 pi.DeactivateInput();
-
-                // 2. 銷毀該物件身上的 PlayerInput 元件 (保留物件本身，只殺 Input)
                 Destroy(pi);
-
-                // 3. 直接返回，不執行後面的加入邏輯
                 return;
             }
         }
-        // ?????? ----------------------- ??????
-
 
         // 如果該索引的玩家已存在，就不重複處理
         if (playerConfigs.Any(p => p.PlayerIndex == pi.playerIndex))
             return;
 
-        // 建立設定檔 (這裡會儲存重要的設備資訊)
+        // 建立設定檔 (儲存硬體設備等重要資訊)
         var newConfig = new PlayerConfiguration(pi);
 
-        // 指派預設 prefab（如果有設定）
         if (pi.playerIndex >= 0 && pi.playerIndex < defaultPrefabs.Count && defaultPrefabs[pi.playerIndex] != null)
         {
             newConfig.SelectedCharacterPrefab = defaultPrefabs[pi.playerIndex];
@@ -73,6 +63,16 @@ public class PlayerConfigurationManager : MonoBehaviour
 
         playerConfigs.Add(newConfig);
         Debug.Log($"玩家 {newConfig.PlayerIndex} 加入。設備: {newConfig.Device?.displayName}, 方案: {newConfig.ControlScheme}");
+
+        // === 核心邏輯：當玩家人數達到 3 人或 4 人時，關閉指定的 UI 提示 ===
+        if (playerConfigs.Count >= 3)
+        {
+            if (specificJoinUIPrompt != null)
+            {
+                specificJoinUIPrompt.SetActive(false);
+                Debug.Log("玩家人數達到 3 人或以上，已關閉指定的加入提示 UI。");
+            }
+        }
     }
 
     public void SetPlayerCharacterPrefab(int index, GameObject prefab)
@@ -92,7 +92,6 @@ public class PlayerConfigurationManager : MonoBehaviour
 
         if (playerConfigs.Count == MaxPlayers && playerConfigs.All(p => p.isReady))
         {
-            // 嘗試獲取地圖名稱，如果 AllGameManager 不存在則忽略
             string selectedMap = null;
             if (AllGameManager.Instance != null)
             {
@@ -127,28 +126,19 @@ public class PlayerConfiguration
     {
         PlayerIndex = pi.playerIndex;
 
-        // 1. 儲存硬體設備 (例如手把或鍵盤)
-        // 這是解決跨場景控制器遺失或互換的關鍵
         if (pi.devices.Count > 0)
         {
             Device = pi.devices[0];
         }
 
-        // 2. 儲存控制方案名稱 (例如 "Gamepad", "Keyboard")
         ControlScheme = pi.currentControlScheme;
-
         isReady = false;
         SelectedCharacterPrefab = null;
     }
 
     public int PlayerIndex { get; private set; }
-
-    // 儲存 InputDevice 物件，這是不會被銷毀的全域參照
     public InputDevice Device { get; private set; }
-
-    // 儲存方案名稱字串
     public string ControlScheme { get; private set; }
-
     public bool isReady { get; set; }
     public GameObject SelectedCharacterPrefab { get; set; }
 }
