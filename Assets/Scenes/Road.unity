@@ -3510,7 +3510,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1555660681}
         m_TargetAssemblyTypeName: GameResetManager, Assembly-CSharp
         m_MethodName: ReturnToMainMenu
         m_Mode: 1
