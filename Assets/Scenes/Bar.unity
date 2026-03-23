@@ -2102,6 +2102,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8d9deabe64621134aa62aac39096071d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 0401cae510a607f49a26d945b08a4023, type: 2}
     - target: {fileID: 919132149155446097, guid: 8d9deabe64621134aa62aac39096071d, type: 3}
       propertyPath: m_Name
       value: Counter 2
@@ -3162,6 +3166,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 6cb27fb52686b404dac995f105d54fdd, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3927ec7526b64cd4890adb71c9c99024, type: 2}
     - target: {fileID: 919132149155446097, guid: 6cb27fb52686b404dac995f105d54fdd, type: 3}
       propertyPath: m_Name
       value: liquor shelf 1
