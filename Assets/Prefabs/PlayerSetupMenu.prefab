@@ -1900,17 +1900,17 @@ MonoBehaviour:
   readyCharacterDisplay: {fileID: 5119027047916203225}
   characterImages:
   - characterPrefab: {fileID: 6906998413789825852, guid: d4318a9677b503d4c9e6ee3096b8040a, type: 3}
-    readyImage: {fileID: 21300000, guid: 2034de92e62e93c41b2ff171c3aa7a53, type: 3}
+    readyImage: {fileID: 21300000, guid: 0575e6e08f0e089428dfdc805c9d5a2c, type: 3}
   - characterPrefab: {fileID: 6906998413789825852, guid: 339965310c859c64eb6f6fee38800420, type: 3}
-    readyImage: {fileID: 21300000, guid: d1e6926de89de494db96143f271e1611, type: 3}
+    readyImage: {fileID: 21300000, guid: c6a300d41e17f604aade7f8e946268e0, type: 3}
   - characterPrefab: {fileID: 6906998413789825852, guid: d1fd751e641810e44919f1a57e63185d, type: 3}
-    readyImage: {fileID: 21300000, guid: 3b603ff11380bf145bfb44099772297d, type: 3}
+    readyImage: {fileID: 21300000, guid: 14fc87dfb2f3a684f8effbbd33d0f566, type: 3}
   - characterPrefab: {fileID: 6906998413789825852, guid: b28eb1a9dc542fb4fb67d0e998a5c73b, type: 3}
-    readyImage: {fileID: 21300000, guid: cc3ed7e501107d64da0d0b053ca49edd, type: 3}
+    readyImage: {fileID: 21300000, guid: 6c9022d975835a74aad2bd63f09fdf5b, type: 3}
   - characterPrefab: {fileID: 6906998413789825852, guid: 6b3a836893620564fba80cfb4d683cd7, type: 3}
-    readyImage: {fileID: 21300000, guid: 9caf9524b57872844a6356ef9fa30327, type: 3}
+    readyImage: {fileID: 21300000, guid: 6992c7772f2697948960857262e6c9e9, type: 3}
   - characterPrefab: {fileID: 6906998413789825852, guid: 3c6c1d23ad9d1934ca4627a5c6b1087e, type: 3}
-    readyImage: {fileID: 21300000, guid: de1eaaca347e60b4ebe6acaa885ef9c9, type: 3}
+    readyImage: {fileID: 21300000, guid: 16056a6d4f7923b4ba4ba7dccef68c14, type: 3}
 --- !u!1 &2858708666971378781
 GameObject:
   m_ObjectHideFlags: 0
