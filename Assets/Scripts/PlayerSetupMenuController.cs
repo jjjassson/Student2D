@@ -4,12 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 新增：建立一個類別來設定「角色預製體」與「Ready畫面角色圖」的對應關係
 [System.Serializable]
 public class CharacterImageMapping
 {
     public GameObject characterPrefab;
-    public Sprite readyImage; // 該角色在 Ready 畫面時要顯示的圖片
+    public Sprite readyImage;
 }
 
 public class PlayerSetupMenuController : MonoBehaviour
@@ -25,11 +24,10 @@ public class PlayerSetupMenuController : MonoBehaviour
     [SerializeField]
     private Button readyButton;
 
-    // 新增：Ready 面板上用來顯示角色圖片的 UI Image 元件
+    // Ready 畫面上的角色圖片 UI
     [SerializeField]
     private Image readyCharacterDisplay;
 
-    // 新增：在 Inspector 中設定角色與圖片的對應清單
     [SerializeField]
     private List<CharacterImageMapping> characterImages;
 
@@ -51,35 +49,49 @@ public class PlayerSetupMenuController : MonoBehaviour
         }
     }
 
+    // 步驟 1：玩家選擇了角色
     public void SetCharacter(GameObject characterPrefab)
     {
         if (!inputEnable) { return; }
 
-        // 記錄玩家選擇的角色
         PlayerConfigurationManager.Instance.SetPlayerCharacterPrefab(playerIndex, characterPrefab);
 
-        // 新增：尋找對應的圖片並顯示在 Ready 面板上
         if (readyCharacterDisplay != null)
         {
+            // 找到對應圖片並換上去，但先將 GameObject 關閉，不讓玩家看到
             foreach (var mapping in characterImages)
             {
                 if (mapping.characterPrefab == characterPrefab)
                 {
                     readyCharacterDisplay.sprite = mapping.readyImage;
-                    break; // 找到對應圖片就跳出迴圈
+                    break;
                 }
             }
+            // 關鍵：選角色時先隱藏圖片
+            readyCharacterDisplay.gameObject.SetActive(false);
         }
 
+        // 顯示 Ready 畫面並讓玩家可以點擊 Ready 按鈕
         readyPanel.SetActive(true);
+        readyButton.gameObject.SetActive(true);
         readyButton.Select();
         menuPanel.SetActive(false);
     }
 
+    // 步驟 2：玩家按下 Ready 按鈕
     public void ReadyPlayer()
     {
         if (!inputEnable) { return; }
+
+        // 關鍵：按下按鈕後才顯示角色圖片
+        if (readyCharacterDisplay != null)
+        {
+            readyCharacterDisplay.gameObject.SetActive(true);
+        }
+
         PlayerConfigurationManager.Instance.ReadyPlayer(playerIndex);
+
+        // 隱藏 Ready 按鈕
         readyButton.gameObject.SetActive(false);
     }
 }
