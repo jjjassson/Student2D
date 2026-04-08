@@ -4,11 +4,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+// 1. 修改資料結構，支援大圖與小圖
 [System.Serializable]
 public class CharacterImageMapping
 {
     public GameObject characterPrefab;
-    public Sprite readyImage;
+    public Sprite largeReadyImage; // 放大圖
+    public Sprite smallReadyImage; // 小圖
 }
 
 public class PlayerSetupMenuController : MonoBehaviour
@@ -24,9 +26,12 @@ public class PlayerSetupMenuController : MonoBehaviour
     [SerializeField]
     private Button readyButton;
 
-    // Ready 畫面上的角色圖片 UI
+    // 2. 宣告兩個 UI Image 元件來分別顯示大圖與小圖
+    [Header("Character Displays")]
     [SerializeField]
-    private Image readyCharacterDisplay;
+    private Image largeCharacterDisplay; // 負責顯示放大圖的 UI Image
+    [SerializeField]
+    private Image smallCharacterDisplay; // 負責顯示小圖的 UI Image
 
     [SerializeField]
     private List<CharacterImageMapping> characterImages;
@@ -56,20 +61,27 @@ public class PlayerSetupMenuController : MonoBehaviour
 
         PlayerConfigurationManager.Instance.SetPlayerCharacterPrefab(playerIndex, characterPrefab);
 
-        if (readyCharacterDisplay != null)
+        // 3. 找到對應圖片並分別設定給兩個 Image 元件
+        foreach (var mapping in characterImages)
         {
-            // 找到對應圖片並換上去，但先將 GameObject 關閉，不讓玩家看到
-            foreach (var mapping in characterImages)
+            if (mapping.characterPrefab == characterPrefab)
             {
-                if (mapping.characterPrefab == characterPrefab)
-                {
-                    readyCharacterDisplay.sprite = mapping.readyImage;
-                    break;
-                }
+                if (largeCharacterDisplay != null)
+                    largeCharacterDisplay.sprite = mapping.largeReadyImage;
+
+                if (smallCharacterDisplay != null)
+                    smallCharacterDisplay.sprite = mapping.smallReadyImage;
+
+                break;
             }
-            // 關鍵：選角色時先隱藏圖片
-            readyCharacterDisplay.gameObject.SetActive(false);
         }
+
+        // 選角色時先隱藏這兩張圖片
+        if (largeCharacterDisplay != null)
+            largeCharacterDisplay.gameObject.SetActive(false);
+
+        if (smallCharacterDisplay != null)
+            smallCharacterDisplay.gameObject.SetActive(false);
 
         // 顯示 Ready 畫面並讓玩家可以點擊 Ready 按鈕
         readyPanel.SetActive(true);
@@ -83,11 +95,12 @@ public class PlayerSetupMenuController : MonoBehaviour
     {
         if (!inputEnable) { return; }
 
-        // 關鍵：按下按鈕後才顯示角色圖片
-        if (readyCharacterDisplay != null)
-        {
-            readyCharacterDisplay.gameObject.SetActive(true);
-        }
+        // 4. 按下按鈕後，將大圖與小圖同時顯示出來
+        if (largeCharacterDisplay != null)
+            largeCharacterDisplay.gameObject.SetActive(true);
+
+        if (smallCharacterDisplay != null)
+            smallCharacterDisplay.gameObject.SetActive(true);
 
         PlayerConfigurationManager.Instance.ReadyPlayer(playerIndex);
 

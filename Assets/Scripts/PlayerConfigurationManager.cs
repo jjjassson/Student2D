@@ -65,12 +65,12 @@ public class PlayerConfigurationManager : MonoBehaviour
         Debug.Log($"玩家 {newConfig.PlayerIndex} 加入。設備: {newConfig.Device?.displayName}, 方案: {newConfig.ControlScheme}");
 
         // === 核心邏輯：當玩家人數達到 3 人或 4 人時，關閉指定的 UI 提示 ===
-        if (playerConfigs.Count >= 3)
+        if (playerConfigs.Count >= 1)
         {
             if (specificJoinUIPrompt != null)
             {
                 specificJoinUIPrompt.SetActive(false);
-                Debug.Log("玩家人數達到 3 人或以上，已關閉指定的加入提示 UI。");
+                Debug.Log("玩家人數達到 1 人或以上，已關閉指定的加入提示 UI。");
             }
         }
     }
