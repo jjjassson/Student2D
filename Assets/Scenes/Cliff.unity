@@ -1951,6 +1951,8 @@ MonoBehaviour:
   maxDistance: 30
   smoothTime: 0.3
   offsetDirection: {x: -3, y: 4, z: -26}
+  enableMinXLimit: 1
+  minXLimit: -5
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
