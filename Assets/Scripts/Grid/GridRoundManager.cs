@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
-// 1. 定義資料結構
+// 1. 定義資料結構 (修正了剛剛漏掉的部分)
 [System.Serializable]
 public class GridItemPair
 {
@@ -23,17 +24,35 @@ public class GridRoundManager : MonoBehaviour
     public float survivalTime = 20f;
     public float intermissionDelay = 3f;
 
-    [Header("UI 設定")]
-    public bool showUI = true; // ✨ 新增這行：在 Inspector 勾選/取消來開啟或關閉 UI
+    [Header("舊版文字 UI 設定")]
+    public bool showUI = true;
     public int uiFontSize = 60;
-    public int uiRoundFontSize = 80;    // 回合文字的大小
-    public Color roundTextColor = Color.white; // 回合文字的顏色
+    public int uiRoundFontSize = 80;
+    public Color roundTextColor = Color.white;
     public Color placementColor = Color.green;
     public Color survivalColor = Color.red;
     public Color defaultColor = Color.yellow;
 
+    [Header("新版圖形 UI 設定")]
+    public bool showNewUI = true;
+    [Tooltip("請把你整個新 UI 的總面板拖進來")]
+    public GameObject newUIPanel;
+
+    [Tooltip("請將 Hierarchy 中那個叫做『數字』的資料夾物件拖到這裡")]
+    public GameObject numberFolder;
+
+    [Header("狀態圖片設定")]
+    public Image phaseImage;
+    public Sprite placementPhaseSprite;
+    public Sprite survivalPhaseSprite;
+    public Sprite defaultPhaseSprite;
+
+    [Header("倒數數字圖片設定 (請依序放 0 到 9)")]
+    public Sprite[] numberSprites = new Sprite[10];
+    public Image timerTensImage;
+    public Image timerUnitsImage;
+
     [Header("攝影機錄影")]
-    [Tooltip("請將掛有 CameraRecorder 的主攝影機拖進來，若無會自動抓取")]
     public CameraRecorder mainCamRecorder;
 
     // --- 內部資料結構 ---
@@ -46,16 +65,14 @@ public class GridRoundManager : MonoBehaviour
     }
 
     private List<PlayerData> players = new List<PlayerData>();
-
-    // --- 狀態變數 ---
     private int roundNumber = 0;
     public bool IsRoundActive { get; private set; } = false;
-    private bool isGameOver = false; // 判斷遊戲是否已結束 (進入回放)
+    private bool isGameOver = false;
 
     // UI 顯示用的變數
-    private string uiCurrentPhaseText = ""; // 目前階段文字
-    private float uiTimeLeft = 0f;          // 剩餘時間
-    private Color uiCurrentColor = Color.white; // 目前階段文字顏色
+    private string uiCurrentPhaseText = "";
+    private float uiTimeLeft = 0f;
+    private Color uiCurrentColor = Color.white;
 
     // 事件
     public event System.Action<float> OnCountdownTick;
@@ -65,38 +82,90 @@ public class GridRoundManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            // 將新關卡的 UI 和攝影機，交接給存活著的舊 Manager
+            Instance.newUIPanel = this.newUIPanel;
+            Instance.numberFolder = this.numberFolder; // 交接「數字」資料夾
+            Instance.phaseImage = this.phaseImage;
+            Instance.timerTensImage = this.timerTensImage;
+            Instance.timerUnitsImage = this.timerUnitsImage;
+            Instance.mainCamRecorder = this.mainCamRecorder;
+            Instance.itemFolder = this.itemFolder;
+
+            // 確保每次進入新關卡時，狀態都是全新的
+            Instance.isGameOver = false;
+            Instance.roundNumber = 0;
+
+            // 停止舊的迴圈，重新啟動新關卡的流程
+            Instance.StopAllCoroutines();
+            Instance.StartCoroutine(Instance.StartGameRoutine());
+
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
-        isGameOver = false; // 確保開始時狀態正確
+        isGameOver = false;
         StartCoroutine(StartGameRoutine());
     }
 
-    // 🔥 強制停止遊戲循環的方法
-    // 這會在 GoalPoint 觸發時被呼叫，防止進入下一回合
+    private void Update()
+    {
+        // 判斷條件：(必須開啟新 UI) 且 (遊戲尚未結束)
+        bool shouldShow = showNewUI && !isGameOver;
+
+        if (newUIPanel != null)
+        {
+            newUIPanel.SetActive(shouldShow);
+        }
+
+        // 強制控制「數字」資料夾的開關，重播時會被關閉
+        if (numberFolder != null)
+        {
+            numberFolder.SetActive(shouldShow);
+        }
+
+        if (shouldShow)
+        {
+            UpdateTimerImages();
+        }
+    }
+
+    private void UpdateTimerImages()
+    {
+        if (timerTensImage == null || timerUnitsImage == null || numberSprites.Length < 10) return;
+
+        int timeInt = Mathf.Max(0, Mathf.CeilToInt(uiTimeLeft));
+        if (timeInt > 99) timeInt = 99;
+
+        int tens = timeInt / 10;
+        int units = timeInt % 10;
+
+        timerTensImage.sprite = numberSprites[tens];
+        timerUnitsImage.sprite = numberSprites[units];
+    }
+
     public void StopGameLoop()
     {
-        Debug.Log("遊戲結束，停止所有計時與循環。");
+        Debug.Log("停止遊戲循環，進入重播，隱藏所有 UI。");
 
-        // 殺死 StartGameRoutine 和 RoundCycleSequence
         StopAllCoroutines();
 
         IsRoundActive = false;
-        isGameOver = true; // 設定為 True，用來隱藏 Round 文字
+        isGameOver = true; // 設定為 true 後，Update 會自動把數字資料夾隱藏
 
-        // 更新 UI 狀態讓玩家知道結束了
-        SetPhaseStatus("遊戲結束 - 精彩回放", Color.cyan);
+        SetPhaseStatus("遊戲結束", Color.cyan);
         uiTimeLeft = 0;
     }
 
     IEnumerator StartGameRoutine()
     {
-        // 🔥 關鍵修正 1：移除 WaitForSeconds(1.0f) 造成的延遲
-        // 只等待一幀，確保 InitializeLevel 把玩家生完就好，此時玩家絕對還來不及移動
         yield return new WaitForEndOfFrame();
 
         GridObjectPlacer[] foundPlacers = FindObjectsOfType<GridObjectPlacer>();
@@ -107,13 +176,11 @@ public class GridRoundManager : MonoBehaviour
             data.placer = placer;
             data.score = placer.GetComponent<PlayerScore>();
 
-            // 此時抓取座標最為精準
             data.spawnPoint = placer.transform.position;
             data.rb = placer.GetComponent<Rigidbody>();
             players.Add(data);
         }
 
-        // 自動尋找主攝影機錄影機 (防止忘記拉)
         if (mainCamRecorder == null)
         {
             mainCamRecorder = FindObjectOfType<CameraRecorder>();
@@ -127,16 +194,13 @@ public class GridRoundManager : MonoBehaviour
     {
         roundNumber++;
         IsRoundActive = true;
-        Debug.Log($"=== Round {roundNumber} 開始 ===");
         OnRoundStart?.Invoke(roundNumber);
 
-        // 1️⃣ 復活、重置位置與 **開始錄影**
         foreach (var p in players)
         {
             if (p.score != null) p.score.Revive();
             ResetPlayerPosition(p);
 
-            // 啟動玩家錄影 (維持只錄玩家)
             ReplayRecorder recorder = p.placer.GetComponent<ReplayRecorder>();
             if (recorder != null)
             {
@@ -144,30 +208,20 @@ public class GridRoundManager : MonoBehaviour
             }
         }
 
-        // 啟動鏡頭錄影
         if (mainCamRecorder != null)
         {
             mainCamRecorder.StartRecording();
         }
-        else
-        {
-            Debug.LogWarning("注意：沒有設定 CameraRecorder，重播時鏡頭不會動！");
-        }
 
-        // 🔥 發牌邏輯 (已修改：每人隨機獨立抽一張)
         if (itemFolder.Count > 0)
         {
             foreach (var p in players)
             {
-                // 1. 針對「這位玩家」隨機抽一組
                 GridItemPair randomPair = itemFolder[Random.Range(0, itemFolder.Count)];
-
-                // 2. 將抽到的這組給這位玩家
                 p.placer.AssignNewObjectPair(randomPair.mainPrefab, randomPair.secondaryPrefab);
             }
         }
 
-        // 2️⃣ 放置階段
         SetPhaseStatus("放置階段", placementColor);
         SetAllPlayersPlacementMode(true);
 
@@ -184,7 +238,6 @@ public class GridRoundManager : MonoBehaviour
         }
         SetAllPlayersPlacementMode(false);
 
-        // 3️⃣ 生存階段
         SetPhaseStatus("生存挑戰", survivalColor);
 
         if (!CheckIfAllDead())
@@ -202,7 +255,6 @@ public class GridRoundManager : MonoBehaviour
             }
         }
 
-        // 4️⃣ 回合結束
         SetPhaseStatus("回合結束", defaultColor);
         uiTimeLeft = 0;
 
@@ -222,6 +274,16 @@ public class GridRoundManager : MonoBehaviour
         uiCurrentPhaseText = text;
         OnPhaseChange?.Invoke(text);
         uiCurrentColor = color;
+
+        if (phaseImage != null)
+        {
+            if (text == "放置階段")
+                phaseImage.sprite = placementPhaseSprite;
+            else if (text == "生存挑戰")
+                phaseImage.sprite = survivalPhaseSprite;
+            else
+                phaseImage.sprite = defaultPhaseSprite;
+        }
     }
 
     private void SetAllPlayersPlacementMode(bool active)
@@ -231,23 +293,21 @@ public class GridRoundManager : MonoBehaviour
 
     private void ResetPlayerPosition(PlayerData p)
     {
-        // 1. 消除物理動能
         if (p.rb != null)
         {
             p.rb.velocity = Vector3.zero;
             p.rb.angularVelocity = Vector3.zero;
         }
 
-        // 🔥 關鍵修正 2：確保強迫位移不會被物理引擎(CharacterController)給彈回去
         CharacterController cc = p.placer.GetComponent<CharacterController>();
-        if (cc != null) cc.enabled = false; // 傳送前先關閉
+        if (cc != null) cc.enabled = false;
 
         if (p.placer != null)
         {
             p.placer.transform.position = p.spawnPoint;
         }
 
-        if (cc != null) cc.enabled = true; // 傳送後再開啟
+        if (cc != null) cc.enabled = true;
     }
 
     private bool CheckIfAllDead()
@@ -260,15 +320,12 @@ public class GridRoundManager : MonoBehaviour
         return true;
     }
 
-    // --- OnGUI 顯示邏輯 ---
     void OnGUI()
     {
-        // ✨ 新增這行：如果 Inspector 裡的 showUI 被取消勾選，就不執行畫面的繪製
-        if (!showUI) return;
+        if (!showUI || isGameOver) return;
 
         if (players.Count == 0) return;
 
-        // 1. 顯示階段文字 (例如：生存挑戰、遊戲結束-精彩回放)
         GUIStyle statusStyle = new GUIStyle(GUI.skin.label);
         statusStyle.fontSize = uiFontSize;
         statusStyle.alignment = TextAnchor.MiddleCenter;
@@ -286,17 +343,13 @@ public class GridRoundManager : MonoBehaviour
         }
         GUI.Label(statusRect, displayText, statusStyle);
 
-        // 2. 顯示 Round 幾 (只有在遊戲尚未結束時才顯示)
-        if (!isGameOver)
-        {
-            GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
-            roundStyle.fontSize = uiRoundFontSize;
-            roundStyle.alignment = TextAnchor.UpperCenter;
-            roundStyle.fontStyle = FontStyle.Bold;
-            roundStyle.normal.textColor = roundTextColor;
+        GUIStyle roundStyle = new GUIStyle(GUI.skin.label);
+        roundStyle.fontSize = uiRoundFontSize;
+        roundStyle.alignment = TextAnchor.UpperCenter;
+        roundStyle.fontStyle = FontStyle.Bold;
+        roundStyle.normal.textColor = roundTextColor;
 
-            Rect roundRect = new Rect(0, 30, Screen.width, 150);
-            GUI.Label(roundRect, $"Round {roundNumber}", roundStyle);
-        }
+        Rect roundRect = new Rect(0, 30, Screen.width, 150);
+        GUI.Label(roundRect, $"Round {roundNumber}", roundStyle);
     }
 }

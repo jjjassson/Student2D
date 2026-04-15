@@ -34,6 +34,20 @@ public class ReplayManager : MonoBehaviour
 
     public void StartGlobalReplay()
     {
+        // ✨✨✨ 新增：通知 GridRoundManager 停止計時並隱藏 UI ✨✨✨
+        if (GridRoundManager.Instance != null)
+        {
+            // 呼叫停止迴圈，這會讓 isGameOver 變成 true
+            GridRoundManager.Instance.StopGameLoop();
+
+            // 雙重保險：直接強制把新版 UI 面板關掉
+            if (GridRoundManager.Instance.newUIPanel != null)
+            {
+                GridRoundManager.Instance.newUIPanel.SetActive(false);
+            }
+        }
+        // ✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨
+
         if (replayCoroutine != null) StopCoroutine(replayCoroutine);
         replayCoroutine = StartCoroutine(ExactReplayRoutine());
     }
