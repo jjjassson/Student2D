@@ -24,6 +24,7 @@ public class GridRoundManager : MonoBehaviour
     public float intermissionDelay = 3f;
 
     [Header("UI 設定")]
+    public bool showUI = true; // ✨ 新增這行：在 Inspector 勾選/取消來開啟或關閉 UI
     public int uiFontSize = 60;
     public int uiRoundFontSize = 80;    // 回合文字的大小
     public Color roundTextColor = Color.white; // 回合文字的顏色
@@ -262,6 +263,9 @@ public class GridRoundManager : MonoBehaviour
     // --- OnGUI 顯示邏輯 ---
     void OnGUI()
     {
+        // ✨ 新增這行：如果 Inspector 裡的 showUI 被取消勾選，就不執行畫面的繪製
+        if (!showUI) return;
+
         if (players.Count == 0) return;
 
         // 1. 顯示階段文字 (例如：生存挑戰、遊戲結束-精彩回放)
