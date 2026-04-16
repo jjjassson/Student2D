@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CharacterController))]
 public class Lung2 : MonoBehaviour
@@ -14,37 +16,127 @@ public class Lung2 : MonoBehaviour
     private Vector3 velocity;
     private bool groundedPlayer;
 
-    // 🧩 狀態
     [HideInInspector] public bool isSlowed = false;
     [HideInInspector] public bool isJumpReduced = false;
-
-    // 🧩 🆕 全方向反轉狀態（與 Player1 一致）
     [HideInInspector] public bool isInverted = false;
 
-    // 🧩 預設參數記錄
     private float defaultMoveSpeed;
     private float defaultJumpForce;
+
+    // ================= 煙霧 =================
+    [Header("煙霧技能")]
+    public GameObject smokeObject;
+    public float smokeDuration = 5f;
+    public float smokeCooldown = 10f;
+    public bool autoLoop = true;
+
+    [Header("煙霧範圍")]
+    public float smokeRange = 3f;
+
+    [Header("煙霧材質")]
+    public Material smokeMaterial;
+
+    private ParticleSystem smokeParticle;
+    private ParticleSystemRenderer smokeRenderer;
+
+    private HashSet<Lung2> affectedTargets = new HashSet<Lung2>();
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
         defaultMoveSpeed = moveSpeed;
         defaultJumpForce = jumpForce;
+
+        if (smokeObject != null)
+        {
+            smokeParticle = smokeObject.GetComponent<ParticleSystem>();
+            smokeRenderer = smokeObject.GetComponent<ParticleSystemRenderer>();
+
+            if (smokeRenderer != null && smokeMaterial != null)
+                smokeRenderer.material = smokeMaterial;
+
+            smokeObject.SetActive(false);
+        }
+
+        if (autoLoop)
+            StartCoroutine(SmokeLoop());
     }
 
-    // ============================================================
-    // SlowZone / LowJumpZone（與 Player1 一致）
-    // ============================================================
+    IEnumerator SmokeLoop()
+    {
+        while (true)
+        {
+            SetSmoke(true);
+
+            float timer = 0f;
+            while (timer < smokeDuration)
+            {
+                timer += Time.deltaTime;
+                UpdateSmokeEffect();
+                yield return null;
+            }
+
+            SetSmoke(false);
+            yield return new WaitForSeconds(smokeCooldown);
+        }
+    }
+
+    void SetSmoke(bool active)
+    {
+        if (smokeParticle == null) return;
+
+        if (active)
+        {
+            smokeObject.SetActive(true);
+            smokeParticle.Play();
+        }
+        else
+        {
+            smokeParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            smokeObject.SetActive(false);
+            ResetAllAffected();
+        }
+    }
+
+    void UpdateSmokeEffect()
+    {
+        HashSet<Lung2> currentFrame = new HashSet<Lung2>();
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, smokeRange);
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.gameObject == gameObject) continue;
+
+            if (hit.TryGetComponent<Lung2>(out var l2))
+            {
+                l2.ApplySpeedMultiplier(0.5f);
+                currentFrame.Add(l2);
+            }
+        }
+
+        foreach (var old in affectedTargets)
+        {
+            if (!currentFrame.Contains(old))
+                old.ResetSpeed();
+        }
+
+        affectedTargets = currentFrame;
+    }
+
+    void ResetAllAffected()
+    {
+        foreach (var t in affectedTargets)
+            t.ResetSpeed();
+
+        affectedTargets.Clear();
+    }
+
+    // ===== 原本功能 =====
     public void ApplySpeedMultiplier(float multiplier)
     {
         moveSpeed = defaultMoveSpeed * multiplier;
         isSlowed = multiplier < 1f;
-    }
-
-    public void ApplyJumpMultiplier(float multiplier)
-    {
-        jumpForce = defaultJumpForce * multiplier;
-        isJumpReduced = multiplier < 1f;
     }
 
     public void ResetSpeed()
@@ -53,15 +145,18 @@ public class Lung2 : MonoBehaviour
         isSlowed = false;
     }
 
+    public void ApplyJumpMultiplier(float multiplier)
+    {
+        jumpForce = defaultJumpForce * multiplier;
+        isJumpReduced = multiplier < 1f;
+    }
+
     public void ResetJump()
     {
         jumpForce = defaultJumpForce;
         isJumpReduced = false;
     }
 
-    // ============================================================
-    // 🆕 操作反轉（與 Player1 一致）
-    // ============================================================
     public void InvertMovement()
     {
         isInverted = true;
@@ -72,9 +167,6 @@ public class Lung2 : MonoBehaviour
         isInverted = false;
     }
 
-    // ============================================================
-    // 玩家輸入
-    // ============================================================
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
@@ -88,9 +180,6 @@ public class Lung2 : MonoBehaviour
         }
     }
 
-    // ============================================================
-    // 更新移動（⚠ 只允許 X 軸）
-    // ============================================================
     private void Update()
     {
         groundedPlayer = controller.isGrounded;
@@ -98,20 +187,16 @@ public class Lung2 : MonoBehaviour
         if (groundedPlayer && velocity.y < 0)
             velocity.y = 0f;
 
-        // ⚠ 只取 X 軸（保留你的原始限制）
         Vector3 move = new Vector3(moveInput.x, 0, 0);
 
-        // 🆕 反轉操作
         if (isInverted)
             move *= -1f;
 
         controller.Move(move * Time.deltaTime * moveSpeed);
 
-        // 重力
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // 面向左右
         if (Mathf.Abs(move.x) > 0.01f)
         {
             Quaternion targetRot = Quaternion.LookRotation(move, Vector3.up);
@@ -123,9 +208,6 @@ public class Lung2 : MonoBehaviour
         }
     }
 
-    // ============================================================
-    // PlatformDisappear（與 Player1 一致）
-    // ============================================================
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hit.collider == null) return;
