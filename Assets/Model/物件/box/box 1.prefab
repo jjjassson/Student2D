@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -0.47743887
       objectReference: {fileID: 0}
+    - target: {fileID: -7146521406498821007, guid: 914fd2a5e77f63e41a7f96529a5435e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -3542852092398272455, guid: 914fd2a5e77f63e41a7f96529a5435e2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.5206804
@@ -272,7 +276,7 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
