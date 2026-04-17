@@ -62,7 +62,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: cb47a323e18e4834ebd605a99c45b6df, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.011636734
+      value: -1.6550299
       objectReference: {fileID: 0}
     - target: {fileID: -4683669308469848369, guid: cb47a323e18e4834ebd605a99c45b6df, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -70,11 +70,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 3c56c267a9f40e0438f9bc274c09343a, type: 2}
     - target: {fileID: -2577548232221058511, guid: cb47a323e18e4834ebd605a99c45b6df, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0058431625
+      value: -1.6725098
       objectReference: {fileID: 0}
     - target: {fileID: -2484921068739079471, guid: cb47a323e18e4834ebd605a99c45b6df, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -1.6666666
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cb47a323e18e4834ebd605a99c45b6df, type: 3}
       propertyPath: m_Name
@@ -142,4 +142,4 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 7.9754133, y: 2.2267923, z: 2.6069007}
-  m_Center: {x: -0.5660677, y: -0.005965233, z: -0.03652072}
+  m_Center: {x: -0.5660677, y: -1.56, z: -0.03652072}

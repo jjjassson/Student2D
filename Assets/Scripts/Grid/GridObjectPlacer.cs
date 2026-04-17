@@ -124,12 +124,13 @@ public class GridObjectPlacer : MonoBehaviour
         currentIconObj.transform.SetParent(parentTransform);
         currentIconObj.transform.localPosition = new Vector3(0, iconHeightOffset, 0);
 
-        // 設定物件的 LocalScale 來改變圖片大小
-        currentIconObj.transform.localScale = new Vector3(iconScale, iconScale, iconScale);
-
         SpriteRenderer sr = currentIconObj.AddComponent<SpriteRenderer>();
         sr.sprite = playerIcon;
         sr.sortingOrder = 10;
+
+        // 🔥 新增：動態掛載「防拉伸」小幫手腳本，鎖死絕對大小
+        IconAntiStretch antiStretch = currentIconObj.AddComponent<IconAntiStretch>();
+        antiStretch.targetScale = iconScale;
     }
 
     private void DisableColliders(GameObject obj)
@@ -196,5 +197,34 @@ public class GridObjectPlacer : MonoBehaviour
         if (secondaryGhostObject != null) { Destroy(secondaryGhostObject); secondaryGhostObject = null; }
 
         isPlacementMode = false; // 該玩家提早結束放置模式
+    }
+}
+
+// 🔥 新增：放在同一個檔案裡的獨立類別，專門用來防止圖片跟隨父物件變形
+public class IconAntiStretch : MonoBehaviour
+{
+    public float targetScale = 1.0f;
+
+    void LateUpdate()
+    {
+        // 如果有父物件，就根據父物件的變形程度，進行「反向縮小/放大」
+        if (transform.parent != null)
+        {
+            Vector3 parentScale = transform.parent.lossyScale;
+
+            // 避免除以 0 產生錯誤
+            if (parentScale.x == 0 || parentScale.y == 0 || parentScale.z == 0) return;
+
+            transform.localScale = new Vector3(
+                targetScale / parentScale.x,
+                targetScale / parentScale.y,
+                targetScale / parentScale.z
+            );
+        }
+        else
+        {
+            // 如果沒有父物件，就保持正常的 Target Scale
+            transform.localScale = new Vector3(targetScale, targetScale, targetScale);
+        }
     }
 }
