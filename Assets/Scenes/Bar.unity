@@ -857,6 +857,9 @@ MonoBehaviour:
   - itemName: "\u7BB1\u5B50"
     mainPrefab: {fileID: 706543145372646846, guid: c74dda073318b3c42b8493e6f8cf8e37, type: 3}
     secondaryPrefab: {fileID: 706543145372646846, guid: a49e605637b430242b02387c03c24aff, type: 3}
+  - itemName: "\u7BB1\u5B50"
+    mainPrefab: {fileID: 226921273718323395, guid: 852e316a1bbd72440b110110b3b6d13f, type: 3}
+    secondaryPrefab: {fileID: 226921273718323395, guid: 5d982878ea234c04ca56adff1e50ac50, type: 3}
   placementTime: 10
   survivalTime: 15
   intermissionDelay: 1
