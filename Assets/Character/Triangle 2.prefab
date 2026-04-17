@@ -359,6 +359,9 @@ MonoBehaviour:
   inputThreshold: 0.5
   xRange: {x: -18, y: 18}
   zRange: {x: -15, y: -3}
+  playerIcon: {fileID: 21300000, guid: 300e65d01b6175d4499d3c5fae178689, type: 3}
+  iconHeightOffset: 2
+  iconScale: 0.2
 --- !u!114 &6360194700050009758
 MonoBehaviour:
   m_ObjectHideFlags: 0
