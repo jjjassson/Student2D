@@ -37,7 +37,7 @@ public class Lung2 : MonoBehaviour
     }
 
     // ============================================================
-    // SlowZone / LowJumpZone（與 Player1 一致）
+    // SlowZone / LowJumpZone
     // ============================================================
     public void ApplySpeedMultiplier(float multiplier)
     {
@@ -64,7 +64,7 @@ public class Lung2 : MonoBehaviour
     }
 
     // ============================================================
-    // 🆕 操作反轉（與 Player1 一致）
+    // 操作反轉
     // ============================================================
     public void InvertMovement()
     {
@@ -93,7 +93,7 @@ public class Lung2 : MonoBehaviour
     }
 
     // ============================================================
-    // 更新移動（⚠ 只允許 X 軸）
+    // 更新
     // ============================================================
     private void Update()
     {
@@ -102,19 +102,17 @@ public class Lung2 : MonoBehaviour
         if (groundedPlayer && velocity.y < 0)
             velocity.y = 0f;
 
-        // ⚠ 只取 X 軸（保留你的原始限制）
         Vector3 move = new Vector3(moveInput.x, 0, 0);
 
-        // 🆕 反轉操作
         if (isInverted)
             move *= -1f;
 
         controller.Move(move * Time.deltaTime * moveSpeed);
 
-        // 重力
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
+<<<<<<< Updated upstream
         // ==========================================
         // 🆕 核心修改：固定面向 Z 軸負方向 (面向玩家)
         // ==========================================
@@ -135,10 +133,25 @@ public class Lung2 : MonoBehaviour
             currentPos.z = fixedZPosition;
             transform.position = currentPos;
         }
+=======
+        // ⭐⭐⭐ 改這裡：永遠面向攝影機 ⭐⭐⭐
+        LockToCamera();
+    }
+
+    // ⭐⭐⭐ 新增 ⭐⭐⭐
+    void LockToCamera()
+    {
+        if (Camera.main == null) return;
+
+        Vector3 camEuler = Camera.main.transform.eulerAngles;
+
+        // 只跟著 Y 軸（水平）
+        transform.rotation = Quaternion.Euler(0f, camEuler.y, 0f);
+>>>>>>> Stashed changes
     }
 
     // ============================================================
-    // PlatformDisappear（與 Player1 一致）
+    // PlatformDisappear
     // ============================================================
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {

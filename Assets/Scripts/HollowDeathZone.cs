@@ -4,7 +4,6 @@ public class HollowDeathZone : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        // 嘗試抓 Player1
         Player1 player1 = other.GetComponent<Player1>();
         if (player1 != null)
         {
@@ -12,7 +11,6 @@ public class HollowDeathZone : MonoBehaviour
             return;
         }
 
-        // 如果未來有 Player2
         Player2 player2 = other.GetComponent<Player2>();
         if (player2 != null)
         {
@@ -23,7 +21,6 @@ public class HollowDeathZone : MonoBehaviour
 
     private void HandlePlayer1Death(Player1 player)
     {
-        // 如果 Player1 已經有 DieAndRespawn()
         var method = player.GetType().GetMethod("DieAndRespawn");
         if (method != null)
         {
@@ -31,9 +28,8 @@ public class HollowDeathZone : MonoBehaviour
         }
         else
         {
-            // 保底方案（避免你現在還沒加死亡系統）
-            Debug.LogWarning("Player1 尚未實作 DieAndRespawn()，已暫時關閉物件");
-            player.gameObject.SetActive(false);
+            Debug.LogWarning("Player1 尚未實作 DieAndRespawn()，改用傳送");
+            player.transform.position = Vector3.zero;
         }
     }
 
@@ -46,8 +42,8 @@ public class HollowDeathZone : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Player2 尚未實作 DieAndRespawn()");
-            player.gameObject.SetActive(false);
+            Debug.LogWarning("Player2 尚未實作 DieAndRespawn()，改用傳送");
+            player.transform.position = Vector3.zero;
         }
     }
 }
