@@ -111,16 +111,10 @@ public class Lung2 : MonoBehaviour
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // 面向左右
-        if (Mathf.Abs(move.x) > 0.01f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(move, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                targetRot,
-                720f * Time.deltaTime
-            );
-        }
+        // ==========================================
+        // 🆕 核心修改：固定面向 Z 軸負方向 (面向玩家)
+        // ==========================================
+        transform.rotation = Quaternion.Euler(0, 180f, 0);
     }
 
     // ============================================================
