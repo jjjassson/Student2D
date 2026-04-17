@@ -9,6 +9,10 @@ public class Triangle2 : MonoBehaviour
     public float jumpForce = 1f;
     public float gravityValue = -9.81f;
 
+    // ⭐⭐⭐ 新增：可以設定要鎖死的 Z 軸位置
+    [Header("鎖定位置")]
+    public float fixedZPosition = 0f;
+
     [Header("Triangle 能力設定")]
     [SerializeField] private float skillCooldown = 6.5f;
     [SerializeField] private float boostDuration = 1.5f;
@@ -71,6 +75,22 @@ public class Triangle2 : MonoBehaviour
 
         if (boosting)
             BlinkColor();
+
+        // ⭐⭐⭐ 新增：鎖死 Z 軸，防止因為物理碰撞偏移 ⭐⭐⭐
+        LockZPosition();
+    }
+
+    // ⭐⭐⭐ 新增：鎖定 Z 軸的方法 ⭐⭐⭐
+    void LockZPosition()
+    {
+        Vector3 currentPos = transform.position;
+
+        // 加上浮點數容差，避免無意義的微小覆寫
+        if (Mathf.Abs(currentPos.z - fixedZPosition) > 0.001f)
+        {
+            currentPos.z = fixedZPosition;
+            transform.position = currentPos;
+        }
     }
 
     private void HandleSkillTimer()

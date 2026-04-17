@@ -9,6 +9,10 @@ public class Love2 : MonoBehaviour
     public float jumpForce = 1f;
     public float gravityValue = -9.81f;
 
+    // ⭐⭐⭐ 新增：可以設定要鎖死的 Z 軸位置
+    [Header("鎖定位置")]
+    public float fixedZPosition = 0f;
+
     [Header("戀愛腦能力（吸引）")]
     [SerializeField] private bool enableLoveForce = true;
     [SerializeField] private float attractRadius = 6f;
@@ -67,6 +71,22 @@ public class Love2 : MonoBehaviour
         // 4. 戀愛腦能力
         if (enableLoveForce)
             ApplyLoveForce();
+
+        // ⭐⭐⭐ 新增：鎖死 Z 軸，防止因為物理碰撞偏移 ⭐⭐⭐
+        LockZPosition();
+    }
+
+    // ⭐⭐⭐ 新增：鎖定 Z 軸的方法 ⭐⭐⭐
+    void LockZPosition()
+    {
+        Vector3 currentPos = transform.position;
+
+        // 加上浮點數容差，避免無意義的微小覆寫
+        if (Mathf.Abs(currentPos.z - fixedZPosition) > 0.001f)
+        {
+            currentPos.z = fixedZPosition;
+            transform.position = currentPos;
+        }
     }
 
     private void ApplyLoveForce()
@@ -81,6 +101,8 @@ public class Love2 : MonoBehaviour
             if (target == null) continue;
 
             Vector3 dir = (transform.position - target.transform.position).normalized;
+
+            // 這裡也可能產生物理推擠，所以 LockZPosition 放在 Update 最後面剛好可以一併校正！
             target.Move(dir * attractForce * Time.deltaTime);
         }
     }
