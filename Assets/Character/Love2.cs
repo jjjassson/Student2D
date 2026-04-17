@@ -51,12 +51,20 @@ public class Love2 : MonoBehaviour
         groundedPlayer = controller.isGrounded;
         if (groundedPlayer && velocity.y < 0) velocity.y = 0f;
 
+        // 1. 處理移動
         Vector3 move = new Vector3(moveInput.x, 0, 0);
         controller.Move(move * moveSpeed * Time.deltaTime);
 
+        // --- 2. 核心修改：固定面向 Z 軸負方向 (面向玩家) ---
+        // 在 Unity 的標準座標系中，180 度通常會讓角色正面朝向螢幕外
+        transform.rotation = Quaternion.Euler(0, 180f, 0);
+        // ------------------------------------------------
+
+        // 3. 處理重力
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
+        // 4. 戀愛腦能力
         if (enableLoveForce)
             ApplyLoveForce();
     }
