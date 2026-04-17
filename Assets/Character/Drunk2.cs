@@ -44,6 +44,20 @@ public class Drunk2 : MonoBehaviour
 
         velocity.y += gravityValue * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        // ⭐⭐⭐ 關鍵：鎖死朝向攝影機 ⭐⭐⭐
+        LockToCamera();
+    }
+
+    // ⭐⭐⭐ 核心（不再用 LookRotation）⭐⭐⭐
+    void LockToCamera()
+    {
+        if (Camera.main == null) return;
+
+        Vector3 camEuler = Camera.main.transform.eulerAngles;
+
+        // 只跟著 Y 軸（水平）
+        transform.rotation = Quaternion.Euler(0f, camEuler.y, 0f);
     }
 
     // ===== 被附身時接收 Input =====

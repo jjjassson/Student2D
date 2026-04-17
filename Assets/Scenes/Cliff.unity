@@ -827,7 +827,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemFolder:
   - itemName: Failed
-    mainPrefab: {fileID: 1352439419651427092, guid: 3443aba46deeba145ab2f08d22219ce8, type: 3}
+    mainPrefab: {fileID: 7867894473069641729, guid: 38035bd16acba1944a87c5984271e116, type: 3}
     secondaryPrefab: {fileID: 1352439419651427092, guid: 687b058df5334834d9619903dfa9c47b, type: 3}
   - itemName: Chair
     mainPrefab: {fileID: 577509353761043554, guid: e5a40a47730b06c43b63653ab513874b, type: 3}
