@@ -604,6 +604,9 @@ MonoBehaviour:
   - itemName: failed
     mainPrefab: {fileID: 7867894473069641729, guid: 38035bd16acba1944a87c5984271e116, type: 3}
     secondaryPrefab: {fileID: 1352439419651427092, guid: 687b058df5334834d9619903dfa9c47b, type: 3}
+  - itemName: failed
+    mainPrefab: {fileID: 226921273718323395, guid: 852e316a1bbd72440b110110b3b6d13f, type: 3}
+    secondaryPrefab: {fileID: 226921273718323395, guid: 5d982878ea234c04ca56adff1e50ac50, type: 3}
   placementTime: 20
   survivalTime: 20
   intermissionDelay: 1
@@ -725,6 +728,9 @@ MonoBehaviour:
     uiSprite: {fileID: 0}
   - mainPrefab: {fileID: 2013447679602650498, guid: 060bf9e8e140ec644b72186a99f5f2e7, type: 3}
     secondaryPrefab: {fileID: 2013447679602650498, guid: e0be80d121d262840a4667b816e50cbb, type: 3}
+    uiSprite: {fileID: 0}
+  - mainPrefab: {fileID: 226921273718323395, guid: 852e316a1bbd72440b110110b3b6d13f, type: 3}
+    secondaryPrefab: {fileID: 226921273718323395, guid: 5d982878ea234c04ca56adff1e50ac50, type: 3}
     uiSprite: {fileID: 0}
   content: {fileID: 316745537}
   buttonPrefab: {fileID: 4021500633432609323, guid: 3cb4e1a77a24be94a8594bcd537bad76, type: 3}
